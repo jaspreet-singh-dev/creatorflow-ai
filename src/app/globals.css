@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 4%; /* #070A12 Deepest navy */
+    --foreground: 210 40% 98%;
+
+    --card: 222 44% 8%; /* #0B101E Deep navy card */
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 44% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 263 70% 50%; /* #8B5CF6 Purple accent */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 91% 60%; /* #3B82F6 Blue accent */
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 263 70% 50%;
+
+    --radius: 0.5rem;
+  }
+}
+
+body {
+  background-color: #070A12;
+  color: #F8FAFC;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0B101E;
+}
+::-webkit-scrollbar-thumb {
+  background: #1E2B4A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2B3C66;
+}
+
+/* Focus styles */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #8B5CF6 !important;
+  box-shadow: 0 0 0 1px #8B5CF6;
+}

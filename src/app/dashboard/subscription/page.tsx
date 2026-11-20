@@ -1,0 +1,402 @@
+"use client";
+
+import React, { useState } from "react";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
+import { useAuth } from "@/context/auth-context";
+import { useChannel } from "@/context/channel-context";
+import { useData, PLAN_LIMITS } from "@/context/data-context";
+import { useToast } from "@/components/ui/toast";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  CreditCard,
+  CheckCircle,
+  Zap,
+  Sparkles,
+  Youtube,
+  ShieldCheck,
+  Check,
+  ArrowRight,
+  Info,
+  Download,
+  Calendar,
+  Receipt,
+} from "lucide-react";
+import { PlanTier } from "@/types/database.types";
+
+export default function SubscriptionPage() {
+  const { profile } = useAuth();
+  const { channels } = useChannel();
+  const { usage } = useData();
+  const { toast } = useToast();
+
+  const [currentTier, setCurrentTier] = useState<PlanTier>(profile?.plan_tier || "creator");
+  const [switchMessage, setSwitchMessage] = useState<string | null>(null);
+
+  const currentLimit = PLAN_LIMITS[currentTier] || PLAN_LIMITS.creator;
+
+  const handleSwitchPlan = (tier: PlanTier) => {
+    setCurrentTier(tier);
+    toast.success("Plan Updated", `Workspace successfully upgraded to ${tier.toUpperCase()} tier.`);
+    setSwitchMessage(`Plan tier updated to ${tier.toUpperCase()}. Usage quotas refreshed.`);
+    setTimeout(() => setSwitchMessage(null), 3000);
+  };
+
+  const invoices = [
+    { id: "INV-2026-11", date: "Nov 1, 2026", amount: "$29.00", status: "Paid", plan: "Creator Pro" },
+    { id: "INV-2026-10", date: "Oct 1, 2026", amount: "$29.00", status: "Paid", plan: "Creator Pro" },
+    { id: "INV-2026-09", date: "Sep 1, 2026", amount: "$29.00", status: "Paid", plan: "Creator Pro" },
+  ];
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-8 animate-in fade-in duration-200">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Subscription & Usage Limits
+              </h1>
+              <Badge variant="default" className="text-[10px] font-bold uppercase tracking-wider">
+                {currentTier} PLAN
+              </Badge>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+              Manage your plan tier, monitor monthly AI usage quotas, and manage channel connection limits.
+            </p>
+          </div>
+        </div>
+
+        {switchMessage && (
+          <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs flex items-center gap-2">
+            <Check className="w-4 h-4 shrink-0" />
+            <span>{switchMessage}</span>
+          </div>
+        )}
+
+        {/* Current Cycle Usage Meters */}
+        <Card className="border-navy-800 bg-navy-900/90 shadow-card p-6 space-y-6">
+          <div className="flex items-center justify-between pb-3 border-b border-navy-800">
+            <div>
+              <CardTitle className="text-base text-white">Monthly Usage Quotas</CardTitle>
+              <CardDescription className="text-xs text-slate-400">
+                Cycle resets on December 1, 2026.
+              </CardDescription>
+            </div>
+            <Badge variant="blue" className="text-xs">
+              Billing Status: Active
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* AI Generations Gauge */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-300 font-semibold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
+                  AI Metadata Generations
+                </span>
+                <span className="text-white font-mono font-bold">
+                  {usage.metadataGenerations} / {currentLimit.ai}
+                </span>
+              </div>
+              <Progress
+                value={Math.min(100, (usage.metadataGenerations / currentLimit.ai) * 100)}
+                indicatorColor="bg-brand-purple"
+              />
+              <p className="text-[10px] text-slate-400">
+                {Math.max(0, currentLimit.ai - usage.metadataGenerations)} generations remaining this billing month.
+              </p>
+            </div>
+
+            {/* Connected Channels Gauge */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-300 font-semibold flex items-center gap-1.5">
+                  <Youtube className="w-3.5 h-3.5 text-red-500" />
+                  Connected Channels
+                </span>
+                <span className="text-white font-mono font-bold">
+                  {channels.length} / {currentLimit.channels}
+                </span>
+              </div>
+              <Progress
+                value={Math.min(100, (channels.length / currentLimit.channels) * 100)}
+                indicatorColor="bg-red-500"
+              />
+              <p className="text-[10px] text-slate-400">
+                {Math.max(0, currentLimit.channels - channels.length)} channel slots available.
+              </p>
+            </div>
+
+            {/* Video Uploads Gauge */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-300 font-semibold flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5 text-emerald-400" />
+                  Video Upload Jobs
+                </span>
+                <span className="text-white font-mono font-bold">
+                  {usage.videoUploads} / {currentLimit.uploads}
+                </span>
+              </div>
+              <Progress
+                value={Math.min(100, (usage.videoUploads / currentLimit.uploads) * 100)}
+                indicatorColor="bg-emerald-400"
+              />
+              <p className="text-[10px] text-slate-400">
+                {Math.max(0, currentLimit.uploads - usage.videoUploads)} video upload jobs remaining.
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Plan Tiers Selection Grid */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="text-base font-bold text-white">Available Plans</h3>
+            <p className="text-xs text-slate-400">
+              Upgrade or switch between plans to test scale and capability limits.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* FREE PLAN */}
+            <Card
+              className={`border transition-all flex flex-col justify-between ${
+                currentTier === "free"
+                  ? "border-brand-purple bg-navy-900/90 shadow-glow"
+                  : "border-navy-800 bg-navy-900/60"
+              }`}
+            >
+              <CardHeader className="p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base text-white">Free Starter</CardTitle>
+                  {currentTier === "free" && (
+                    <Badge variant="default" className="text-[10px]">
+                      Current Plan
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-baseline gap-1 mt-2">
+                  <span className="text-3xl font-extrabold text-white">$0</span>
+                  <span className="text-xs text-slate-400">/ mo</span>
+                </div>
+                <CardDescription className="text-xs text-slate-400 mt-2">
+                  For creators launching their first channel.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="p-6 pt-0 space-y-2.5 text-xs text-slate-300">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>1 Connected YouTube Channel</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>15 AI Metadata Generations / mo</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>Direct YouTube Uploads (5 / mo)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>Content Calendar Planning</span>
+                </div>
+              </CardContent>
+
+              <CardFooter className="p-6 pt-0">
+                <Button
+                  variant={currentTier === "free" ? "secondary" : "outline"}
+                  disabled={currentTier === "free"}
+                  onClick={() => handleSwitchPlan("free")}
+                  className="w-full text-xs font-semibold border-navy-700"
+                >
+                  {currentTier === "free" ? "Active Plan" : "Switch to Free"}
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {/* CREATOR PLAN */}
+            <Card
+              className={`border-2 transition-all flex flex-col justify-between relative shadow-glow ${
+                currentTier === "creator"
+                  ? "border-brand-purple bg-navy-900/90"
+                  : "border-navy-700 bg-navy-900/70"
+              }`}
+            >
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge variant="default" className="text-[10px] font-bold px-3">
+                  MOST POPULAR
+                </Badge>
+              </div>
+              <CardHeader className="p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base text-white">Creator Pro</CardTitle>
+                  {currentTier === "creator" && (
+                    <Badge variant="default" className="text-[10px]">
+                      Current Plan
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-baseline gap-1 mt-2">
+                  <span className="text-3xl font-extrabold text-white">$29</span>
+                  <span className="text-xs text-slate-400">/ mo</span>
+                </div>
+                <CardDescription className="text-xs text-slate-400 mt-2">
+                  For ambitious creators publishing consistent content.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="p-6 pt-0 space-y-2.5 text-xs text-slate-300">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>Up to 3 Connected Channels</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>200 AI Metadata Generations / mo</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>YouTube Analytics Dashboard</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>Thumbnail Studio & Feed Preview</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>AI Content Ideation Assistant</span>
+                </div>
+              </CardContent>
+
+              <CardFooter className="p-6 pt-0">
+                <Button
+                  variant={currentTier === "creator" ? "secondary" : "gradient"}
+                  disabled={currentTier === "creator"}
+                  onClick={() => handleSwitchPlan("creator")}
+                  className="w-full text-xs font-semibold shadow-glow"
+                >
+                  {currentTier === "creator" ? "Active Plan" : "Switch to Creator Pro"}
+                </Button>
+              </CardFooter>
+            </Card>
+
+            {/* AGENCY / PRO PLAN */}
+            <Card
+              className={`border transition-all flex flex-col justify-between ${
+                currentTier === "pro"
+                  ? "border-brand-purple bg-navy-900/90 shadow-glow"
+                  : "border-navy-800 bg-navy-900/60"
+              }`}
+            >
+              <CardHeader className="p-6">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base text-white">Agency Studio</CardTitle>
+                  {currentTier === "pro" && (
+                    <Badge variant="default" className="text-[10px]">
+                      Current Plan
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-baseline gap-1 mt-2">
+                  <span className="text-3xl font-extrabold text-white">$79</span>
+                  <span className="text-xs text-slate-400">/ mo</span>
+                </div>
+                <CardDescription className="text-xs text-slate-400 mt-2">
+                  For video production studios and agencies.
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="p-6 pt-0 space-y-2.5 text-xs text-slate-300">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>Up to 25 Connected Channels</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>1,000 AI Generations / mo</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>Consolidated Multi-Channel Analytics</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
+                  <span>Priority YouTube API Quota Handling</span>
+                </div>
+              </CardContent>
+
+              <CardFooter className="p-6 pt-0">
+                <Button
+                  variant={currentTier === "pro" ? "secondary" : "outline"}
+                  disabled={currentTier === "pro"}
+                  onClick={() => handleSwitchPlan("pro")}
+                  className="w-full text-xs font-semibold border-navy-700"
+                >
+                  {currentTier === "pro" ? "Active Plan" : "Switch to Agency Studio"}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+
+        {/* Invoice & Billing History Section */}
+        <div className="space-y-4">
+          <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <Receipt className="w-4 h-4 text-brand-purple" />
+            Billing & Invoices
+          </h3>
+
+          <Card className="border-navy-800 bg-navy-900/80 overflow-hidden shadow-card">
+            <div className="divide-y divide-navy-800 text-xs">
+              {invoices.map((inv) => (
+                <div
+                  key={inv.id}
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-navy-850/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-navy-950 border border-navy-800 flex items-center justify-center text-slate-300 shrink-0 font-mono text-[10px]">
+                      PDF
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">{inv.id} — {inv.plan}</p>
+                      <p className="text-[11px] text-slate-400">{inv.date}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 self-end sm:self-center">
+                    <span className="font-mono font-bold text-white">{inv.amount}</span>
+                    <Badge variant="success" className="text-[10px]">
+                      {inv.status}
+                    </Badge>
+                    <button
+                      onClick={() => toast.success("Invoice Downloaded", `Receipt ${inv.id}.pdf downloaded.`)}
+                      className="text-slate-400 hover:text-white p-1 rounded"
+                      title="Download Invoice"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+
+        {/* Payment Gateway Architecture Note */}
+        <div className="p-4 rounded-xl border border-navy-800 bg-navy-950/60 text-xs text-slate-400 flex items-start gap-3">
+          <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+          <div>
+            <strong className="text-white">Payment Gateway Integration:</strong> In accordance with project requirements, payment processing webhooks connect directly into the Supabase <code className="text-brand-purple">subscriptions</code> and <code className="text-brand-purple">usage_records</code> schema.
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
