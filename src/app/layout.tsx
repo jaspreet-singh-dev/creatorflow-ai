@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/context/theme-context";
 import { AuthProvider } from "@/context/auth-context";
 import { ChannelProvider } from "@/context/channel-context";
 import { ToastProvider } from "@/components/ui/toast";
@@ -17,15 +18,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-navy-950 text-slate-100 antialiased selection:bg-brand-purple/30 selection:text-white">
-        <ToastProvider>
-          <AuthProvider>
-            <ChannelProvider>
-              <DataProvider>{children}</DataProvider>
-            </ChannelProvider>
-          </AuthProvider>
-        </ToastProvider>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className="min-h-screen bg-navy-950 text-slate-100 antialiased selection:bg-brand-purple/30 selection:text-white transition-colors duration-200">
+        <ThemeProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <ChannelProvider>
+                <DataProvider>{children}</DataProvider>
+              </ChannelProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

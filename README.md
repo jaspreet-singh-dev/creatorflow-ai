@@ -56,9 +56,15 @@
 
 ### 📺 Channel Manager (`/dashboard/channels`)
 - Multi-channel YouTube account linking via Google OAuth 2.0
+- **Real YouTube Handle Lookup & Metadata Ingestion**: Connect any public channel via handle (e.g. `@channel`) with live subscriber, video, and view statistics via `/api/youtube/channel-lookup`
 - Channel switching: Instant workspace toggle between connected channels
-- Live statistics: Subscribers, total views, published video count, and token status
+- Live statistics: Subscribers, total views, published video count, and sync state
 - Server-side token encryption and user isolation via PostgreSQL RLS
+
+### ⚙️ Settings & Environment Vault (`/dashboard/settings`)
+- Live inspection and verification of backend service connections (`/api/settings/keys`)
+- Runtime credential configuration for Gemini AI, Google OAuth, and Supabase with masked display
+- Creator profile editing (avatar, display name, email)
 
 ### 📊 Analytics Dashboard (`/dashboard/analytics`)
 - Authorized channel metrics: Total Views, Watch Time (hours), Average View Duration, Impressions, Impression CTR (%), and Subscribers Gained

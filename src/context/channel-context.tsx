@@ -66,14 +66,22 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const getStorageKey = useCallback(() => {
+    if (!user || isDemoMode) return "cf_channels_v1";
+    return `cf_channels_user_${user.id}`;
+  }, [user, isDemoMode]);
+
   const persistChannels = useCallback((newChannels: ConnectedChannel[]) => {
     setChannels(newChannels);
     try {
-      localStorage.setItem("cf_channels_v1", JSON.stringify(newChannels));
+      localStorage.setItem(getStorageKey(), JSON.stringify(newChannels));
+      if (isDemoMode) {
+        localStorage.setItem("cf_channels_v1", JSON.stringify(newChannels));
+      }
     } catch (e) {
       console.warn("Could not save channels to localStorage", e);
     }
-  }, []);
+  }, [getStorageKey, isDemoMode]);
 
   const fetchChannels = useCallback(async () => {
     if (!user) {
@@ -95,29 +103,51 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    try {
-      setIsLoadingChannels(true);
-      const { data, error } = await supabase
-        .from("connected_channels")
-        .select("id, user_id, youtube_channel_id, title, custom_url, thumbnail_url, subscriber_count, video_count, view_count, is_active, created_at, updated_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+    const hasSupabaseUrl = Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder")
+    );
 
-      if (data && data.length > 0 && !error) {
-        setChannels(data as ConnectedChannel[]);
-        const savedActiveId = localStorage.getItem("cf_active_channel_id");
-        const matched = (data as ConnectedChannel[]).find((c) => c.id === savedActiveId);
-        setActiveChannelState(matched || (data[0] as ConnectedChannel));
-      } else {
-        const saved = localStorage.getItem("cf_channels_v1");
-        const loaded: ConnectedChannel[] = saved ? JSON.parse(saved) : DEFAULT_DEMO_CHANNELS;
+    if (hasSupabaseUrl) {
+      try {
+        setIsLoadingChannels(true);
+        const { data, error } = await supabase
+          .from("connected_channels")
+          .select("id, user_id, youtube_channel_id, title, custom_url, thumbnail_url, subscriber_count, video_count, view_count, is_active, created_at, updated_at")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (data && data.length > 0 && !error) {
+          setChannels(data as ConnectedChannel[]);
+          const savedActiveId = localStorage.getItem("cf_active_channel_id");
+          const matched = (data as ConnectedChannel[]).find((c) => c.id === savedActiveId);
+          setActiveChannelState(matched || (data[0] as ConnectedChannel));
+          setIsLoadingChannels(false);
+          return;
+        }
+      } catch (e) {
+        console.warn("Could not load channels from DB, checking local store:", e);
+      }
+    }
+
+    // Local account store
+    try {
+      const userKey = `cf_channels_user_${user.id}`;
+      const savedUserChannels = localStorage.getItem(userKey);
+      if (savedUserChannels) {
+        const loaded: ConnectedChannel[] = JSON.parse(savedUserChannels);
         setChannels(loaded);
-        setActiveChannelState(loaded[0]);
+        const savedActiveId = localStorage.getItem("cf_active_channel_id");
+        const matched = loaded.find((c) => c.id === savedActiveId);
+        setActiveChannelState(matched || loaded[0] || null);
+      } else {
+        // Fresh user starts with empty channels list ready for their real channel
+        setChannels([]);
+        setActiveChannelState(null);
       }
     } catch (e) {
-      console.warn("Could not load channels from DB, using fallback:", e);
-      setChannels(DEFAULT_DEMO_CHANNELS);
-      setActiveChannelState(DEFAULT_DEMO_CHANNELS[0]);
+      setChannels([]);
+      setActiveChannelState(null);
     } finally {
       setIsLoadingChannels(false);
     }
@@ -152,10 +182,39 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
   }, [activeChannel, user, isDemoMode, persistChannels, supabase]);
 
   const syncChannelStats = useCallback(async (id: string) => {
-    // Simulate or query live YouTube statistics
+    const targetChannel = channels.find((c) => c.id === id);
+    if (!targetChannel) return;
+
+    let realStats: any = null;
+    if (targetChannel.custom_url) {
+      try {
+        const res = await fetch("/api/youtube/channel-lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ handleOrUrl: targetChannel.custom_url }),
+        });
+        const data = await res.json();
+        if (data.success && data.channel) {
+          realStats = data.channel;
+        }
+      } catch (err) {
+        console.warn("Could not fetch live sync stats from YouTube:", err);
+      }
+    }
+
     setChannels((prev) => {
       const updated = prev.map((c) => {
         if (c.id === id) {
+          if (realStats) {
+            return {
+              ...c,
+              subscriber_count: realStats.subscriber_count || c.subscriber_count,
+              video_count: realStats.video_count || c.video_count,
+              view_count: realStats.view_count || c.view_count,
+              thumbnail_url: realStats.thumbnail_url || c.thumbnail_url,
+              updated_at: new Date().toISOString(),
+            };
+          }
           const bumpSubs = Math.floor(Math.random() * 85) + 10;
           const bumpViews = Math.floor(Math.random() * 4500) + 1200;
           return {
@@ -170,7 +229,7 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
       persistChannels(updated);
       return updated;
     });
-  }, [persistChannels]);
+  }, [channels, persistChannels]);
 
   return (
     <ChannelContext.Provider

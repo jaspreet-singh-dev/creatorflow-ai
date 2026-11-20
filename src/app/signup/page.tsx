@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, Mail, Lock, User, ArrowRight, CheckCircle2, AlertCircle } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -37,11 +38,17 @@ export default function SignUpPage() {
       setError(signUpError.message || "Failed to create account. Please check your details.");
     } else {
       setIsSuccess(true);
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 1200);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-navy-950 relative overflow-hidden">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-purple/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-brand-blue/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -67,20 +74,20 @@ export default function SignUpPage() {
           </CardHeader>
           <CardContent>
             {isSuccess ? (
-              <div className="p-6 text-center space-y-4">
+              <div className="p-6 text-center space-y-4 animate-in zoom-in-95">
                 <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h4 className="font-semibold text-white text-base">Account Created!</h4>
+                <h4 className="font-semibold text-white text-base">Account Created Successfully!</h4>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  We have sent a verification confirmation to <strong className="text-white">{email}</strong>. Once confirmed, you can sign in to your dashboard.
+                  Welcome to CreatorFlow AI, <strong className="text-white">{fullName || email}</strong>! Your creator workspace is ready.
                 </p>
                 <Button
                   variant="gradient"
-                  className="w-full text-xs font-semibold"
-                  onClick={() => router.push("/login")}
+                  className="w-full text-xs font-semibold shadow-glow"
+                  onClick={() => router.push("/dashboard")}
                 >
-                  Proceed to Sign In
+                  Enter Dashboard Now
                 </Button>
               </div>
             ) : (

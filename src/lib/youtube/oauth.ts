@@ -6,16 +6,17 @@ export const YOUTUBE_SCOPES = [
   "https://www.googleapis.com/auth/yt-analytics.readonly",
 ];
 
-export function getOAuth2Client() {
+export function getOAuth2Client(customRedirectUri?: string) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.YOUTUBE_REDIRECT_URI || "http://localhost:3000/api/youtube/callback";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const redirectUri = customRedirectUri || process.env.YOUTUBE_REDIRECT_URI || `${baseUrl}/api/youtube/callback`;
 
   return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 }
 
-export function generateAuthUrl(state?: string): string {
-  const oauth2Client = getOAuth2Client();
+export function generateAuthUrl(state?: string, customRedirectUri?: string): string {
+  const oauth2Client = getOAuth2Client(customRedirectUri);
 
   return oauth2Client.generateAuthUrl({
     access_type: "offline",
@@ -26,8 +27,8 @@ export function generateAuthUrl(state?: string): string {
   });
 }
 
-export async function exchangeCodeForTokens(code: string) {
-  const oauth2Client = getOAuth2Client();
+export async function exchangeCodeForTokens(code: string, customRedirectUri?: string) {
+  const oauth2Client = getOAuth2Client(customRedirectUri);
   const { tokens } = await oauth2Client.getToken(code);
   oauth2Client.setCredentials(tokens);
 

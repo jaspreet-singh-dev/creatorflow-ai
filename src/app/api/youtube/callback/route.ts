@@ -7,14 +7,15 @@ export async function GET(req: NextRequest) {
   const code = searchParams.get("code");
   const error = searchParams.get("error");
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   if (error || !code) {
     return NextResponse.redirect(`${baseUrl}/dashboard/channels?error=${encodeURIComponent(error || "Authorization cancelled")}`);
   }
 
   try {
-    const { tokens, channelData } = await exchangeCodeForTokens(code);
+    const redirectUri = `${baseUrl}/api/youtube/callback`;
+    const { tokens, channelData } = await exchangeCodeForTokens(code, redirectUri);
 
     // Save or update channel in Supabase
     const supabase = createClient();

@@ -17,7 +17,9 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const state = searchParams.get("state") || undefined;
 
-    const authUrl = generateAuthUrl(state);
+    const origin = req.nextUrl.origin || process.env.NEXT_PUBLIC_APP_URL;
+    const redirectUri = origin ? `${origin}/api/youtube/callback` : undefined;
+    const authUrl = generateAuthUrl(state, redirectUri);
 
     return NextResponse.json({
       configured: true,

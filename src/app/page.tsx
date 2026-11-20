@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function HomePage() {
   const { user, signInDemo } = useAuth();
@@ -49,6 +50,7 @@ export default function HomePage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {user ? (
             <Link href="/dashboard">
               <Button variant="gradient" size="sm" className="font-semibold text-xs px-4">

@@ -31,6 +31,9 @@ import {
   PlusCircle,
   Radio,
   ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  SlidersHorizontal,
 } from "lucide-react";
 import { GeneratedMetadataOutput } from "@/lib/ai/gemini";
 import { useData, SavedMetadataRecord } from "@/context/data-context";
@@ -68,6 +71,16 @@ export default function MetadataStudioPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isAdvanced, setIsAdvanced] = useState(false);
+
+  const QUICK_NICHES = [
+    "Tech & Web Development",
+    "AI & Automation",
+    "Business & Finance",
+    "Gaming",
+    "Education & How-To",
+    "Vlog & Lifestyle",
+  ];
 
   // Generated Output state
   const [metadata, setMetadata] = useState<GeneratedMetadataOutput>({
@@ -355,149 +368,167 @@ ${metadata.thumbnailIdeas.join("\n")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Associate Video */}
+                {/* 1. Main Video Topic Input */}
                 <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-300">
-                      Associate with Video Project
-                    </label>
-                    {selectedVideoId !== "create_new" && (
-                      <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
-                        <CheckCircle2 className="w-3 h-3" /> Linked
-                      </span>
-                    )}
-                  </div>
-                  <select
-                    value={selectedVideoId}
-                    onChange={(e) => setSelectedVideoId(e.target.value)}
-                    className="w-full h-10 rounded-lg border border-navy-800 bg-navy-950 px-3 text-xs text-slate-200 focus:border-brand-purple"
-                  >
-                    <option value="create_new">+ Create New Video Project from this</option>
-                    {videos.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.title.slice(0, 48)}... ({v.status})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Video Topic */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Video Topic / Working Title <span className="text-brand-purple">*</span>
+                  <label className="text-xs font-bold text-white flex items-center justify-between">
+                    <span>What is your video about?</span>
+                    <span className="text-[10px] text-brand-purple font-normal">Topic or Working Title</span>
                   </label>
                   <Input
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
-                    placeholder="e.g. 10 AI Tools that will replace junior developers"
-                    className="text-xs"
+                    placeholder="e.g. 10 AI Tools that will replace junior developers in 2026"
+                    className="text-xs h-10 border-navy-700 bg-navy-950 focus:border-brand-purple"
                   />
                 </div>
 
-                {/* Primary Keyword */}
+                {/* 2. Quick Category / Niche Pills */}
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Primary Target Keyword
+                  <label className="text-[11px] font-semibold text-slate-300">
+                    Quick Category:
                   </label>
-                  <Input
-                    value={primaryKeyword}
-                    onChange={(e) => setPrimaryKeyword(e.target.value)}
-                    placeholder="e.g. AI Tools for Developers"
-                    className="text-xs"
-                  />
-                </div>
-
-                {/* Secondary Keywords */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Secondary Keywords (comma separated)
-                  </label>
-                  <Input
-                    value={secondaryKeywords}
-                    onChange={(e) => setSecondaryKeywords(e.target.value)}
-                    placeholder="e.g. coding tools, nextjs, llm, productivity"
-                    className="text-xs"
-                  />
-                </div>
-
-                {/* Transcript / Summary Context */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">
-                    Video Description, Outline or Transcript
-                  </label>
-                  <Textarea
-                    rows={4}
-                    value={transcript}
-                    onChange={(e) => setTranscript(e.target.value)}
-                    placeholder="Paste rough notes, outline, or audio transcript to generate accurate chapters..."
-                    className="text-xs resize-none"
-                  />
-                </div>
-
-                {/* Grid: Niche & Target Audience */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300">Channel Niche</label>
-                    <Input
-                      value={niche}
-                      onChange={(e) => setNiche(e.target.value)}
-                      placeholder="e.g. Tech, Finance, Gaming"
-                      className="text-xs"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300">Target Audience</label>
-                    <Input
-                      value={targetAudience}
-                      onChange={(e) => setTargetAudience(e.target.value)}
-                      placeholder="e.g. Beginners, Software Pros"
-                      className="text-xs"
-                    />
+                  <div className="flex flex-wrap gap-1.5">
+                    {QUICK_NICHES.map((n) => {
+                      const isSelected = niche === n;
+                      return (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => setNiche(n)}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                            isSelected
+                              ? "bg-brand-purple text-white shadow-glow"
+                              : "bg-navy-950/80 text-slate-400 hover:text-white hover:bg-navy-800 border border-navy-800"
+                          }`}
+                        >
+                          {n}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* Grid: Tone & Language */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300">Preferred Tone</label>
-                    <select
-                      value={preferredTone}
-                      onChange={(e) => setPreferredTone(e.target.value)}
-                      className="w-full h-10 rounded-lg border border-navy-800 bg-navy-950 px-3 text-xs text-slate-200 focus:border-brand-purple"
-                    >
-                      <option>Engaging & Authoritative</option>
-                      <option>Curiosity Gap / Contrarian</option>
-                      <option>Casual & Relatable</option>
-                      <option>Fast-Paced / High Energy</option>
-                      <option>Educational / Tutorial</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-300">Language</label>
-                    <select
-                      value={language}
-                      onChange={(e) => setLanguage(e.target.value)}
-                      className="w-full h-10 rounded-lg border border-navy-800 bg-navy-950 px-3 text-xs text-slate-200 focus:border-brand-purple"
-                    >
-                      <option>English</option>
-                      <option>Spanish</option>
-                      <option>German</option>
-                      <option>French</option>
-                      <option>Hindi</option>
-                      <option>Portuguese</option>
-                    </select>
-                  </div>
-                </div>
-
+                {/* Primary Action Button */}
                 <Button
                   onClick={handleGenerate}
                   variant="gradient"
-                  className="w-full text-xs font-semibold mt-2 shadow-glow"
+                  className="w-full text-xs font-bold py-2.5 shadow-glow"
                   isLoading={isGenerating}
                 >
-                  <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
-                  Generate All Metadata
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Generate Complete YouTube Kit (Titles, SEO & Tags)
                 </Button>
+
+                {/* Collapsible Advanced Options Toggle */}
+                <div className="pt-2 border-t border-navy-800">
+                  <button
+                    type="button"
+                    onClick={() => setIsAdvanced(!isAdvanced)}
+                    className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-white py-1 transition-colors"
+                  >
+                    <span className="flex items-center gap-1.5 font-medium">
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-brand-purple" />
+                      {isAdvanced ? "Hide Advanced Options" : "Show Advanced Options (Keywords, Transcript, Tone)"}
+                    </span>
+                    {isAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+
+                  {isAdvanced && (
+                    <div className="space-y-3.5 pt-3 animate-in fade-in duration-150">
+                      {/* Associate Video */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-300">
+                          Associate with Existing Video Project
+                        </label>
+                        <select
+                          value={selectedVideoId}
+                          onChange={(e) => setSelectedVideoId(e.target.value)}
+                          className="w-full h-9 rounded-lg border border-navy-800 bg-navy-950 px-3 text-xs text-slate-200 focus:border-brand-purple"
+                        >
+                          <option value="create_new">+ Create New Video Project from this</option>
+                          {videos.map((v) => (
+                            <option key={v.id} value={v.id}>
+                              {v.title.slice(0, 48)}... ({v.status})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Primary Keyword */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-300">
+                          Primary Target Keyword
+                        </label>
+                        <Input
+                          value={primaryKeyword}
+                          onChange={(e) => setPrimaryKeyword(e.target.value)}
+                          placeholder="e.g. AI Tools for Developers"
+                          className="text-xs h-9"
+                        />
+                      </div>
+
+                      {/* Secondary Keywords */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-300">
+                          Secondary Keywords (comma separated)
+                        </label>
+                        <Input
+                          value={secondaryKeywords}
+                          onChange={(e) => setSecondaryKeywords(e.target.value)}
+                          placeholder="e.g. coding tools, nextjs, llm, productivity"
+                          className="text-xs h-9"
+                        />
+                      </div>
+
+                      {/* Transcript / Summary Context */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-slate-300">
+                          Rough Notes, Outline or Transcript
+                        </label>
+                        <Textarea
+                          rows={3}
+                          value={transcript}
+                          onChange={(e) => setTranscript(e.target.value)}
+                          placeholder="Paste rough notes, outline, or audio transcript to generate accurate chapters..."
+                          className="text-xs resize-none"
+                        />
+                      </div>
+
+                      {/* Grid: Tone & Target Audience */}
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-300">Preferred Tone</label>
+                          <select
+                            value={preferredTone}
+                            onChange={(e) => setPreferredTone(e.target.value)}
+                            className="w-full h-9 rounded-lg border border-navy-800 bg-navy-950 px-2 text-xs text-slate-200"
+                          >
+                            <option>Engaging & Authoritative</option>
+                            <option>Curiosity Gap / Contrarian</option>
+                            <option>Casual & Relatable</option>
+                            <option>Fast-Paced / High Energy</option>
+                            <option>Educational / Tutorial</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-slate-300">Language</label>
+                          <select
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value)}
+                            className="w-full h-9 rounded-lg border border-navy-800 bg-navy-950 px-2 text-xs text-slate-200"
+                          >
+                            <option>English</option>
+                            <option>Spanish</option>
+                            <option>German</option>
+                            <option>French</option>
+                            <option>Hindi</option>
+                            <option>Portuguese</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

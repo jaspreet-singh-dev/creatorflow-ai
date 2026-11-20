@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/context/auth-context";
 import { useData } from "@/context/data-context";
+import { useTheme, Theme } from "@/context/theme-context";
 import { useToast } from "@/components/ui/toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -23,22 +24,92 @@ import {
   Save,
   Check,
   RotateCcw,
+  Eye,
+  EyeOff,
+  ExternalLink,
+  RefreshCw,
+  Sun,
+  Moon,
+  Palette,
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { profile, user, isDemoMode } = useAuth();
+  const { profile, user, updateProfile } = useAuth();
   const { resetToDemoDefaults } = useData();
+  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const [fullName, setFullName] = useState(profile?.full_name || "Alex Rivera");
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  // Live API Keys form state
+  const [supabaseUrl, setSupabaseUrl] = useState("");
+  const [supabaseAnonKey, setSupabaseAnonKey] = useState("");
+  const [geminiApiKey, setGeminiApiKey] = useState("");
+  const [googleClientId, setGoogleClientId] = useState("");
+  const [googleClientSecret, setGoogleClientSecret] = useState("");
+  const [isSavingKeys, setIsSavingKeys] = useState(false);
+  const [keyStatus, setKeyStatus] = useState<any>(null);
+  const [showSecrets, setShowSecrets] = useState(false);
+
+  // Fetch current backend key status
+  const fetchKeyStatus = async () => {
+    try {
+      const res = await fetch("/api/settings/keys");
+      const data = await res.json();
+      setKeyStatus(data);
+      if (data.supabase?.url) setSupabaseUrl(data.supabase.url);
+      if (data.googleOAuth?.clientId) setGoogleClientId(data.googleOAuth.clientId);
+    } catch (e) {
+      console.warn("Could not fetch key status:", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchKeyStatus();
+  }, []);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    await updateProfile({
+      full_name: fullName,
+      avatar_url: avatarUrl,
+    });
     setSaveSuccess(true);
     toast.success("Profile Updated", `Saved display name "${fullName}".`);
     setTimeout(() => setSaveSuccess(false), 2500);
+  };
+
+  const handleSaveKeys = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingKeys(true);
+
+    try {
+      const res = await fetch("/api/settings/keys", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          supabaseUrl,
+          supabaseAnonKey,
+          geminiApiKey,
+          googleClientId,
+          googleClientSecret,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success("Live Credentials Saved", "Keys saved to .env.local and loaded into app runtime.");
+        await fetchKeyStatus();
+      } else {
+        toast.error("Failed to Save Keys", data.error || "Could not write configuration.");
+      }
+    } catch (err: any) {
+      toast.error("Error", err?.message || "Failed to contact settings endpoint.");
+    } finally {
+      setIsSavingKeys(false);
+    }
   };
 
   return (
@@ -48,10 +119,10 @@ export default function SettingsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Account & API Settings
+              Account & Live API Settings
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Manage your user profile, verify connected services, and inspect backend integrations.
+              Configure your user profile, connect live Supabase Auth, Google OAuth 2.0, and Gemini AI credentials.
             </p>
           </div>
 
@@ -74,8 +145,8 @@ export default function SettingsPage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* User Profile Form (6 Cols) */}
-          <div className="lg:col-span-6 space-y-5">
+          {/* Left Column: User Profile & Security (5 Cols) */}
+          <div className="lg:col-span-5 space-y-5">
             <Card className="border-navy-800 bg-navy-900/90 shadow-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base text-white flex items-center gap-2">
@@ -97,7 +168,7 @@ export default function SettingsPage() {
                       className="text-xs bg-navy-950/40 text-slate-400 cursor-not-allowed"
                     />
                     <p className="text-[10px] text-slate-500">
-                      Email is managed via your Supabase authentication record.
+                      Active user account email.
                     </p>
                   </div>
 
@@ -132,95 +203,282 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Security Best Practices */}
+            {/* Interactive Theme & Appearance Mode */}
+            <Card className="border-navy-800 bg-navy-900/90 shadow-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base text-white flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-brand-purple" />
+                  Appearance & Interactive Themes
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Switch between Dark Studio, true AMOLED pure black, and daylight mode.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 gap-2.5">
+                  {/* Theme Option: Dark Navy */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTheme("dark");
+                      toast.success("Theme Applied", "Activated Dark Navy Studio palette.");
+                    }}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                      theme === "dark"
+                        ? "border-brand-purple bg-brand-purple/15 shadow-glow"
+                        : "border-navy-800 bg-navy-950/60 hover:border-navy-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-[#070A12] border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                        <Moon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>Dark Navy Studio</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-mono">#070A12</span>
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Cinematic deep-navy creator workspace (Default).
+                        </p>
+                      </div>
+                    </div>
+                    {theme === "dark" && (
+                      <div className="w-5 h-5 rounded-full bg-brand-purple flex items-center justify-center text-white shrink-0">
+                        <Check className="w-3 h-3" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Theme Option: AMOLED Black */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTheme("amoled");
+                      toast.success("Theme Applied", "Activated Pure AMOLED Black mode.");
+                    }}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                      theme === "amoled"
+                        ? "border-purple-500 bg-purple-500/15 shadow-glow"
+                        : "border-navy-800 bg-navy-950/60 hover:border-navy-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-black border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>AMOLED Pure Black</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-mono">#000000</span>
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Pitch-black OLED battery saver with infinite contrast.
+                        </p>
+                      </div>
+                    </div>
+                    {theme === "amoled" && (
+                      <div className="w-5 h-5 rounded-full bg-brand-purple flex items-center justify-center text-white shrink-0">
+                        <Check className="w-3 h-3" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Theme Option: Light Daylight */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTheme("light");
+                      toast.success("Theme Applied", "Activated Studio Daylight mode.");
+                    }}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                      theme === "light"
+                        ? "border-amber-500 bg-amber-500/15 shadow-glow"
+                        : "border-navy-800 bg-navy-950/60 hover:border-navy-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-white border border-amber-500/40 flex items-center justify-center text-amber-500 shrink-0">
+                        <Sun className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span>Studio Daylight</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 font-mono">Light</span>
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Crisp slate & bright white for daytime productivity.
+                        </p>
+                      </div>
+                    </div>
+                    {theme === "light" && (
+                      <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-white shrink-0">
+                        <Check className="w-3 h-3" />
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Security Architecture */}
             <Card className="border-navy-800 bg-navy-900/90 shadow-card p-5 space-y-3">
               <div className="flex items-center gap-2 text-white font-semibold text-sm">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span>Security & Row Level Security</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                All video drafts, channel tokens, and metadata records in CreatorFlow AI are isolated by user ID via Supabase PostgreSQL RLS policies (<code className="text-brand-purple">auth.uid() = user_id</code>). Sensitive Google OAuth refresh tokens are encrypted and handled exclusively within server-side API routes.
+                All video drafts, channel tokens, and metadata records are isolated by user ID. When connecting Google OAuth or Supabase, secrets remain securely on the Next.js server side.
               </p>
             </Card>
           </div>
 
-          {/* Connected APIs & Integrations (6 Cols) */}
-          <div className="lg:col-span-6 space-y-5">
+          {/* Right Column: Live API Credentials Configuration (7 Cols) */}
+          <div className="lg:col-span-7 space-y-5">
             <Card className="border-navy-800 bg-navy-900/90 shadow-card">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base text-white flex items-center gap-2">
-                  <Key className="w-4 h-4 text-brand-blue" />
-                  Backend Integrations Status
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base text-white flex items-center gap-2">
+                    <Key className="w-4 h-4 text-brand-blue" />
+                    Live Credentials & External APIs
+                  </CardTitle>
+                  <button
+                    type="button"
+                    onClick={() => setShowSecrets(!showSecrets)}
+                    className="text-xs text-slate-400 hover:text-white flex items-center gap-1"
+                  >
+                    {showSecrets ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    <span>{showSecrets ? "Hide Secrets" : "Reveal Secrets"}</span>
+                  </button>
+                </div>
                 <CardDescription className="text-xs text-slate-400">
-                  Audit external service connections configured in <code className="text-slate-300">.env.local</code>.
+                  Save your production API keys directly to <code className="text-slate-300">.env.local</code>. Changes take effect immediately.
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-3.5">
-                {/* Gemini AI Status */}
-                <div className="p-3.5 rounded-xl border border-navy-800 bg-navy-950 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-brand-purple/20 text-brand-purple flex items-center justify-center">
-                      <Sparkles className="w-4 h-4" />
+              <CardContent>
+                <form onSubmit={handleSaveKeys} className="space-y-5">
+                  {/* Section 1: Google Cloud OAuth 2.0 (YouTube Data API v3) */}
+                  <div className="space-y-3 p-4 rounded-xl border border-navy-800 bg-navy-950/70">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Youtube className="w-4 h-4 text-red-500" />
+                        <h4 className="text-xs font-bold text-white">Google Cloud & YouTube OAuth 2.0</h4>
+                      </div>
+                      <Badge
+                        variant={keyStatus?.googleOAuth?.configured ? "success" : "secondary"}
+                        className="text-[10px]"
+                      >
+                        {keyStatus?.googleOAuth?.configured ? "Configured" : "Missing Keys"}
+                      </Badge>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">Google Gemini 1.5 Flash</p>
-                      <p className="text-[11px] text-slate-400">Metadata & Content Engine</p>
-                    </div>
-                  </div>
-                  <Badge variant="success" className="text-[10px]">
-                    Active / Fallback Ready
-                  </Badge>
-                </div>
+                    <p className="text-[11px] text-slate-400">
+                      Required for live Google OAuth consent & official video upload and scheduling.
+                    </p>
 
-                {/* YouTube Data API v3 */}
-                <div className="p-3.5 rounded-xl border border-navy-800 bg-navy-950 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center">
-                      <Youtube className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">YouTube Data & Analytics v3</p>
-                      <p className="text-[11px] text-slate-400">Google OAuth 2.0 Client</p>
+                    <div className="space-y-2">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-300">Google Client ID</label>
+                        <Input
+                          type="text"
+                          value={googleClientId}
+                          onChange={(e) => setGoogleClientId(e.target.value)}
+                          placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
+                          className="text-xs font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-300">Google Client Secret</label>
+                        <Input
+                          type={showSecrets ? "text" : "password"}
+                          value={googleClientSecret}
+                          onChange={(e) => setGoogleClientSecret(e.target.value)}
+                          placeholder={keyStatus?.googleOAuth?.secretMasked || "GOCSPX-..."}
+                          className="text-xs font-mono"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <Badge variant="blue" className="text-[10px]">
-                    OAuth Configured
-                  </Badge>
-                </div>
 
-                {/* Supabase PostgreSQL & Auth */}
-                <div className="p-3.5 rounded-xl border border-navy-800 bg-navy-950 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                      <Database className="w-4 h-4" />
+                  {/* Section 2: Supabase PostgreSQL & Auth */}
+                  <div className="space-y-3 p-4 rounded-xl border border-navy-800 bg-navy-950/70">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Database className="w-4 h-4 text-emerald-400" />
+                        <h4 className="text-xs font-bold text-white">Supabase Authentication & Database</h4>
+                      </div>
+                      <Badge
+                        variant={keyStatus?.supabase?.configured ? "success" : "secondary"}
+                        className="text-[10px]"
+                      >
+                        {keyStatus?.supabase?.configured ? "Connected" : "Local Engine Active"}
+                      </Badge>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">Supabase PostgreSQL & RLS</p>
-                      <p className="text-[11px] text-slate-400">Authentication & Storage</p>
+                    <p className="text-[11px] text-slate-400">
+                      Connect your Supabase project for multi-user cloud auth and PostgreSQL RLS storage.
+                    </p>
+
+                    <div className="space-y-2">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-300">Project URL</label>
+                        <Input
+                          type="text"
+                          value={supabaseUrl}
+                          onChange={(e) => setSupabaseUrl(e.target.value)}
+                          placeholder="https://your-project.supabase.co"
+                          className="text-xs font-mono"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-slate-300">Anon Public Key</label>
+                        <Input
+                          type={showSecrets ? "text" : "password"}
+                          value={supabaseAnonKey}
+                          onChange={(e) => setSupabaseAnonKey(e.target.value)}
+                          placeholder={keyStatus?.supabase?.keyMasked || "eyJhbGciOi..."}
+                          className="text-xs font-mono"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <Badge variant="success" className="text-[10px]">
-                    Connected
-                  </Badge>
-                </div>
+
+                  {/* Section 3: Gemini AI API Key */}
+                  <div className="space-y-3 p-4 rounded-xl border border-navy-800 bg-navy-950/70">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-brand-purple" />
+                        <h4 className="text-xs font-bold text-white">Google Gemini AI Engine</h4>
+                      </div>
+                      <Badge
+                        variant={keyStatus?.gemini?.configured ? "success" : "secondary"}
+                        className="text-[10px]"
+                      >
+                        {keyStatus?.gemini?.configured ? "Live Gemini Active" : "Heuristic Ready"}
+                      </Badge>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-semibold text-slate-300">Gemini API Key</label>
+                      <Input
+                        type={showSecrets ? "text" : "password"}
+                        value={geminiApiKey}
+                        onChange={(e) => setGeminiApiKey(e.target.value)}
+                        placeholder={keyStatus?.gemini?.keyMasked || "AIzaSy..."}
+                        className="text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    type="submit"
+                    variant="gradient"
+                    isLoading={isSavingKeys}
+                    className="w-full text-xs font-bold shadow-glow h-10"
+                  >
+                    <Save className="w-3.5 h-3.5 mr-1.5" />
+                    Save & Apply Live Keys
+                  </Button>
+                </form>
               </CardContent>
-            </Card>
-
-            {/* Quick Setup Instructions */}
-            <Card className="border-navy-800 bg-navy-900/90 shadow-card p-5 space-y-3">
-              <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-                Production Keys Setup Guide
-              </h4>
-              <div className="text-xs text-slate-400 space-y-2">
-                <p>To connect live production services, copy <code className="text-white">.env.example</code> to <code className="text-white">.env.local</code> and populate:</p>
-                <ul className="list-disc pl-4 space-y-1 text-slate-300">
-                  <li><code className="text-brand-purple">GEMINI_API_KEY</code> from Google AI Studio</li>
-                  <li><code className="text-brand-purple">GOOGLE_CLIENT_ID</code> & <code className="text-brand-purple">GOOGLE_CLIENT_SECRET</code> from Google Cloud Console</li>
-                  <li><code className="text-brand-purple">NEXT_PUBLIC_SUPABASE_URL</code> & <code className="text-brand-purple">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> from Supabase</li>
-                </ul>
-              </div>
             </Card>
           </div>
         </div>

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  :root, [data-theme="dark"] {
     --background: 222 47% 4%; /* #070A12 Deepest navy */
     --foreground: 210 40% 98%;
 
@@ -34,15 +34,253 @@
 
     --radius: 0.5rem;
   }
+
+  [data-theme="amoled"] {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 263 70% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 8%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 263 70% 55%;
+  }
+
+  [data-theme="light"] {
+    --background: 210 40% 98%; /* #F8FAFC soft white */
+    --foreground: 222 47% 11%; /* #0F172A slate 900 */
+
+    --card: 0 0% 100%; /* #FFFFFF pure white */
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 263 70% 50%; /* #8B5CF6 */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%; /* #E2E8F0 */
+    --input: 214 32% 91%;
+    --ring: 263 70% 50%;
+  }
 }
 
 body {
   background-color: #070A12;
   color: #F8FAFC;
   font-feature-settings: "rlig" 1, "calt" 1;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Custom Sleek Scrollbar */
+/* ========================================================
+   AMOLED PURE BLACK OVERRIDES (#000000 OLED True Black)
+   ======================================================== */
+[data-theme="amoled"] body {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="amoled"] .bg-navy-950 {
+  background-color: #000000 !important;
+}
+
+[data-theme="amoled"] .bg-navy-900 {
+  background-color: #070707 !important;
+}
+
+[data-theme="amoled"] .bg-navy-900\/90 {
+  background-color: rgba(7, 7, 7, 0.95) !important;
+}
+
+[data-theme="amoled"] .bg-navy-900\/60 {
+  background-color: rgba(7, 7, 7, 0.8) !important;
+}
+
+[data-theme="amoled"] .bg-navy-900\/40 {
+  background-color: rgba(7, 7, 7, 0.5) !important;
+}
+
+[data-theme="amoled"] .bg-navy-850 {
+  background-color: #0E0E0E !important;
+}
+
+[data-theme="amoled"] .bg-navy-800 {
+  background-color: #141414 !important;
+}
+
+[data-theme="amoled"] .bg-navy-800\/80 {
+  background-color: rgba(20, 20, 20, 0.8) !important;
+}
+
+[data-theme="amoled"] .bg-navy-800\/40 {
+  background-color: rgba(20, 20, 20, 0.4) !important;
+}
+
+[data-theme="amoled"] .border-navy-800 {
+  border-color: #1A1A1A !important;
+}
+
+[data-theme="amoled"] .border-navy-800\/80 {
+  border-color: rgba(26, 26, 26, 0.8) !important;
+}
+
+[data-theme="amoled"] .border-navy-700 {
+  border-color: #27272A !important;
+}
+
+[data-theme="amoled"] ::-webkit-scrollbar-track {
+  background: #000000 !important;
+}
+
+[data-theme="amoled"] ::-webkit-scrollbar-thumb {
+  background: #222222 !important;
+}
+
+/* ========================================================
+   LIGHT / DAYLIGHT STUDIO OVERRIDES (#F8FAFC Slate Palette)
+   ======================================================== */
+[data-theme="light"] body {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .bg-navy-950 {
+  background-color: #F8FAFC !important;
+}
+
+[data-theme="light"] .bg-navy-950\/80 {
+  background-color: rgba(248, 250, 252, 0.85) !important;
+}
+
+[data-theme="light"] .bg-navy-950\/90 {
+  background-color: rgba(248, 250, 252, 0.95) !important;
+}
+
+[data-theme="light"] .bg-navy-950\/95 {
+  background-color: rgba(248, 250, 252, 0.98) !important;
+}
+
+[data-theme="light"] .bg-navy-900 {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .bg-navy-900\/90 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme="light"] .bg-navy-900\/80 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+
+[data-theme="light"] .bg-navy-900\/60 {
+  background-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme="light"] .bg-navy-900\/40 {
+  background-color: rgba(241, 245, 249, 0.6) !important;
+}
+
+[data-theme="light"] .bg-navy-850 {
+  background-color: #F1F5F9 !important;
+}
+
+[data-theme="light"] .bg-navy-800 {
+  background-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .bg-navy-800\/80 {
+  background-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+[data-theme="light"] .bg-navy-800\/40 {
+  background-color: rgba(241, 245, 249, 0.8) !important;
+}
+
+[data-theme="light"] .border-navy-800 {
+  border-color: #E2E8F0 !important;
+}
+
+[data-theme="light"] .border-navy-800\/80 {
+  border-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+[data-theme="light"] .border-navy-700 {
+  border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] .text-white {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .text-slate-100 {
+  color: #1E293B !important;
+}
+
+[data-theme="light"] .text-slate-200 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .text-slate-300 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .text-slate-400 {
+  color: #64748B !important;
+}
+
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: #F1F5F9 !important;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: #CBD5E1 !important;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8 !important;
+}
+
+/* Custom Sleek Scrollbar (Default Dark) */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

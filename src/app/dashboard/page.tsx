@@ -93,6 +93,81 @@ export default function DashboardOverviewPage() {
           </div>
         </div>
 
+        {/* Creator 3-Step Quickstart: Easy & Complexity-Free Workflow */}
+        <div className="p-4 sm:p-5 rounded-2xl border border-brand-purple/20 bg-navy-900/90 shadow-card space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-navy-800">
+            <div>
+              <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-brand-purple" />
+                Creator Quickstart: 3 Simple Steps
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                The fastest way to take a video idea to an optimized, scheduled YouTube drop.
+              </p>
+            </div>
+            <span className="text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 shrink-0 self-start sm:self-auto">
+              Ready to Publish
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+            {/* Step 1: Channel */}
+            <div className="p-3.5 rounded-xl bg-navy-950/70 border border-navy-800 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center font-bold text-xs shrink-0 border border-red-500/20">
+                1
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-white truncate">
+                  {activeChannel ? activeChannel.title : "Connect Channel"}
+                </p>
+                <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                  {activeChannel ? `${formatNumber(activeChannel.subscriber_count)} subscribers` : "Enter handle (@you)"}
+                </p>
+                <Link
+                  href="/dashboard/channels"
+                  className="inline-flex items-center gap-1 text-[11px] text-brand-purple font-semibold hover:underline mt-1.5"
+                >
+                  {activeChannel ? "Switch or Sync →" : "Link Channel →"}
+                </Link>
+              </div>
+            </div>
+
+            {/* Step 2: AI Metadata */}
+            <div className="p-3.5 rounded-xl bg-navy-950/70 border border-navy-800 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-brand-purple/10 text-brand-purple flex items-center justify-center font-bold text-xs shrink-0 border border-brand-purple/20">
+                2
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-white truncate">AI Titles & SEO Kit</p>
+                <p className="text-[11px] text-slate-400 truncate mt-0.5">Titles, description, tags & score</p>
+                <Link
+                  href="/dashboard/metadata"
+                  className="inline-flex items-center gap-1 text-[11px] text-brand-purple font-semibold hover:underline mt-1.5"
+                >
+                  Generate Metadata →
+                </Link>
+              </div>
+            </div>
+
+            {/* Step 3: Publish / Schedule */}
+            <div className="p-3.5 rounded-xl bg-navy-950/70 border border-navy-800 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-brand-blue/10 text-brand-blue flex items-center justify-center font-bold text-xs shrink-0 border border-brand-blue/20">
+                3
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-white truncate">Schedule & Drop</p>
+                <p className="text-[11px] text-slate-400 truncate mt-0.5">Calendar drop or direct upload</p>
+                <Link
+                  href="/dashboard/calendar"
+                  className="inline-flex items-center gap-1 text-[11px] text-brand-blue font-semibold hover:underline mt-1.5"
+                >
+                  Open Calendar →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Notice for Demo Mode */}
         {isDemoMode && (
           <div className="p-3.5 rounded-xl border border-brand-purple/30 bg-brand-purple/10 flex items-center justify-between gap-4">

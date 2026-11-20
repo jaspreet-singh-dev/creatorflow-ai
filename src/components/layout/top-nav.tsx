@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { ChannelSwitcher } from "./channel-switcher";
 import { UserNav } from "./user-nav";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   Bell,
   Menu,
@@ -73,6 +74,9 @@ export function TopNav() {
             <span>Upload</span>
           </Button>
         </Link>
+
+        {/* Theme Switcher Toggle (Light / Dark Navy / AMOLED) */}
+        <ThemeToggle />
 
         {/* Notifications Popover */}
         <div className="relative">
@@ -165,7 +169,12 @@ export function TopNav() {
             ))}
           </div>
 
-          <div className="pt-6 border-t border-navy-800">
+          <div className="pt-6 border-t border-navy-800 space-y-4">
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Appearance Theme</p>
+              <ThemeToggle variant="segmented" />
+            </div>
+
             <Link
               href="/dashboard/metadata"
               onClick={() => setMobileMenuOpen(false)}
