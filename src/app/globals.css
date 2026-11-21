@@ -169,6 +169,7 @@ body {
 
 /* ========================================================
    LIGHT / DAYLIGHT STUDIO OVERRIDES (#F8FAFC Slate Palette)
+   Zero Invisible Words — High-Contrast Accessible Design
    ======================================================== */
 [data-theme="light"] body {
   background-color: #F8FAFC !important;
@@ -179,16 +180,12 @@ body {
   background-color: #F8FAFC !important;
 }
 
-[data-theme="light"] .bg-navy-950\/80 {
-  background-color: rgba(248, 250, 252, 0.85) !important;
-}
-
-[data-theme="light"] .bg-navy-950\/90 {
+[data-theme="light"] .bg-navy-950\/95,
+[data-theme="light"] .bg-navy-950\/90,
+[data-theme="light"] .bg-navy-950\/85,
+[data-theme="light"] .bg-navy-950\/80,
+[data-theme="light"] .bg-navy-950\/70 {
   background-color: rgba(248, 250, 252, 0.95) !important;
-}
-
-[data-theme="light"] .bg-navy-950\/95 {
-  background-color: rgba(248, 250, 252, 0.98) !important;
 }
 
 [data-theme="light"] .bg-navy-900 {
@@ -196,20 +193,14 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-[data-theme="light"] .bg-navy-900\/90 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-}
-
-[data-theme="light"] .bg-navy-900\/80 {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-}
-
-[data-theme="light"] .bg-navy-900\/60 {
-  background-color: rgba(255, 255, 255, 0.7) !important;
-}
-
+[data-theme="light"] .bg-navy-900\/95,
+[data-theme="light"] .bg-navy-900\/90,
+[data-theme="light"] .bg-navy-900\/80,
+[data-theme="light"] .bg-navy-900\/70,
+[data-theme="light"] .bg-navy-900\/60,
+[data-theme="light"] .bg-navy-900\/50,
 [data-theme="light"] .bg-navy-900\/40 {
-  background-color: rgba(241, 245, 249, 0.6) !important;
+  background-color: #FFFFFF !important;
 }
 
 [data-theme="light"] .bg-navy-850 {
@@ -217,27 +208,30 @@ body {
 }
 
 [data-theme="light"] .bg-navy-800 {
-  background-color: #E2E8F0 !important;
+  background-color: #F1F5F9 !important;
 }
 
-[data-theme="light"] .bg-navy-800\/80 {
-  background-color: rgba(226, 232, 240, 0.8) !important;
-}
-
+[data-theme="light"] .bg-navy-800\/80,
+[data-theme="light"] .bg-navy-800\/50,
 [data-theme="light"] .bg-navy-800\/40 {
-  background-color: rgba(241, 245, 249, 0.8) !important;
+  background-color: #F1F5F9 !important;
 }
 
-[data-theme="light"] .border-navy-800 {
+[data-theme="light"] .border-navy-800,
+[data-theme="light"] .border-navy-800\/80,
+[data-theme="light"] .border-navy-700,
+[data-theme="light"] .border-navy-600 {
   border-color: #E2E8F0 !important;
 }
 
-[data-theme="light"] .border-navy-800\/80 {
-  border-color: rgba(226, 232, 240, 0.8) !important;
-}
-
-[data-theme="light"] .border-navy-700 {
-  border-color: #CBD5E1 !important;
+/* All generic text and headings in light mode are dark slate for maximum readability */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6 {
+  color: #0F172A !important;
 }
 
 [data-theme="light"] .text-white {
@@ -245,27 +239,176 @@ body {
 }
 
 [data-theme="light"] .text-slate-100 {
-  color: #1E293B !important;
+  color: #0F172A !important;
 }
 
 [data-theme="light"] .text-slate-200 {
-  color: #334155 !important;
+  color: #1E293B !important;
 }
 
 [data-theme="light"] .text-slate-300 {
-  color: #475569 !important;
+  color: #334155 !important;
 }
 
 [data-theme="light"] .text-slate-400 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .text-slate-500 {
   color: #64748B !important;
 }
 
+[data-theme="light"] .text-gray-100,
+[data-theme="light"] .text-gray-200 {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .text-gray-300 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .text-gray-400 {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .text-zinc-100,
+[data-theme="light"] .text-zinc-200 {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .text-zinc-300 {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .text-zinc-400 {
+  color: #475569 !important;
+}
+
+/* Prevent hover states from turning text white on light backgrounds */
+[data-theme="light"] .hover\:text-white:hover {
+  color: #0F172A !important;
+}
+
+[data-theme="light"] .hover\:text-slate-200:hover,
+[data-theme="light"] .hover\:text-slate-100:hover {
+  color: #0F172A !important;
+}
+
+/* Accessible high-contrast colored text for badges, icons, and status indicators */
+[data-theme="light"] .text-purple-300,
+[data-theme="light"] .text-purple-400,
+[data-theme="light"] .text-violet-300,
+[data-theme="light"] .text-violet-400,
+[data-theme="light"] code.text-purple-300 {
+  color: #6D28D9 !important;
+}
+
+[data-theme="light"] .text-blue-300,
+[data-theme="light"] .text-blue-400,
+[data-theme="light"] .text-indigo-300,
+[data-theme="light"] .text-indigo-400 {
+  color: #1D4ED8 !important;
+}
+
+[data-theme="light"] .text-emerald-300,
+[data-theme="light"] .text-emerald-400,
+[data-theme="light"] .text-green-300,
+[data-theme="light"] .text-green-400 {
+  color: #047857 !important;
+}
+
+[data-theme="light"] .text-amber-300,
+[data-theme="light"] .text-amber-400,
+[data-theme="light"] .text-yellow-300,
+[data-theme="light"] .text-yellow-400 {
+  color: #B45309 !important;
+}
+
+[data-theme="light"] .text-rose-300,
+[data-theme="light"] .text-rose-400,
+[data-theme="light"] .text-red-300,
+[data-theme="light"] .text-red-400 {
+  color: #BE123C !important;
+}
+
+[data-theme="light"] .text-cyan-300,
+[data-theme="light"] .text-cyan-400 {
+  color: #0E7490 !important;
+}
+
+/* Badge backgrounds in light mode */
+[data-theme="light"] .bg-brand-purple\/20,
+[data-theme="light"] .bg-purple-500\/10,
+[data-theme="light"] .bg-purple-500\/20 {
+  background-color: #F3E8FF !important;
+  border-color: #D8B4FE !important;
+}
+
+[data-theme="light"] .bg-brand-blue\/20,
+[data-theme="light"] .bg-blue-500\/10,
+[data-theme="light"] .bg-blue-500\/20 {
+  background-color: #DBEAFE !important;
+  border-color: #93C5FD !important;
+}
+
+[data-theme="light"] .bg-emerald-500\/10,
+[data-theme="light"] .bg-emerald-500\/20 {
+  background-color: #D1FAE5 !important;
+  border-color: #6EE7B7 !important;
+}
+
+[data-theme="light"] .bg-amber-500\/10,
+[data-theme="light"] .bg-amber-500\/20 {
+  background-color: #FEF3C7 !important;
+  border-color: #FCD34D !important;
+}
+
+[data-theme="light"] .bg-rose-500\/10,
+[data-theme="light"] .bg-rose-500\/20,
+[data-theme="light"] .bg-red-500\/10,
+[data-theme="light"] .bg-red-500\/20 {
+  background-color: #FFE4E6 !important;
+  border-color: #FDA4AF !important;
+}
+
+/* Preserve crisp white text ONLY on filled colored buttons, badges, and gradient backgrounds */
+[data-theme="light"] .bg-brand-purple,
+[data-theme="light"] .bg-brand-purple-hover,
+[data-theme="light"] .bg-brand-blue,
+[data-theme="light"] .bg-brand-blue-hover,
+[data-theme="light"] [class*="bg-gradient-to"],
+[data-theme="light"] .bg-rose-600,
+[data-theme="light"] .bg-red-600,
+[data-theme="light"] .bg-emerald-600,
+[data-theme="light"] .bg-violet-600,
+[data-theme="light"] .bg-blue-600 {
+  color: #FFFFFF !important;
+}
+
+[data-theme="light"] .bg-brand-purple *,
+[data-theme="light"] .bg-brand-blue *,
+[data-theme="light"] [class*="bg-gradient-to"] *,
+[data-theme="light"] .bg-rose-600 *,
+[data-theme="light"] .bg-red-600 *,
+[data-theme="light"] .bg-emerald-600 *,
+[data-theme="light"] .bg-violet-600 *,
+[data-theme="light"] .bg-blue-600 * {
+  color: #FFFFFF !important;
+}
+
+/* Form inputs, textareas, selects, and scrollbars */
 [data-theme="light"] input,
 [data-theme="light"] textarea,
 [data-theme="light"] select {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
   border-color: #CBD5E1 !important;
+}
+
+[data-theme="light"] input::placeholder,
+[data-theme="light"] textarea::placeholder {
+  color: #64748B !important;
+  opacity: 1 !important;
 }
 
 [data-theme="light"] ::-webkit-scrollbar-track {

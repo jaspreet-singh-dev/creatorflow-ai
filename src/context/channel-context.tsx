@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { ConnectedChannel } from "@/types/database.types";
 import { useAuth } from "./auth-context";
 import { createClient } from "@/lib/supabase/client";
@@ -20,32 +20,65 @@ const DEFAULT_DEMO_CHANNELS: ConnectedChannel[] = [
   {
     id: "chan-demo-1",
     user_id: "demo-user-123456",
-    youtube_channel_id: "UC_x5XG1OV2P6uZZ5FSM9Ttw",
-    title: "AI Horizons Tech",
-    custom_url: "@AIHorizons",
-    thumbnail_url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&auto=format&fit=crop&q=80",
-    subscriber_count: 148500,
-    video_count: 84,
-    view_count: 6240000,
+    youtube_channel_id: "UC_novoicecraft_official",
+    title: "NoVoiceCraft",
+    custom_url: "@novoice_craft",
+    thumbnail_url: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=120&auto=format&fit=crop&q=80",
+    subscriber_count: 335,
+    video_count: 134,
+    view_count: 619466,
     is_active: true,
-    created_at: new Date(Date.now() - 60 * 86400000).toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "chan-demo-2",
-    user_id: "demo-user-123456",
-    youtube_channel_id: "UC_y7Y8z90abcdefghijklm",
-    title: "Nexus Code & Cloud",
-    custom_url: "@NexusCode",
-    thumbnail_url: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=120&auto=format&fit=crop&q=80",
-    subscriber_count: 32400,
-    video_count: 42,
-    view_count: 1420000,
-    is_active: true,
-    created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+    created_at: "2025-05-19T00:00:00.000Z",
     updated_at: new Date().toISOString(),
   },
 ];
+
+export function deduplicateChannels(channelsList: ConnectedChannel[]): ConnectedChannel[] {
+  if (!Array.isArray(channelsList)) return [];
+
+  const legacyBlockedHandles = new Set(["aihorizons", "nexuscode", "aihorizonstech"]);
+  const legacyBlockedTitles = new Set(["ai horizons tech", "nexus code & cloud", "ai horizons"]);
+
+  const seenIds = new Set<string>();
+  const seenYtIds = new Set<string>();
+  const seenHandles = new Set<string>();
+  const seenTitles = new Set<string>();
+
+  const result: ConnectedChannel[] = [];
+
+  for (const ch of channelsList) {
+    if (!ch) continue;
+
+    const id = (ch.id || "").trim();
+    const ytId = (ch.youtube_channel_id || "").trim();
+    const handle = (ch.custom_url || "").trim().toLowerCase().replace(/^@/, "");
+    const title = (ch.title || "").trim().toLowerCase().replace(/\s+/g, " ");
+
+    // Remove legacy generic channels if they linger in user's localStorage
+    if (legacyBlockedHandles.has(handle) || legacyBlockedTitles.has(title)) {
+      continue;
+    }
+
+    const isDuplicate =
+      (id && seenIds.has(id)) ||
+      (ytId && seenYtIds.has(ytId)) ||
+      (handle && seenHandles.has(handle)) ||
+      (title && seenTitles.has(title));
+
+    if (isDuplicate) {
+      continue;
+    }
+
+    if (id) seenIds.add(id);
+    if (ytId) seenYtIds.add(ytId);
+    if (handle) seenHandles.add(handle);
+    if (title) seenTitles.add(title);
+
+    result.push(ch);
+  }
+
+  return result;
+}
 
 const ChannelContext = createContext<ChannelContextType | undefined>(undefined);
 
@@ -55,7 +88,7 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
   const [activeChannel, setActiveChannelState] = useState<ConnectedChannel | null>(null);
   const [isLoadingChannels, setIsLoadingChannels] = useState(true);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const setActiveChannel = useCallback((channel: ConnectedChannel) => {
     setActiveChannelState(channel);
@@ -71,17 +104,22 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
     return `cf_channels_user_${user.id}`;
   }, [user, isDemoMode]);
 
-  const persistChannels = useCallback((newChannels: ConnectedChannel[]) => {
-    setChannels(newChannels);
+  const saveChannelsToStorage = useCallback((chans: ConnectedChannel[]) => {
     try {
-      localStorage.setItem(getStorageKey(), JSON.stringify(newChannels));
+      localStorage.setItem(getStorageKey(), JSON.stringify(chans));
       if (isDemoMode) {
-        localStorage.setItem("cf_channels_v1", JSON.stringify(newChannels));
+        localStorage.setItem("cf_channels_v1", JSON.stringify(chans));
       }
     } catch (e) {
       console.warn("Could not save channels to localStorage", e);
     }
   }, [getStorageKey, isDemoMode]);
+
+  const persistChannels = useCallback((newChannels: ConnectedChannel[]) => {
+    const deduplicated = deduplicateChannels(newChannels);
+    saveChannelsToStorage(deduplicated);
+    setChannels(deduplicated);
+  }, [saveChannelsToStorage]);
 
   const fetchChannels = useCallback(async () => {
     if (!user) {
@@ -94,11 +132,19 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
     if (isDemoMode) {
       const saved = localStorage.getItem("cf_channels_v1");
       const loaded: ConnectedChannel[] = saved ? JSON.parse(saved) : DEFAULT_DEMO_CHANNELS;
-      setChannels(loaded);
+      const deduplicated = deduplicateChannels(loaded);
+      if (saved && deduplicated.length !== loaded.length) {
+        try {
+          localStorage.setItem("cf_channels_v1", JSON.stringify(deduplicated));
+        } catch {
+          // ignore storage error
+        }
+      }
+      setChannels(deduplicated);
 
       const savedActiveId = localStorage.getItem("cf_active_channel_id");
-      const matched = loaded.find((c) => c.id === savedActiveId);
-      setActiveChannelState(matched || loaded[0] || null);
+      const matched = deduplicated.find((c) => c.id === savedActiveId);
+      setActiveChannelState(matched || deduplicated[0] || null);
       setIsLoadingChannels(false);
       return;
     }
@@ -118,10 +164,11 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
           .order("created_at", { ascending: false });
 
         if (data && data.length > 0 && !error) {
-          setChannels(data as ConnectedChannel[]);
+          const deduplicated = deduplicateChannels(data as ConnectedChannel[]);
+          setChannels(deduplicated);
           const savedActiveId = localStorage.getItem("cf_active_channel_id");
-          const matched = (data as ConnectedChannel[]).find((c) => c.id === savedActiveId);
-          setActiveChannelState(matched || (data[0] as ConnectedChannel));
+          const matched = deduplicated.find((c) => c.id === savedActiveId);
+          setActiveChannelState(matched || deduplicated[0] || null);
           setIsLoadingChannels(false);
           return;
         }
@@ -136,10 +183,18 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
       const savedUserChannels = localStorage.getItem(userKey);
       if (savedUserChannels) {
         const loaded: ConnectedChannel[] = JSON.parse(savedUserChannels);
-        setChannels(loaded);
+        const deduplicated = deduplicateChannels(loaded);
+        if (deduplicated.length !== loaded.length) {
+          try {
+            localStorage.setItem(userKey, JSON.stringify(deduplicated));
+          } catch {
+            // ignore storage error
+          }
+        }
+        setChannels(deduplicated);
         const savedActiveId = localStorage.getItem("cf_active_channel_id");
-        const matched = loaded.find((c) => c.id === savedActiveId);
-        setActiveChannelState(matched || loaded[0] || null);
+        const matched = deduplicated.find((c) => c.id === savedActiveId);
+        setActiveChannelState(matched || deduplicated[0] || null);
       } else {
         // Fresh user starts with empty channels list ready for their real channel
         setChannels([]);
@@ -158,18 +213,48 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
   }, [fetchChannels]);
 
   const addChannelLocally = useCallback((channel: ConnectedChannel) => {
+    let targetActiveChannel = channel;
     setChannels((prev) => {
-      const updated = [channel, ...prev];
-      persistChannels(updated);
+      const channelYtId = (channel.youtube_channel_id || "").trim();
+      const channelHandle = (channel.custom_url || "").trim().toLowerCase().replace(/^@/, "");
+      const channelTitle = (channel.title || "").trim().toLowerCase().replace(/\s+/g, " ");
+
+      // Find if this channel already exists in the list
+      const existingIdx = prev.findIndex((c) => {
+        if (c.id === channel.id) return true;
+        if (channelYtId && c.youtube_channel_id && c.youtube_channel_id.trim() === channelYtId) return true;
+        if (channelHandle && c.custom_url && c.custom_url.trim().toLowerCase().replace(/^@/, "") === channelHandle) return true;
+        if (channelTitle && c.title && c.title.trim().toLowerCase().replace(/\s+/g, " ") === channelTitle) return true;
+        return false;
+      });
+
+      let updated: ConnectedChannel[];
+      if (existingIdx >= 0) {
+        const existing = prev[existingIdx];
+        const merged: ConnectedChannel = {
+          ...existing,
+          ...channel,
+          id: existing.id,
+          updated_at: new Date().toISOString(),
+        };
+        targetActiveChannel = merged;
+        const rest = prev.filter((_, idx) => idx !== existingIdx);
+        updated = deduplicateChannels([merged, ...rest]);
+      } else {
+        updated = deduplicateChannels([channel, ...prev]);
+      }
+
+      saveChannelsToStorage(updated);
       return updated;
     });
-    setActiveChannel(channel);
-  }, [persistChannels, setActiveChannel]);
+
+    setActiveChannel(targetActiveChannel);
+  }, [saveChannelsToStorage, setActiveChannel]);
 
   const deleteChannel = useCallback(async (id: string) => {
     setChannels((prev) => {
       const updated = prev.filter((c) => c.id !== id);
-      persistChannels(updated);
+      saveChannelsToStorage(updated);
       if (activeChannel?.id === id) {
         setActiveChannelState(updated[0] || null);
       }
@@ -179,7 +264,7 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
     if (user && !isDemoMode) {
       await supabase.from("connected_channels").delete().eq("id", id);
     }
-  }, [activeChannel, user, isDemoMode, persistChannels, supabase]);
+  }, [activeChannel, user, isDemoMode, saveChannelsToStorage, supabase]);
 
   const syncChannelStats = useCallback(async (id: string) => {
     const targetChannel = channels.find((c) => c.id === id);
@@ -215,12 +300,9 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
               updated_at: new Date().toISOString(),
             };
           }
-          const bumpSubs = Math.floor(Math.random() * 85) + 10;
-          const bumpViews = Math.floor(Math.random() * 4500) + 1200;
+          // If live sync is not available, preserve verified statistics without fabricating fake numbers
           return {
             ...c,
-            subscriber_count: c.subscriber_count + bumpSubs,
-            view_count: c.view_count + bumpViews,
             updated_at: new Date().toISOString(),
           };
         }

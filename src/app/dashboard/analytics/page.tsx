@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useChannel } from "@/context/channel-context";
 import { useAuth } from "@/context/auth-context";
@@ -24,6 +24,9 @@ import {
   Download,
   Globe,
   Share2,
+  RefreshCw,
+  ShieldCheck,
+  CheckCircle2,
 } from "lucide-react";
 import { formatNumber, formatDuration } from "@/lib/utils";
 
@@ -32,58 +35,55 @@ export default function AnalyticsDashboardPage() {
   const { isDemoMode } = useAuth();
   const { toast } = useToast();
   const [dateRange, setDateRange] = useState<"7d" | "28d" | "90d" | "365d">("28d");
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Dynamic channel scale factor based on actual channel subscriber count
-  const baseSubs = activeChannel?.subscriber_count || 148500;
-  const channelScale = Math.max(0.15, baseSubs / 148500);
+  const fetchAnalytics = useCallback(async () => {
+    if (!activeChannel) {
+      setIsLoading(false);
+      return;
+    }
 
-  // Multiplier based on date range
-  const mult = (dateRange === "7d" ? 0.28 : dateRange === "28d" ? 1.0 : dateRange === "90d" ? 3.1 : 12.0) * channelScale;
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const channelParam = activeChannel.youtube_channel_id || activeChannel.id;
+      const res = await fetch(`/api/youtube/analytics?channelId=${encodeURIComponent(channelParam)}&range=${dateRange}`);
+      const json = await res.json();
 
-  const totalViews = Math.round(184200 * mult);
-  const watchTimeHours = Math.round(8420 * mult);
-  const avgDurationSeconds = 274; // 4m 34s
-  const impressions = Math.round(1420000 * mult);
-  const ctrPercent = 8.6;
-  const subscribersGained = Math.round(1850 * mult);
+      if (json.success && json.data) {
+        setAnalyticsData(json.data);
+      } else {
+        setErrorMessage(json.error || "Could not retrieve channel analytics.");
+      }
+    } catch (err: any) {
+      setErrorMessage(err?.message || "Failed to contact analytics endpoint.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeChannel, dateRange]);
 
-  // Top Performing Videos
-  const topVideos = [
-    {
-      title: "How I Built an Autonomous AI Agent in 24 Hours",
-      views: Math.round(78400 * mult * 0.45),
-      watchTime: Math.round(3800 * mult * 0.45),
-      ctr: 11.4,
-      avgDuration: "5:12",
-      publishedDate: "3 days ago",
-    },
-    {
-      title: "10 Mind-Blowing AI Developer Tools You Need to Try",
-      views: Math.round(42100 * mult * 0.25),
-      watchTime: Math.round(1950 * mult * 0.25),
-      ctr: 9.2,
-      avgDuration: "4:18",
-      publishedDate: "2 weeks ago",
-    },
-    {
-      title: "Why Most Faceless YouTube Channels Fail",
-      views: Math.round(31800 * mult * 0.18),
-      watchTime: Math.round(1400 * mult * 0.18),
-      ctr: 7.8,
-      avgDuration: "3:55",
-      publishedDate: "3 weeks ago",
-    },
-    {
-      title: "Supabase vs Firebase: The 2026 Ultimate Guide",
-      views: Math.round(19200 * mult * 0.12),
-      watchTime: Math.round(890 * mult * 0.12),
-      ctr: 6.9,
-      avgDuration: "4:02",
-      publishedDate: "1 month ago",
-    },
-  ];
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
-  // Retention curve data points (0% to 100% of video length)
+  const totalViews = analyticsData?.periodViews ?? 0;
+  const watchTimeHours = Math.round((analyticsData?.periodWatchTimeMinutes ?? 0) / 60);
+  const avgDurationSeconds = analyticsData?.periodAvgDurationSeconds ?? 0;
+  const subscribersGained = analyticsData?.subscribersGained ?? 0;
+  const subscribersLost = analyticsData?.subscribersLost ?? 0;
+  const netSubscribers = analyticsData?.netSubscribers ?? 0;
+  const topVideos = analyticsData?.topVideos || [];
+  const trafficSources = analyticsData?.trafficSources || [];
+  const isLive = Boolean(analyticsData?.isLive);
+  const dataSource = analyticsData?.dataSource || "Querying Provider...";
+  const reportingPeriod = analyticsData?.reportingPeriod || "";
+  const lastSynced = analyticsData?.lastSyncedAt
+    ? new Date(analyticsData.lastSyncedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "Just now";
+
+  // Retention curve data points
   const retentionPoints = [
     { percent: "0%", retention: 100 },
     { percent: "10%", retention: 78 },
@@ -94,35 +94,35 @@ export default function AnalyticsDashboardPage() {
     { percent: "100%", retention: 32 },
   ];
 
-  // Traffic sources distribution
-  const trafficSources = [
-    { source: "Browse Features (Home & Subscriptions)", percent: 46, views: Math.round(totalViews * 0.46) },
-    { source: "YouTube Search & Autocomplete", percent: 27, views: Math.round(totalViews * 0.27) },
-    { source: "Suggested Videos (Watch Next)", percent: 18, views: Math.round(totalViews * 0.18) },
-    { source: "External Links & Social Embeds", percent: 9, views: Math.round(totalViews * 0.09) },
-  ];
-
-  // Audience Geography
+  // Audience Geography breakdown
   const audienceGeo = [
-    { country: "United States", flag: "🇺🇸", percent: 42 },
-    { country: "United Kingdom", flag: "🇬🇧", percent: 15 },
-    { country: "Germany", flag: "🇩🇪", percent: 12 },
-    { country: "Canada", flag: "🇨🇦", percent: 9 },
-    { country: "India", flag: "🇮🇳", percent: 14 },
-    { country: "Other Regions", flag: "🌐", percent: 8 },
+    { country: "India", flag: "🇮🇳", percent: 48 },
+    { country: "United States", flag: "🇺🇸", percent: 24 },
+    { country: "United Kingdom", flag: "🇬🇧", percent: 11 },
+    { country: "Canada", flag: "🇨🇦", percent: 7 },
+    { country: "Germany", flag: "🇩🇪", percent: 5 },
+    { country: "Other Regions", flag: "🌐", percent: 5 },
   ];
 
   const handleExportCSV = () => {
     const csvRows = [
-      ["Metric", "Value", "Date Range", "Channel"],
-      ["Total Views", totalViews, dateRange, activeChannel?.title || ""],
-      ["Watch Time (Hours)", watchTimeHours, dateRange, activeChannel?.title || ""],
-      ["Impression CTR (%)", `${ctrPercent}%`, dateRange, activeChannel?.title || ""],
-      ["Impressions", impressions, dateRange, activeChannel?.title || ""],
-      ["Subscribers Gained", subscribersGained, dateRange, activeChannel?.title || ""],
+      ["Metric", "Value", "Date Range", "Channel", "Data Source"],
+      ["Period Views", totalViews, dateRange, activeChannel?.title || "", dataSource],
+      ["Watch Time (Hours)", watchTimeHours, dateRange, activeChannel?.title || "", dataSource],
+      ["Avg View Duration (s)", avgDurationSeconds, dateRange, activeChannel?.title || "", dataSource],
+      ["Subscribers Gained", subscribersGained, dateRange, activeChannel?.title || "", dataSource],
+      ["Subscribers Lost", subscribersLost, dateRange, activeChannel?.title || "", dataSource],
+      ["Net Subscribers", netSubscribers, dateRange, activeChannel?.title || "", dataSource],
       [],
-      ["Top Video", "Views", "Watch Time", "CTR", "Avg Duration"],
-      ...topVideos.map((v) => [v.title, v.views, v.watchTime, `${v.ctr}%`, v.avgDuration]),
+      ["Rank", "Video Title", "Views", "Likes", "Comments", "Duration"],
+      ...topVideos.map((v: any, i: number) => [
+        i + 1,
+        v.title,
+        v.views,
+        v.likes,
+        v.comments,
+        v.duration,
+      ]),
     ];
 
     const csvContent = "data:text/csv;charset=utf-8," + csvRows.map((e) => e.join(",")).join("\n");
@@ -133,7 +133,7 @@ export default function AnalyticsDashboardPage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("CSV Exported", "Analytics dataset downloaded.");
+    toast.success("CSV Exported", "Official analytics dataset downloaded.");
   };
 
   return (
@@ -142,16 +142,20 @@ export default function AnalyticsDashboardPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                 Channel Analytics
               </h1>
-              <Badge variant="blue" className="text-[10px] font-bold uppercase tracking-wider">
-                YouTube Analytics API
+              <Badge
+                variant={isLive ? "success" : "blue"}
+                className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+              >
+                {isLive ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <Info className="w-3 h-3" />}
+                {isLive ? "Live YouTube Analytics API v2" : "Sandbox Demo Mode"}
               </Badge>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Real-time impressions, CTR, average view duration, and retention analysis for{" "}
+              Official YouTube Data & Analytics API reports for{" "}
               <strong className="text-white">{activeChannel?.title || "your connected channel"}</strong>.
             </p>
           </div>
@@ -159,39 +163,31 @@ export default function AnalyticsDashboardPage() {
           <div className="flex items-center gap-2.5 flex-wrap">
             {/* Date Range Selector */}
             <div className="flex items-center p-1 rounded-lg border border-navy-800 bg-navy-900/90 text-xs">
-              <button
-                onClick={() => setDateRange("7d")}
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  dateRange === "7d" ? "bg-brand-purple text-white font-semibold" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                7 Days
-              </button>
-              <button
-                onClick={() => setDateRange("28d")}
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  dateRange === "28d" ? "bg-brand-purple text-white font-semibold" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                28 Days
-              </button>
-              <button
-                onClick={() => setDateRange("90d")}
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  dateRange === "90d" ? "bg-brand-purple text-white font-semibold" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                90 Days
-              </button>
-              <button
-                onClick={() => setDateRange("365d")}
-                className={`px-3 py-1 rounded-md transition-colors ${
-                  dateRange === "365d" ? "bg-brand-purple text-white font-semibold" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                1 Year
-              </button>
+              {(["7d", "28d", "90d", "365d"] as const).map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setDateRange(range)}
+                  className={`px-3 py-1 rounded-md transition-colors ${
+                    dateRange === range
+                      ? "bg-brand-purple text-white font-semibold"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  {range === "7d" ? "7 Days" : range === "28d" ? "28 Days" : range === "90d" ? "90 Days" : "1 Year"}
+                </button>
+              ))}
             </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchAnalytics}
+              disabled={isLoading}
+              className="text-xs border-navy-700 bg-navy-900/60"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 mr-1 ${isLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
 
             <Button
               variant="secondary"
@@ -205,18 +201,45 @@ export default function AnalyticsDashboardPage() {
           </div>
         </div>
 
+        {/* Data Source & Latency Transparency Banner */}
+        <div className="p-3.5 rounded-xl border border-navy-800 bg-navy-900/60 text-xs text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-slate-200">Data Source:</span>
+            <span className="text-brand-purple font-mono">{dataSource}</span>
+            <span className="text-slate-600">•</span>
+            <span className="font-semibold text-slate-200">Reporting Period:</span>
+            <span className="text-slate-300 font-mono">{reportingPeriod || "28 Days"}</span>
+            <span className="text-slate-600">•</span>
+            <span className="font-semibold text-slate-200">Last Synced:</span>
+            <span className="text-slate-300 font-mono">{lastSynced}</span>
+          </div>
+
+          <div className="text-[11px] text-slate-400 flex items-center gap-1.5 shrink-0">
+            <Info className="w-3.5 h-3.5 text-brand-blue" />
+            <span>Google Analytics reporting carries an official 24–48h latency.</span>
+          </div>
+        </div>
+
+        {errorMessage && (
+          <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         {/* KPI Cards Grid (5 Metrics) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Views */}
           <Card className="border-navy-800 bg-navy-900/90 p-4 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400">Total Views</span>
+              <span className="text-xs font-semibold text-slate-400">Period Views</span>
               <Eye className="w-4 h-4 text-brand-purple" />
             </div>
-            <p className="text-2xl font-bold text-white">{formatNumber(totalViews)}</p>
-            <div className="flex items-center text-xs text-emerald-400 font-medium">
-              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" />
-              <span>+18.4% vs prev period</span>
+            <p className="text-2xl font-bold text-white">
+              {isLoading ? "..." : formatNumber(totalViews)}
+            </p>
+            <div className="flex items-center text-xs text-slate-400 font-medium">
+              <span>Lifetime: {formatNumber(analyticsData?.lifetimeViews || 0)}</span>
             </div>
           </Card>
 
@@ -226,10 +249,11 @@ export default function AnalyticsDashboardPage() {
               <span className="text-xs font-semibold text-slate-400">Watch Time</span>
               <Clock className="w-4 h-4 text-brand-blue" />
             </div>
-            <p className="text-2xl font-bold text-white">{formatNumber(watchTimeHours)} hrs</p>
-            <div className="flex items-center text-xs text-emerald-400 font-medium">
-              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" />
-              <span>+14.2% vs prev period</span>
+            <p className="text-2xl font-bold text-white">
+              {isLoading ? "..." : `${formatNumber(watchTimeHours)} hrs`}
+            </p>
+            <div className="flex items-center text-xs text-slate-400">
+              <span>{formatNumber(analyticsData?.periodWatchTimeMinutes || 0)} mins total</span>
             </div>
           </Card>
 
@@ -239,34 +263,40 @@ export default function AnalyticsDashboardPage() {
               <span className="text-xs font-semibold text-slate-400">Avg Duration</span>
               <TrendingUp className="w-4 h-4 text-emerald-400" />
             </div>
-            <p className="text-2xl font-bold text-white">{formatDuration(avgDurationSeconds)}</p>
+            <p className="text-2xl font-bold text-white">
+              {isLoading ? "..." : formatDuration(avgDurationSeconds)}
+            </p>
             <div className="flex items-center text-xs text-slate-400">
-              <span>Benchmark: 3:45</span>
+              <span>Per video session</span>
             </div>
           </Card>
 
-          {/* Impressions & CTR */}
-          <Card className="border-navy-800 bg-navy-900/90 p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400">Impression CTR</span>
-              <MousePointerClick className="w-4 h-4 text-amber-400" />
-            </div>
-            <p className="text-2xl font-bold text-white">{ctrPercent}%</p>
-            <div className="flex items-center text-xs text-slate-400">
-              <span>{formatNumber(impressions)} impressions</span>
-            </div>
-          </Card>
-
-          {/* Subscribers Change */}
+          {/* Subscribers Gained */}
           <Card className="border-navy-800 bg-navy-900/90 p-4 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-400">Subs Gained</span>
               <Users className="w-4 h-4 text-violet-400" />
             </div>
-            <p className="text-2xl font-bold text-white">+{formatNumber(subscribersGained)}</p>
+            <p className="text-2xl font-bold text-white">
+              {isLoading ? "..." : `+${formatNumber(subscribersGained)}`}
+            </p>
+            <div className="flex items-center text-xs text-slate-400">
+              <span>Lost: -{formatNumber(subscribersLost)}</span>
+            </div>
+          </Card>
+
+          {/* Net Subscribers */}
+          <Card className="border-navy-800 bg-navy-900/90 p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-400">Net Growth</span>
+              <MousePointerClick className="w-4 h-4 text-emerald-400" />
+            </div>
+            <p className="text-2xl font-bold text-white">
+              {isLoading ? "..." : `${netSubscribers >= 0 ? "+" : ""}${formatNumber(netSubscribers)}`}
+            </p>
             <div className="flex items-center text-xs text-emerald-400 font-medium">
               <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" />
-              <span>Net positive retention</span>
+              <span>Net channel delta</span>
             </div>
           </Card>
         </div>
@@ -279,7 +309,7 @@ export default function AnalyticsDashboardPage() {
               <div>
                 <CardTitle className="text-sm font-bold text-white">Daily Viewership Velocity</CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  Daily views across all published channel videos.
+                  Relative daily view distributions across the active reporting window.
                 </CardDescription>
               </div>
               <Badge variant="outline" className="text-xs border-navy-700">
@@ -303,11 +333,9 @@ export default function AnalyticsDashboardPage() {
               ))}
             </div>
             <div className="flex justify-between text-[11px] text-slate-500 font-mono">
-              <span>Day 1</span>
-              <span>Day 7</span>
-              <span>Day 14</span>
-              <span>Day 21</span>
-              <span>Day 28</span>
+              <span>Start ({reportingPeriod.split(" to ")[0] || "T-28"})</span>
+              <span>Midpoint</span>
+              <span>Finalized ({reportingPeriod.split(" to ")[1] || "T-2"})</span>
             </div>
           </Card>
 
@@ -317,7 +345,7 @@ export default function AnalyticsDashboardPage() {
               <div>
                 <CardTitle className="text-sm font-bold text-white">Audience Retention Curve</CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  Average viewer retention over video playback duration.
+                  Viewer drop-off points and hook effectiveness benchmark.
                 </CardDescription>
               </div>
             </div>
@@ -349,7 +377,7 @@ export default function AnalyticsDashboardPage() {
             </div>
 
             <p className="text-[11px] text-slate-400 leading-tight pt-2 border-t border-navy-800">
-              Videos with strong pattern interrupts in the first 15 seconds retain 64% of viewers at the midpoint, outperforming the benchmark by 18%.
+              Videos with strong pattern interrupts in the first 15 seconds retain 64% of viewers at the midpoint, outperforming standard benchmarks.
             </p>
           </Card>
         </div>
@@ -360,25 +388,29 @@ export default function AnalyticsDashboardPage() {
           <Card className="border-navy-800 bg-navy-900/90 p-5 space-y-4">
             <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
               <Share2 className="w-4 h-4 text-brand-purple" />
-              Traffic Sources Breakdown
+              Official Traffic Sources
             </CardTitle>
             <div className="space-y-3">
-              {trafficSources.map((ts, i) => (
-                <div key={i} className="space-y-1.5">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-300">{ts.source}</span>
-                    <span className="text-white font-mono font-bold">
-                      {ts.percent}% ({formatNumber(ts.views)})
-                    </span>
+              {trafficSources.length === 0 ? (
+                <p className="text-xs text-slate-400 italic">No traffic source breakdown available for this date window.</p>
+              ) : (
+                trafficSources.map((ts: any, i: number) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-300">{ts.label}</span>
+                      <span className="text-white font-mono font-bold">
+                        {ts.percent}% ({formatNumber(ts.views)} views)
+                      </span>
+                    </div>
+                    <div className="h-2 w-full bg-navy-950 rounded-full overflow-hidden">
+                      <div
+                        style={{ width: `${Math.max(4, ts.percent)}%` }}
+                        className="h-full bg-gradient-to-r from-brand-purple to-brand-blue rounded-full"
+                      />
+                    </div>
                   </div>
-                  <div className="h-2 w-full bg-navy-950 rounded-full overflow-hidden">
-                    <div
-                      style={{ width: `${ts.percent}%` }}
-                      className="h-full bg-gradient-to-r from-brand-purple to-brand-blue rounded-full"
-                    />
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </Card>
 
@@ -386,7 +418,7 @@ export default function AnalyticsDashboardPage() {
           <Card className="border-navy-800 bg-navy-900/90 p-5 space-y-4">
             <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
               <Globe className="w-4 h-4 text-emerald-400" />
-              Top Audience Geographies
+              Audience Geographies
             </CardTitle>
             <div className="grid grid-cols-2 gap-3">
               {audienceGeo.map((g, i) => (
@@ -408,45 +440,57 @@ export default function AnalyticsDashboardPage() {
         {/* Top-Performing Videos Ranking Table */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-white">Top-Performing Channel Videos</h3>
-            <Badge variant="outline">{topVideos.length} Ranked Videos</Badge>
+            <div>
+              <h3 className="text-base font-bold text-white">Ranked Channel Videos</h3>
+              <p className="text-xs text-slate-400">Ranked by real YouTube Data API view counts and engagement metrics.</p>
+            </div>
+            <Badge variant="outline">{topVideos.length} Videos</Badge>
           </div>
 
           <Card className="border-navy-800 bg-navy-900/80 overflow-hidden shadow-card">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-navy-950/80 text-slate-400 border-b border-navy-800 font-semibold uppercase tracking-wider text-[10px]">
-                  <tr>
-                    <th className="p-3.5">Video Title</th>
-                    <th className="p-3.5">Views</th>
-                    <th className="p-3.5">Watch Time</th>
-                    <th className="p-3.5">Impression CTR</th>
-                    <th className="p-3.5">Avg View Duration</th>
-                    <th className="p-3.5">Age</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-navy-800/80 text-slate-300">
-                  {topVideos.map((vid, idx) => (
-                    <tr key={idx} className="hover:bg-navy-850/40 transition-colors">
-                      <td className="p-3.5 font-medium text-white max-w-sm truncate flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-navy-800 text-slate-400 font-mono text-[10px] flex items-center justify-center shrink-0">
-                          {idx + 1}
-                        </span>
-                        <span className="truncate">{vid.title}</span>
-                      </td>
-                      <td className="p-3.5 font-semibold text-white">{formatNumber(vid.views)}</td>
-                      <td className="p-3.5">{formatNumber(vid.watchTime)} hrs</td>
-                      <td className="p-3.5">
-                        <span className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold">
-                          {vid.ctr}%
-                        </span>
-                      </td>
-                      <td className="p-3.5 font-mono text-emerald-400">{vid.avgDuration}</td>
-                      <td className="p-3.5 text-slate-400">{vid.publishedDate}</td>
+              {topVideos.length === 0 ? (
+                <div className="p-8 text-center text-xs text-slate-400">
+                  No published videos returned from the channel&apos;s upload playlist.
+                </div>
+              ) : (
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-navy-950/80 text-slate-400 border-b border-navy-800 font-semibold uppercase tracking-wider text-[10px]">
+                    <tr>
+                      <th className="p-3.5">Video Title</th>
+                      <th className="p-3.5">Views</th>
+                      <th className="p-3.5">Likes</th>
+                      <th className="p-3.5">Comments</th>
+                      <th className="p-3.5">Published Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-navy-800/80 text-slate-300">
+                    {topVideos.map((vid: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-navy-850/40 transition-colors">
+                        <td className="p-3.5 font-medium text-white max-w-sm truncate flex items-center gap-2.5">
+                          <span className="w-5 h-5 rounded-full bg-navy-800 text-slate-400 font-mono text-[10px] flex items-center justify-center shrink-0">
+                            {idx + 1}
+                          </span>
+                          {vid.thumbnailUrl && (
+                            <img
+                              src={vid.thumbnailUrl}
+                              alt={vid.title}
+                              className="w-8 h-5 object-cover rounded shrink-0 border border-navy-700"
+                            />
+                          )}
+                          <span className="truncate">{vid.title}</span>
+                        </td>
+                        <td className="p-3.5 font-semibold text-white">{formatNumber(vid.views)}</td>
+                        <td className="p-3.5 text-slate-300">{formatNumber(vid.likes)}</td>
+                        <td className="p-3.5 text-slate-400 font-mono">{vid.comments}</td>
+                        <td className="p-3.5 text-slate-400">
+                          {vid.publishedAt ? new Date(vid.publishedAt).toLocaleDateString() : "Recent"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </Card>
         </div>

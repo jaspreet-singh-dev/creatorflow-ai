@@ -60,15 +60,16 @@ export default function HomePage() {
             </Link>
           ) : (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLaunchDemo}
-                className="hidden sm:inline-flex text-xs h-9 border-navy-700 bg-navy-900/60"
-              >
-                <PlayCircle className="w-3.5 h-3.5 mr-1.5 text-brand-purple" />
-                Live Demo
-              </Button>
+              <Link href="/demo">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="hidden sm:inline-flex text-xs h-9 border-navy-700 bg-navy-900/60"
+                >
+                  <PlayCircle className="w-3.5 h-3.5 mr-1.5 text-brand-purple" />
+                  View Demo
+                </Button>
+              </Link>
               <Link href="/login">
                 <Button variant="ghost" size="sm" className="text-xs">
                   Sign In
@@ -154,13 +155,13 @@ export default function HomePage() {
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
                 <span className="ml-2 text-xs font-mono text-slate-400">creatorflow.ai/dashboard</span>
               </div>
-              <Badge variant="blue" className="text-[10px]">Connected: @AIHorizons</Badge>
+              <Badge variant="blue" className="text-[10px]">Connected: @novoice_craft</Badge>
             </div>
             {/* Dashboard Content Teaser */}
             <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4 text-left">
               <div className="p-4 rounded-xl bg-navy-900/60 border border-navy-800">
                 <span className="text-xs text-slate-400">Total Views Managed</span>
-                <p className="text-2xl font-bold text-white mt-1">7.6M</p>
+                <p className="text-2xl font-bold text-white mt-1">619.5K</p>
                 <span className="text-[11px] text-emerald-400 font-medium">↑ +18.4% this month</span>
               </div>
               <div className="p-4 rounded-xl bg-navy-900/60 border border-navy-800">
@@ -279,7 +280,7 @@ export default function HomePage() {
               <div className="space-y-4">
                 <h4 className="text-lg font-bold text-white">Free Starter</h4>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-extrabold text-white">$0</span>
+                  <span className="text-3xl font-extrabold text-white">₹0</span>
                   <span className="text-xs text-slate-400">/ forever</span>
                 </div>
                 <p className="text-xs text-slate-400">Essential tools to launch your first automated channel.</p>
@@ -304,7 +305,7 @@ export default function HomePage() {
               </div>
               <Link href="/signup">
                 <Button variant="outline" className="w-full text-xs font-semibold border-navy-700">
-                  Get Started
+                  Get Started Free
                 </Button>
               </Link>
             </div>
@@ -317,8 +318,8 @@ export default function HomePage() {
               <div className="space-y-4">
                 <h4 className="text-lg font-bold text-white">Creator Pro</h4>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-extrabold text-white">$29</span>
-                  <span className="text-xs text-slate-400">/ month</span>
+                  <span className="text-3xl font-extrabold text-white">₹999</span>
+                  <span className="text-xs text-slate-400">/ month (incl. GST)</span>
                 </div>
                 <p className="text-xs text-slate-400">For ambitious creators publishing consistent, optimized content.</p>
                 <div className="space-y-2.5 text-xs text-slate-300 pt-2 border-t border-navy-800">
@@ -346,7 +347,7 @@ export default function HomePage() {
               </div>
               <Link href="/signup">
                 <Button variant="gradient" className="w-full text-xs font-semibold shadow-glow">
-                  Start 14-Day Free Trial
+                  Get Started Now
                 </Button>
               </Link>
             </div>
@@ -356,8 +357,8 @@ export default function HomePage() {
               <div className="space-y-4">
                 <h4 className="text-lg font-bold text-white">Agency Studio</h4>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-extrabold text-white">$79</span>
-                  <span className="text-xs text-slate-400">/ month</span>
+                  <span className="text-3xl font-extrabold text-white">₹2,499</span>
+                  <span className="text-xs text-slate-400">/ month (incl. GST)</span>
                 </div>
                 <p className="text-xs text-slate-400">Built for video production teams and channel management agencies.</p>
                 <div className="space-y-2.5 text-xs text-slate-300 pt-2 border-t border-navy-800">
@@ -379,13 +380,13 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <CheckCircle className="w-4 h-4 text-brand-purple shrink-0" />
-                    <span>Dedicated Support</span>
+                    <span>Dedicated Priority Support</span>
                   </div>
                 </div>
               </div>
               <Link href="/signup">
                 <Button variant="outline" className="w-full text-xs font-semibold border-navy-700">
-                  Contact Sales
+                  Get Started
                 </Button>
               </Link>
             </div>
@@ -402,6 +403,20 @@ export default function HomePage() {
             </div>
             <span className="font-bold text-slate-200">CreatorFlow AI</span>
             <span>— The YouTube Creator Automation Platform</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs">
+            <Link href="/demo" className="hover:text-white transition-colors">
+              Product Demo
+            </Link>
+            <Link href="/terms" className="hover:text-white transition-colors">
+              Terms of Service
+            </Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <Link href="/refund" className="hover:text-white transition-colors">
+              Refund Policy
+            </Link>
           </div>
           <p>© 2026 CreatorFlow AI. All rights reserved.</p>
         </div>

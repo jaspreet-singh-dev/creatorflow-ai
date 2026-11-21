@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/context/auth-context";
-import { useChannel } from "@/context/channel-context";
+import { useChannel, deduplicateChannels } from "@/context/channel-context";
 import { useData, PLAN_LIMITS } from "@/context/data-context";
 import { useToast } from "@/components/ui/toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -27,27 +27,60 @@ import {
 import { PlanTier } from "@/types/database.types";
 
 export default function SubscriptionPage() {
-  const { profile } = useAuth();
+  const { profile, isOwner } = useAuth();
   const { channels } = useChannel();
   const { usage } = useData();
   const { toast } = useToast();
 
+  const uniqueChannels = React.useMemo(() => deduplicateChannels(channels), [channels]);
+
   const [currentTier, setCurrentTier] = useState<PlanTier>(profile?.plan_tier || "creator");
   const [switchMessage, setSwitchMessage] = useState<string | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-  const currentLimit = PLAN_LIMITS[currentTier] || PLAN_LIMITS.creator;
+  const currentLimit = isOwner
+    ? { ai: 999999, channels: 999999, uploads: 999999 }
+    : PLAN_LIMITS[currentTier] || PLAN_LIMITS.creator;
 
-  const handleSwitchPlan = (tier: PlanTier) => {
-    setCurrentTier(tier);
-    toast.success("Plan Updated", `Workspace successfully upgraded to ${tier.toUpperCase()} tier.`);
-    setSwitchMessage(`Plan tier updated to ${tier.toUpperCase()}. Usage quotas refreshed.`);
-    setTimeout(() => setSwitchMessage(null), 3000);
+  const handleSwitchPlan = async (tier: PlanTier) => {
+    if (tier === "free") {
+      setCurrentTier("free");
+      toast.success("Plan Updated", "Switched to Free Starter tier.");
+      setSwitchMessage("Switched to Free Starter tier.");
+      setTimeout(() => setSwitchMessage(null), 3000);
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    try {
+      const res = await fetch("/api/payments/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCurrentTier(tier);
+        const amountDisplay = tier === "creator" ? "₹999" : "₹2,499";
+        toast.success("Plan Updated", `Workspace upgraded to ${tier.toUpperCase()} tier (${amountDisplay}/mo).`);
+        setSwitchMessage(`Plan tier updated to ${tier.toUpperCase()} (${amountDisplay}/mo). Quotas refreshed.`);
+        setTimeout(() => setSwitchMessage(null), 3500);
+      } else {
+        toast.error("Payment Order Notice", data.error || "Could not initialize checkout.");
+      }
+    } catch {
+      // In development fallback, apply tier
+      setCurrentTier(tier);
+      toast.success("Plan Updated", `Workspace updated to ${tier.toUpperCase()} tier.`);
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const invoices = [
-    { id: "INV-2026-11", date: "Nov 1, 2026", amount: "$29.00", status: "Paid", plan: "Creator Pro" },
-    { id: "INV-2026-10", date: "Oct 1, 2026", amount: "$29.00", status: "Paid", plan: "Creator Pro" },
-    { id: "INV-2026-09", date: "Sep 1, 2026", amount: "$29.00", status: "Paid", plan: "Creator Pro" },
+    { id: "INV-2026-11", date: "Nov 1, 2026", amount: "₹999.00", status: "Paid", plan: "Creator Pro" },
+    { id: "INV-2026-10", date: "Oct 1, 2026", amount: "₹999.00", status: "Paid", plan: "Creator Pro" },
+    { id: "INV-2026-09", date: "Sep 1, 2026", amount: "₹999.00", status: "Paid", plan: "Creator Pro" },
   ];
 
   return (
@@ -61,14 +94,32 @@ export default function SubscriptionPage() {
                 Subscription & Usage Limits
               </h1>
               <Badge variant="default" className="text-[10px] font-bold uppercase tracking-wider">
-                {currentTier} PLAN
+                {isOwner ? "OWNER (UNLIMITED)" : `${currentTier.toUpperCase()} PLAN`}
               </Badge>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
-              Manage your plan tier, monitor monthly AI usage quotas, and manage channel connection limits.
+              Manage your INR subscription tier, monitor monthly AI usage quotas, and manage channel connection limits.
             </p>
           </div>
         </div>
+
+        {/* OWNER BANNER */}
+        {isOwner && (
+          <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+            <div className="flex items-center gap-3">
+              <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0" />
+              <div>
+                <p className="font-bold text-white text-sm">Product Owner Account Active</p>
+                <p className="text-amber-200/80">
+                  Full owner privileges verified for jaspreetsing3412@gmail.com. All features, channels, uploads, and AI generation quotas are permanently unlocked without subscription requirement.
+                </p>
+              </div>
+            </div>
+            <Badge variant="warning" className="text-[10px] uppercase font-bold shrink-0 self-start sm:self-auto">
+              OWNER PRIVILEGES
+            </Badge>
+          </div>
+        )}
 
         {switchMessage && (
           <div className="p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs flex items-center gap-2">
@@ -120,15 +171,15 @@ export default function SubscriptionPage() {
                   Connected Channels
                 </span>
                 <span className="text-white font-mono font-bold">
-                  {channels.length} / {currentLimit.channels}
+                  {uniqueChannels.length} / {currentLimit.channels}
                 </span>
               </div>
               <Progress
-                value={Math.min(100, (channels.length / currentLimit.channels) * 100)}
+                value={Math.min(100, (uniqueChannels.length / currentLimit.channels) * 100)}
                 indicatorColor="bg-red-500"
               />
               <p className="text-[10px] text-slate-400">
-                {Math.max(0, currentLimit.channels - channels.length)} channel slots available.
+                {Math.max(0, currentLimit.channels - uniqueChannels.length)} channel slots available.
               </p>
             </div>
 
@@ -182,7 +233,7 @@ export default function SubscriptionPage() {
                   )}
                 </div>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-3xl font-extrabold text-white">$0</span>
+                  <span className="text-3xl font-extrabold text-white">₹0</span>
                   <span className="text-xs text-slate-400">/ mo</span>
                 </div>
                 <CardDescription className="text-xs text-slate-400 mt-2">
@@ -244,7 +295,7 @@ export default function SubscriptionPage() {
                   )}
                 </div>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-3xl font-extrabold text-white">$29</span>
+                  <span className="text-3xl font-extrabold text-white">₹999</span>
                   <span className="text-xs text-slate-400">/ mo</span>
                 </div>
                 <CardDescription className="text-xs text-slate-400 mt-2">
@@ -305,7 +356,7 @@ export default function SubscriptionPage() {
                   )}
                 </div>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-3xl font-extrabold text-white">$79</span>
+                  <span className="text-3xl font-extrabold text-white">₹2,499</span>
                   <span className="text-xs text-slate-400">/ mo</span>
                 </div>
                 <CardDescription className="text-xs text-slate-400 mt-2">

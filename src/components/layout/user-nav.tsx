@@ -37,7 +37,7 @@ export function UserNav() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-1 pl-2 rounded-full border border-navy-800 bg-navy-900 hover:bg-navy-850 hover:border-navy-700 transition-colors"
       >
-        <span className="text-xs font-medium text-slate-300 hidden md:inline-block max-w-[120px] truncate">
+        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 hidden md:inline-block max-w-[120px] truncate">
           {displayName}
         </span>
         <div className="w-8 h-8 rounded-full overflow-hidden bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center text-xs font-semibold text-brand-purple">
@@ -52,14 +52,14 @@ export function UserNav() {
       {isOpen && (
         <div className="absolute right-0 mt-2 w-56 rounded-xl border border-navy-800 bg-navy-900 shadow-xl backdrop-blur-md z-50 py-1.5 animate-in fade-in zoom-in-95 duration-150">
           <div className="px-3.5 py-2.5 border-b border-navy-800">
-            <p className="text-xs font-semibold text-white truncate">{displayName}</p>
-            <p className="text-[11px] text-slate-400 truncate">{user?.email}</p>
+            <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{displayName}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{user?.email}</p>
             <div className="mt-2 flex items-center gap-1.5">
               <Badge variant="default" className="text-[10px] uppercase font-bold tracking-wider">
                 {planTier} PLAN
               </Badge>
               {isDemoMode && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 dark:text-amber-300 border border-amber-500/20 font-medium">
                   Demo
                 </span>
               )}
@@ -70,17 +70,17 @@ export function UserNav() {
             <Link
               href="/dashboard/subscription"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-navy-800 transition-colors"
+              className="flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-navy-800 transition-colors"
             >
-              <CreditCard className="w-3.5 h-3.5 text-slate-400" />
+              <CreditCard className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Subscription & Plans</span>
             </Link>
             <Link
               href="/dashboard/settings"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2.5 px-3 py-2 text-xs text-slate-300 hover:text-white hover:bg-navy-800 transition-colors"
+              className="flex items-center gap-2.5 px-3 py-2 text-xs text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-navy-800 transition-colors"
             >
-              <Settings className="w-3.5 h-3.5 text-slate-400" />
+              <Settings className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Account Settings</span>
             </Link>
           </div>

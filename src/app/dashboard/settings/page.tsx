@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/context/auth-context";
 import { useData } from "@/context/data-context";
@@ -30,6 +30,7 @@ import {
   RefreshCw,
   Sun,
   Moon,
+  Monitor,
   Palette,
 } from "lucide-react";
 
@@ -54,21 +55,27 @@ export default function SettingsPage() {
   const [showSecrets, setShowSecrets] = useState(false);
 
   // Fetch current backend key status
-  const fetchKeyStatus = async () => {
+  const fetchKeyStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/settings/keys");
+      const res = await fetch("/api/settings/keys", {
+        headers: {
+          Authorization: `Bearer ${user?.id || "demo-session"}`,
+        },
+      });
       const data = await res.json();
-      setKeyStatus(data);
-      if (data.supabase?.url) setSupabaseUrl(data.supabase.url);
-      if (data.googleOAuth?.clientId) setGoogleClientId(data.googleOAuth.clientId);
+      if (data.success) {
+        setKeyStatus(data);
+        if (data.supabase?.url) setSupabaseUrl(data.supabase.url);
+        if (data.googleOAuth?.clientId) setGoogleClientId(data.googleOAuth.clientId);
+      }
     } catch (e) {
       console.warn("Could not fetch key status:", e);
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     fetchKeyStatus();
-  }, []);
+  }, [fetchKeyStatus]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +95,10 @@ export default function SettingsPage() {
     try {
       const res = await fetch("/api/settings/keys", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.id || "demo-session"}`,
+        },
         body: JSON.stringify({
           supabaseUrl,
           supabaseAnonKey,
@@ -210,18 +220,52 @@ export default function SettingsPage() {
                   <Palette className="w-4 h-4 text-brand-purple" />
                   Appearance & Interactive Themes
                 </CardTitle>
-                <CardDescription className="text-xs text-slate-400">
-                  Switch between Dark Studio, true AMOLED pure black, and daylight mode.
+                <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                  Choose between crisp Light, true AMOLED Black, or automatically match your device theme.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-1 gap-2.5">
-                  {/* Theme Option: Dark Navy */}
+                  {/* Theme Option: Light */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTheme("light");
+                      toast.success("Theme Applied", "Activated Light workspace.");
+                    }}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                      theme === "light"
+                        ? "border-amber-500 bg-amber-500/15 shadow-glow"
+                        : "border-navy-800 bg-navy-950/60 hover:border-navy-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-500 shrink-0">
+                        <Sun className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <span>Light</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 dark:text-amber-400 font-mono">Daylight</span>
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Crisp slate & bright workspace with maximum daytime contrast.
+                        </p>
+                      </div>
+                    </div>
+                    {theme === "light" && (
+                      <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-white shrink-0">
+                        <Check className="w-3 h-3" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Theme Option: Dark (AMOLED) */}
                   <button
                     type="button"
                     onClick={() => {
                       setTheme("dark");
-                      toast.success("Theme Applied", "Activated Dark Navy Studio palette.");
+                      toast.success("Theme Applied", "Activated Dark (AMOLED) mode.");
                     }}
                     className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
                       theme === "dark"
@@ -230,16 +274,16 @@ export default function SettingsPage() {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#070A12] border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-black border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0">
                         <Moon className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <span>Dark Navy Studio</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 font-mono">#070A12</span>
+                        <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <span>Dark (AMOLED)</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-600 dark:text-purple-300 font-mono">#000000</span>
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          Cinematic deep-navy creator workspace (Default).
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Pure pitch-black OLED battery saver with infinite contrast.
                         </p>
                       </div>
                     </div>
@@ -250,69 +294,35 @@ export default function SettingsPage() {
                     )}
                   </button>
 
-                  {/* Theme Option: AMOLED Black */}
+                  {/* Theme Option: System Device Based */}
                   <button
                     type="button"
                     onClick={() => {
-                      setTheme("amoled");
-                      toast.success("Theme Applied", "Activated Pure AMOLED Black mode.");
+                      setTheme("system");
+                      toast.success("Theme Applied", "Matching device operating system theme.");
                     }}
                     className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
-                      theme === "amoled"
-                        ? "border-purple-500 bg-purple-500/15 shadow-glow"
+                      theme === "system"
+                        ? "border-blue-500 bg-blue-500/15 shadow-glow"
                         : "border-navy-800 bg-navy-950/60 hover:border-navy-700"
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-black border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0">
-                        <Sparkles className="w-4 h-4" />
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                        <Monitor className="w-4 h-4" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <span>AMOLED Pure Black</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-mono">#000000</span>
+                        <p className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <span>Device Theme (System)</span>
+                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-600 dark:text-blue-300 font-mono">Auto</span>
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          Pitch-black OLED battery saver with infinite contrast.
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                          Automatically synchronizes with your device&apos;s OS light/dark mode.
                         </p>
                       </div>
                     </div>
-                    {theme === "amoled" && (
-                      <div className="w-5 h-5 rounded-full bg-brand-purple flex items-center justify-center text-white shrink-0">
-                        <Check className="w-3 h-3" />
-                      </div>
-                    )}
-                  </button>
-
-                  {/* Theme Option: Light Daylight */}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTheme("light");
-                      toast.success("Theme Applied", "Activated Studio Daylight mode.");
-                    }}
-                    className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
-                      theme === "light"
-                        ? "border-amber-500 bg-amber-500/15 shadow-glow"
-                        : "border-navy-800 bg-navy-950/60 hover:border-navy-700"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-white border border-amber-500/40 flex items-center justify-center text-amber-500 shrink-0">
-                        <Sun className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <span>Studio Daylight</span>
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-600 font-mono">Light</span>
-                        </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5">
-                          Crisp slate & bright white for daytime productivity.
-                        </p>
-                      </div>
-                    </div>
-                    {theme === "light" && (
-                      <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center text-white shrink-0">
+                    {theme === "system" && (
+                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
                         <Check className="w-3 h-3" />
                       </div>
                     )}

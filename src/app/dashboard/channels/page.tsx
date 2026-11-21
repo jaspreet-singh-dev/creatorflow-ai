@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import { useChannel } from "@/context/channel-context";
+import { useChannel, deduplicateChannels } from "@/context/channel-context";
 import { useAuth } from "@/context/auth-context";
 import { useData } from "@/context/data-context";
 import { useToast } from "@/components/ui/toast";
@@ -40,14 +40,56 @@ export default function ChannelManagerPage() {
     addChannelLocally,
     deleteChannel,
     syncChannelStats,
+    refreshChannels,
   } = useChannel();
   const { isDemoMode, user } = useAuth();
   const { checkQuota } = useData();
   const { toast } = useToast();
 
+  const uniqueChannels = React.useMemo(() => deduplicateChannels(channels), [channels]);
+
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectMessage, setConnectMessage] = useState<string | null>(null);
   const [syncingChannelId, setSyncingChannelId] = useState<string | null>(null);
+
+  // Read URL search params upon returning from Google OAuth
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
+    const channelName = params.get("channel");
+    const errorParam = params.get("error");
+    const linkedChannelStr = params.get("linked_channel");
+
+    if (success === "true") {
+      if (linkedChannelStr) {
+        try {
+          const parsed = JSON.parse(decodeURIComponent(linkedChannelStr));
+          if (parsed && parsed.title) {
+            addChannelLocally(parsed);
+          }
+        } catch (e) {
+          console.warn("Could not parse linked channel payload", e);
+        }
+      }
+      toast.success(
+        "YouTube Channel Connected",
+        `Successfully linked "${channelName || "channel"}" to your CreatorFlow workspace!`
+      );
+      refreshChannels();
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (errorParam) {
+      if (errorParam === "access_denied") {
+        toast.error(
+          "Google Access Denied (Error 403)",
+          "Your Google account must be added to 'Test users' in Google Cloud Console > OAuth consent screen while the app is in Testing mode."
+        );
+      } else {
+        toast.error("Channel Connection Failed", errorParam);
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [refreshChannels, toast, addChannelLocally]);
 
   // Real Channel Connect Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,6 +102,13 @@ export default function ChannelManagerPage() {
   const [channelToDelete, setChannelToDelete] = useState<ConnectedChannel | null>(null);
 
   const handleConnectGoogle = async () => {
+    if (isDemoMode) {
+      toast.info(
+        "Sign In Recommended",
+        "Sign in with your Creator account so your YouTube channel is saved permanently in your Supabase database."
+      );
+    }
+
     const quota = checkQuota("channel");
     if (!quota.allowed) {
       toast.error(
@@ -73,7 +122,8 @@ export default function ChannelManagerPage() {
     setConnectMessage(null);
 
     try {
-      const res = await fetch("/api/youtube/auth-url");
+      const stateParam = user?.id ? `?state=${encodeURIComponent(user.id)}` : "";
+      const res = await fetch(`/api/youtube/auth-url${stateParam}`);
       const data = await res.json();
 
       if (data.configured && data.authUrl) {
@@ -122,8 +172,34 @@ export default function ChannelManagerPage() {
   const handleSaveFetchedChannel = () => {
     if (!fetchedChannel) return;
 
+    // Check if channel already exists in current channels list
+    const existing = channels.find((c) => {
+      if (
+        c.youtube_channel_id &&
+        fetchedChannel.youtube_channel_id &&
+        c.youtube_channel_id.trim() === fetchedChannel.youtube_channel_id.trim()
+      ) {
+        return true;
+      }
+      if (
+        c.custom_url &&
+        fetchedChannel.custom_url &&
+        c.custom_url.trim().toLowerCase() === fetchedChannel.custom_url.trim().toLowerCase()
+      ) {
+        return true;
+      }
+      if (
+        c.title &&
+        fetchedChannel.title &&
+        c.title.trim().toLowerCase() === fetchedChannel.title.trim().toLowerCase()
+      ) {
+        return true;
+      }
+      return false;
+    });
+
     const newChannel: ConnectedChannel = {
-      id: `chan-${Date.now()}`,
+      id: existing ? existing.id : `chan-${Date.now()}`,
       user_id: user?.id || "demo-user-123456",
       youtube_channel_id: fetchedChannel.youtube_channel_id,
       title: fetchedChannel.title,
@@ -133,7 +209,7 @@ export default function ChannelManagerPage() {
       video_count: fetchedChannel.video_count,
       view_count: fetchedChannel.view_count,
       is_active: true,
-      created_at: new Date().toISOString(),
+      created_at: existing ? existing.created_at : new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
@@ -273,10 +349,10 @@ export default function ChannelManagerPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-bold text-white">Connected YouTube Channels</h3>
-            <span className="text-xs text-slate-400">{channels.length} Channels Connected</span>
+            <span className="text-xs text-slate-400">{uniqueChannels.length} Channels Connected</span>
           </div>
 
-          {channels.length === 0 ? (
+          {uniqueChannels.length === 0 ? (
             <Card className="border-navy-800 bg-navy-900/40 p-8 text-center space-y-4">
               <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto border border-red-500/20">
                 <Youtube className="w-8 h-8" />
@@ -316,7 +392,7 @@ export default function ChannelManagerPage() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {channels.map((chan) => {
+              {uniqueChannels.map((chan) => {
                 const isActive = activeChannel?.id === chan.id;
                 const isSyncing = syncingChannelId === chan.id;
 
@@ -496,7 +572,7 @@ export default function ChannelManagerPage() {
                   Live YouTube Channel Search
                 </p>
                 <p className="text-[11px] text-slate-400">
-                  Enter your real YouTube handle (e.g. <code>@mkbhd</code>, <code>@veritasium</code>, or your personal channel like <code>@YourChannel</code>). We will fetch its actual subscribers, avatar, and total views.
+                  Enter your real YouTube handle (e.g. <code>@novoice_craft</code>, <code>@mkbhd</code>, or your gaming channel). We will fetch its actual subscribers, avatar, and total views.
                 </p>
               </div>
 
@@ -579,11 +655,14 @@ export default function ChannelManagerPage() {
 
               <div className="p-3.5 rounded-xl border border-navy-800 bg-navy-900/60 space-y-2">
                 <p className="text-xs font-semibold text-white">To enable one-click Google Sign-in:</p>
-                <ol className="list-decimal pl-4 space-y-1 text-xs text-slate-300">
+                <ol className="list-decimal pl-4 space-y-1.5 text-xs text-slate-300">
                   <li>Go to Google Cloud Console &gt; Credentials</li>
                   <li>Create an OAuth 2.0 Client ID (Web Application)</li>
-                  <li>Set redirect URI to <code>http://localhost:3000/api/youtube/callback</code></li>
-                  <li>Add your keys in the CreatorFlow Settings page</li>
+                  <li>Set Authorized Redirect URI to <code>http://localhost:3000/api/youtube/callback</code></li>
+                  <li>Add your Client ID &amp; Secret in CreatorFlow Settings</li>
+                  <li>
+                    <strong className="text-amber-300">Fix &quot;Error 403: access_denied&quot;:</strong> While your app is in Google Testing mode, navigate to <strong>APIs &amp; Services &gt; OAuth consent screen &gt; Test users</strong>, click <strong>+ ADD USERS</strong> and add your Google email. Google blocks unapproved emails until added as Test Users.
+                  </li>
                 </ol>
               </div>
 

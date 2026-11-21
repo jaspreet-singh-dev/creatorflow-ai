@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
@@ -12,11 +12,17 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, signInDemo } = useAuth();
+  const { signIn, user, isDemoMode, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && user && !isDemoMode) {
+      router.replace("/dashboard");
+    }
+  }, [authLoading, user, isDemoMode, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,15 +33,10 @@ export default function LoginPage() {
     setIsLoading(false);
 
     if (signInError) {
-      setError(signInError.message || "Invalid login credentials. Please try again or use the Demo Sandbox.");
+      setError(signInError.message || "Invalid login credentials. Please check your email and password.");
     } else {
       router.push("/dashboard");
     }
-  };
-
-  const handleDemoLogin = () => {
-    signInDemo();
-    router.push("/dashboard");
   };
 
   return (
@@ -54,54 +55,57 @@ export default function LoginPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-purple to-brand-blue flex items-center justify-center shadow-glow">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <span className="font-extrabold text-2xl tracking-tight text-white">CreatorFlow <span className="text-brand-purple">AI</span></span>
+            <span className="font-extrabold text-2xl tracking-tight text-white">
+              CreatorFlow <span className="text-brand-purple">AI</span>
+            </span>
           </Link>
           <p className="text-sm text-slate-400">
             Sign in to manage your YouTube channels, AI metadata & publishing.
           </p>
         </div>
 
-        {/* Demo Fast Access Pill */}
+        {/* Isolated Demo Showcase Link */}
         <div className="bg-navy-900/90 border border-navy-800 rounded-xl p-3.5 flex items-center justify-between gap-3 shadow-sm">
           <div className="text-left">
-            <p className="text-xs font-semibold text-white flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Instant Evaluation Sandbox
+            <p className="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
+              Looking for a quick preview?
             </p>
-            <p className="text-[11px] text-slate-400 mt-0.5">
-              Explore with pre-seeded channels & demo data.
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              Explore the sample project & publishing preview without signing in.
             </p>
           </div>
-          <Button
-            type="button"
-            variant="blue"
-            size="sm"
-            onClick={handleDemoLogin}
-            className="text-xs h-8 px-3 shrink-0"
-          >
-            <PlayCircle className="w-3.5 h-3.5 mr-1" />
-            Launch Demo
-          </Button>
+          <Link href="/demo">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-xs h-8 px-3 shrink-0 border-navy-700 bg-navy-850/60"
+            >
+              <PlayCircle className="w-3.5 h-3.5 mr-1 text-brand-purple" />
+              View Demo
+            </Button>
+          </Link>
         </div>
 
         <Card className="border-navy-800 bg-navy-900/90 shadow-2xl backdrop-blur-md">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-lg text-white">Sign In</CardTitle>
-            <CardDescription className="text-xs text-slate-400">
-              Enter your Supabase email and password to access your account.
+            <CardTitle className="text-lg text-slate-900 dark:text-white">Sign In</CardTitle>
+            <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+              Enter your email and password to access your CreatorFlow workspace.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-start gap-2">
+                <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 dark:text-rose-300 text-xs flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300">Email Address</label>
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Email Address</label>
                 <Input
                   type="email"
                   placeholder="name@example.com"
@@ -114,7 +118,7 @@ export default function LoginPage() {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-slate-300">Password</label>
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Password</label>
                   <Link
                     href="/reset-password"
                     className="text-xs text-brand-purple hover:underline"
@@ -144,7 +148,7 @@ export default function LoginPage() {
             </form>
           </CardContent>
           <CardFooter className="flex justify-center border-t border-navy-800/80 pt-4">
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Don&apos;t have an account?{" "}
               <Link href="/signup" className="text-brand-purple hover:underline font-semibold">
                 Sign Up

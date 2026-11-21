@@ -3,7 +3,7 @@
 import React from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/context/auth-context";
-import { useChannel } from "@/context/channel-context";
+import { useChannel, deduplicateChannels } from "@/context/channel-context";
 import { useData } from "@/context/data-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,8 @@ export default function DashboardOverviewPage() {
   const { profile, isDemoMode } = useAuth();
   const { channels, activeChannel } = useChannel();
   const { videos } = useData();
+
+  const uniqueChannels = React.useMemo(() => deduplicateChannels(channels), [channels]);
 
   // Filter videos for the active channel if one is selected
   const channelVideos = activeChannel
@@ -78,16 +80,16 @@ export default function DashboardOverviewPage() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <Link href="/dashboard/metadata">
+            <Link href="/dashboard/create">
               <Button variant="gradient" size="sm" className="font-semibold text-xs shadow-glow">
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                Generate Metadata
+                Create with AI
               </Button>
             </Link>
-            <Link href="/dashboard/uploads">
+            <Link href="/dashboard/publish">
               <Button variant="outline" size="sm" className="text-xs border-navy-700 bg-navy-900/60">
                 <UploadCloud className="w-3.5 h-3.5 mr-1.5 text-brand-purple" />
-                New Upload
+                Publish Video
               </Button>
             </Link>
           </div>
@@ -141,10 +143,10 @@ export default function DashboardOverviewPage() {
                 <p className="text-xs font-bold text-white truncate">AI Titles & SEO Kit</p>
                 <p className="text-[11px] text-slate-400 truncate mt-0.5">Titles, description, tags & score</p>
                 <Link
-                  href="/dashboard/metadata"
+                  href="/dashboard/create"
                   className="inline-flex items-center gap-1 text-[11px] text-brand-purple font-semibold hover:underline mt-1.5"
                 >
-                  Generate Metadata →
+                  Create with AI →
                 </Link>
               </div>
             </div>
@@ -155,13 +157,13 @@ export default function DashboardOverviewPage() {
                 3
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-white truncate">Schedule & Drop</p>
-                <p className="text-[11px] text-slate-400 truncate mt-0.5">Calendar drop or direct upload</p>
+                <p className="text-xs font-bold text-white truncate">Publish & Schedule</p>
+                <p className="text-[11px] text-slate-400 truncate mt-0.5">Projects, thumbnails & uploads</p>
                 <Link
-                  href="/dashboard/calendar"
+                  href="/dashboard/publish"
                   className="inline-flex items-center gap-1 text-[11px] text-brand-blue font-semibold hover:underline mt-1.5"
                 >
-                  Open Calendar →
+                  Open Publish Hub →
                 </Link>
               </div>
             </div>
@@ -174,7 +176,7 @@ export default function DashboardOverviewPage() {
             <div className="flex items-center gap-2.5">
               <Sparkles className="w-4 h-4 text-brand-purple shrink-0" />
               <p className="text-xs text-slate-200">
-                <strong className="text-white">Active Sandbox Mode:</strong> Connected to channels <code className="text-purple-300">@AIHorizons</code> and <code className="text-purple-300">@NexusCode</code>. You can test all workflows, AI generation, and scheduling safely.
+                <strong className="text-white">Active Channel Workspace:</strong> Connected to <code className="text-purple-300">@novoice_craft</code> (NoVoiceCraft • 335 subs • 619.5K views). All workflows, Minecraft clutch analytics, and Shorts AI generation are active.
               </p>
             </div>
             <Link href="/dashboard/settings">
@@ -209,7 +211,7 @@ export default function DashboardOverviewPage() {
                   {activeChannel ? `${formatNumber(activeChannel.subscriber_count)} subscribers` : "0 subs"}
                 </span>
                 <span className="text-[11px] font-medium text-emerald-400">
-                  {channels.length} {channels.length === 1 ? "Channel" : "Channels"} Synced
+                  {uniqueChannels.length} {uniqueChannels.length === 1 ? "Channel" : "Channels"} Synced
                 </span>
               </div>
             </CardContent>

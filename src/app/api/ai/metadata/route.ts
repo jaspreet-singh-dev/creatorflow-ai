@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: generated,
+      metadata: generated,
     });
   } catch (error: any) {
     if (error instanceof z.ZodError) {

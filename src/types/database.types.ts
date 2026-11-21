@@ -17,14 +17,27 @@ export type VideoStatus =
   | "processing"
   | "scheduled"
   | "published"
-  | "failed";
+  | "failed"
+  | "cancelled";
+
+export type ProjectStatus =
+  | "idea"
+  | "scripting"
+  | "metadata"
+  | "thumbnail"
+  | "ready"
+  | "scheduled"
+  | "published"
+  | "failed"
+  | "cancelled";
 
 export type UploadJobStatus =
   | "pending"
   | "uploading"
   | "processing"
   | "completed"
-  | "failed";
+  | "failed"
+  | "cancelled";
 
 export type IdeaFormat = "long_form" | "short_form" | "series";
 export type IdeaStatus = "saved" | "in_progress" | "completed" | "archived";
@@ -65,6 +78,8 @@ export interface Video {
   description: string;
   tags: string[];
   privacy_status: VideoPrivacy;
+  self_declared_made_for_kids?: boolean;
+  category_id?: string;
   status: VideoStatus;
   youtube_video_id: string | null;
   scheduled_at: string | null;
@@ -74,6 +89,91 @@ export interface Video {
   created_at: string;
   updated_at: string;
   // Joined relation for UI convenience
+  channel?: ConnectedChannel;
+}
+
+export interface ProjectVersionSnapshot {
+  selectedTitle?: string;
+  titleSuggestions?: string[];
+  hook?: string;
+  hookSuggestions?: string[];
+  script?: string;
+  outline?: string[];
+  chapters?: { time: string; title: string }[];
+  description?: string;
+  tags?: string[];
+  hashtags?: string[];
+  thumbnailText?: string;
+  pinnedComment?: string;
+}
+
+export interface ProjectVersion {
+  id: string;
+  name: string;
+  createdAt: string;
+  summary?: string;
+  type?: "all" | "titles" | "hooks" | "script" | "metadata";
+  snapshot: ProjectVersionSnapshot;
+}
+
+export interface VideoProject {
+  id: string;
+  user_id: string;
+  channel_id: string | null;
+  name: string; // Project Name
+  topic: string;
+  niche: string;
+  contentType: string; // e.g., "tutorial", "commentary", "review", "shorts"
+  targetAudience: string;
+  language: string;
+  idea: string; // Core premise
+  hook: string; // Selected opening hook (0-3s)
+  hookSuggestions: string[];
+  selectedTitle: string;
+  titleSuggestions: string[];
+  outline: string[];
+  script: string;
+  description: string;
+  tags: string[];
+  hashtags: string[];
+  thumbnailText: string;
+  pinnedComment: string;
+  chapters: { time: string; title: string }[];
+  qualityScore: {
+    overall: number;
+    clarity: number;
+    relevance: number;
+    readability: number;
+    keywordCoverage: number;
+    critique: string[];
+    isHeuristicFallback?: boolean;
+  };
+  thumbnailUrl: string | null;
+  thumbnailOverlayText: string | null;
+  thumbnailTextColor?: string;
+  thumbnailStyle?: string;
+  videoFileRef?: {
+    name: string;
+    size: number;
+    type: string;
+    lastModified?: number;
+  } | null;
+  privacyStatus: VideoPrivacy;
+  selfDeclaredMadeForKids?: boolean;
+  categoryId?: string;
+  scheduledAt: string | null;
+  publishedAt: string | null;
+  status: VideoStatus | ProjectStatus;
+  youtubeVideoId: string | null;
+  youtubeVideoUrl: string | null;
+  isSimulatedPublish?: boolean;
+  notes?: string;
+  versions?: ProjectVersion[];
+  activeVersionId?: string;
+  lastSavedAt?: string;
+  autosaveStatus?: "idle" | "saving" | "saved" | "error";
+  createdAt: string;
+  updatedAt: string;
   channel?: ConnectedChannel;
 }
 

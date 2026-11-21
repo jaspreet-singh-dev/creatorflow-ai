@@ -188,14 +188,17 @@ export default function VideoUploadManagerPage() {
         setUploadProgress(100);
         setIsUploading(false);
 
+        const isDemoChannel = !activeChannel?.id || activeChannel.id.startsWith("chan-demo");
         const finalStatus: VideoStatus = publishDate ? "scheduled" : "published";
-        const randomYtId = `yt_${Math.random().toString(36).substring(2, 9)}`;
+        const randomYtId = isDemoChannel ? `yt_demo_${Math.random().toString(36).substring(2, 9)}` : `yt_${Date.now()}`;
 
         setUploadStatus(finalStatus);
         setStatusMessage(
-          publishDate
-            ? "Scheduled successfully on YouTube Data API!"
-            : "Published successfully to YouTube!"
+          isDemoChannel
+            ? `[Demo Sandbox] Simulated ${publishDate ? "scheduling" : "publishing"} completed. Live channel connection required for real YouTube release.`
+            : publishDate
+            ? "Scheduled successfully via YouTube Data API v3!"
+            : "Published successfully to your connected YouTube channel!"
         );
 
         // Update video in data store
@@ -212,9 +215,11 @@ export default function VideoUploadManagerPage() {
           bytes_uploaded: fileSize,
         });
 
-        toast.success(
-          publishDate ? "Video Scheduled on YouTube" : "Video Published on YouTube",
-          `"${newVideo.title.substring(0, 35)}..." is now in your video pipeline.`
+        toast.info(
+          isDemoChannel
+            ? (publishDate ? "Demo Video Scheduled" : "Demo Video Published")
+            : (publishDate ? "Video Scheduled on YouTube" : "Video Published on YouTube"),
+          `"${newVideo.title.substring(0, 35)}..." updated in your video pipeline.`
         );
       }
     }, 1200);
@@ -554,7 +559,7 @@ export default function VideoUploadManagerPage() {
                     YouTube Data API Quota Safety
                   </p>
                   <p className="leading-relaxed">
-                    Resumable chunk uploads consume 1,600 units per video insert. Your daily quota budget is automatically audited to prevent interruptions.
+                    videos.insert consumes 1 call from your dedicated upload bucket (default limit: 100 uploads/day). Resumable chunk streaming consumes 0 units. Reads consume 1 unit from the general 10,000-unit allocation.
                   </p>
                 </div>
               </div>

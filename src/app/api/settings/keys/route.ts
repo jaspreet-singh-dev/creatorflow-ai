@@ -1,12 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { z } from "zod";
+import { verifyApiAuth } from "@/lib/auth/server-auth";
 
-export async function GET() {
+export const dynamic = "force-dynamic";
+
+const keysPayloadSchema = z.object({
+  supabaseUrl: z
+    .string()
+    .max(500)
+    .regex(/^[^\r\n]*$/, "Newlines are not permitted in credentials")
+    .optional(),
+  supabaseAnonKey: z
+    .string()
+    .max(1000)
+    .regex(/^[^\r\n]*$/, "Newlines are not permitted in credentials")
+    .optional(),
+  geminiApiKey: z
+    .string()
+    .max(500)
+    .regex(/^[^\r\n]*$/, "Newlines are not permitted in credentials")
+    .optional(),
+  googleClientId: z
+    .string()
+    .max(500)
+    .regex(/^[^\r\n]*$/, "Newlines are not permitted in credentials")
+    .optional(),
+  googleClientSecret: z
+    .string()
+    .max(500)
+    .regex(/^[^\r\n]*$/, "Newlines are not permitted in credentials")
+    .optional(),
+});
+
+const ALLOWED_CONFIG_KEYS = new Set([
+  "NEXT_PUBLIC_SUPABASE_URL",
+  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  "GEMINI_API_KEY",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
+]);
+
+export async function GET(req: NextRequest) {
+  // 1. Verify authentication
+  const auth = await verifyApiAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { success: false, error: auth.error || "Authentication required." },
+      { status: 401 }
+    );
+  }
+
   const envPath = path.join(process.cwd(), ".env.local");
   let envContent = "";
-  if (fs.existsSync(envPath)) {
-    envContent = fs.readFileSync(envPath, "utf-8");
+  try {
+    if (fs.existsSync(envPath)) {
+      envContent = fs.readFileSync(envPath, "utf-8");
+    }
+  } catch {
+    // If filesystem read is disallowed in serverless, read from process.env
   }
 
   const getVal = (key: string) => {
@@ -14,9 +67,9 @@ export async function GET() {
     return match ? match[1].trim() : (process.env[key] || "");
   };
 
-  const mask = (val: string) => {
-    if (!val || val.length < 8) return val ? "••••••••" : "";
-    return `${val.substring(0, 4)}••••${val.substring(val.length - 4)}`;
+  const safeMask = (val: string) => {
+    if (!val) return "";
+    return "••••••••";
   };
 
   const supabaseUrl = getVal("NEXT_PUBLIC_SUPABASE_URL");
@@ -26,67 +79,106 @@ export async function GET() {
   const googleClientSecret = getVal("GOOGLE_CLIENT_SECRET");
 
   return NextResponse.json({
+    success: true,
     supabase: {
-      url: supabaseUrl,
-      hasKey: Boolean(supabaseKey),
-      keyMasked: mask(supabaseKey),
+      url: supabaseUrl.includes("placeholder") ? "" : supabaseUrl,
+      hasKey: Boolean(supabaseKey && !supabaseKey.includes("placeholder")),
+      keyMasked: safeMask(supabaseKey),
       configured: Boolean(supabaseUrl && supabaseKey && !supabaseUrl.includes("placeholder")),
     },
     gemini: {
-      hasKey: Boolean(geminiKey),
-      keyMasked: mask(geminiKey),
-      configured: Boolean(geminiKey && !geminiKey.includes("placeholder")),
+      hasKey: Boolean(geminiKey && !geminiKey.includes("placeholder") && !geminiKey.includes("YourGeminiApiKeyHere")),
+      keyMasked: safeMask(geminiKey),
+      configured: Boolean(geminiKey && !geminiKey.includes("placeholder") && !geminiKey.includes("YourGeminiApiKeyHere")),
     },
     googleOAuth: {
-      clientId: googleClientId,
-      hasSecret: Boolean(googleClientSecret),
-      secretMasked: mask(googleClientSecret),
-      configured: Boolean(googleClientId && googleClientSecret && !googleClientId.includes("your-google-client-id")),
+      clientId: googleClientId.includes("your-google-client-id") ? "" : googleClientId,
+      hasSecret: Boolean(googleClientSecret && !googleClientSecret.includes("your-google-client-secret")),
+      secretMasked: safeMask(googleClientSecret),
+      configured: Boolean(
+        googleClientId &&
+        googleClientSecret &&
+        !googleClientId.includes("your-google-client-id") &&
+        !googleClientSecret.includes("your-google-client-secret")
+      ),
     },
   });
 }
 
 export async function POST(req: NextRequest) {
+  // 1. Verify authentication
+  const auth = await verifyApiAuth(req);
+  if (!auth.authenticated) {
+    return NextResponse.json(
+      { success: false, error: auth.error || "Authentication required." },
+      { status: 401 }
+    );
+  }
+
   try {
-    const body = await req.json();
+    const rawBody = await req.json();
+    const parsed = keysPayloadSchema.safeParse(rawBody);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Validation failed: " + parsed.error.issues.map((i) => i.message).join(", "),
+        },
+        { status: 400 }
+      );
+    }
+
+    const body = parsed.data;
     const envPath = path.join(process.cwd(), ".env.local");
 
     let currentEnv = "";
-    if (fs.existsSync(envPath)) {
-      currentEnv = fs.readFileSync(envPath, "utf-8");
+    let fileWritable = true;
+    try {
+      if (fs.existsSync(envPath)) {
+        currentEnv = fs.readFileSync(envPath, "utf-8");
+      }
+    } catch {
+      fileWritable = false;
     }
 
     const updates: Record<string, string> = {};
 
-    if (typeof body.supabaseUrl === "string") updates["NEXT_PUBLIC_SUPABASE_URL"] = body.supabaseUrl.trim();
-    if (typeof body.supabaseAnonKey === "string" && body.supabaseAnonKey) {
-      updates["NEXT_PUBLIC_SUPABASE_ANON_KEY"] = body.supabaseAnonKey.trim();
-    }
-    if (typeof body.geminiApiKey === "string" && body.geminiApiKey) {
-      updates["GEMINI_API_KEY"] = body.geminiApiKey.trim();
-    }
-    if (typeof body.googleClientId === "string") updates["GOOGLE_CLIENT_ID"] = body.googleClientId.trim();
-    if (typeof body.googleClientSecret === "string" && body.googleClientSecret) {
-      updates["GOOGLE_CLIENT_SECRET"] = body.googleClientSecret.trim();
-    }
+    if (body.supabaseUrl !== undefined) updates["NEXT_PUBLIC_SUPABASE_URL"] = body.supabaseUrl.trim();
+    if (body.supabaseAnonKey) updates["NEXT_PUBLIC_SUPABASE_ANON_KEY"] = body.supabaseAnonKey.trim();
+    if (body.geminiApiKey) updates["GEMINI_API_KEY"] = body.geminiApiKey.trim();
+    if (body.googleClientId !== undefined) updates["GOOGLE_CLIENT_ID"] = body.googleClientId.trim();
+    if (body.googleClientSecret) updates["GOOGLE_CLIENT_SECRET"] = body.googleClientSecret.trim();
 
     let updatedContent = currentEnv;
 
     for (const [key, val] of Object.entries(updates)) {
+      if (!ALLOWED_CONFIG_KEYS.has(key)) continue;
+
+      // Always update runtime memory
       process.env[key] = val;
-      const regex = new RegExp(`^${key}=.*$`, "m");
-      if (regex.test(updatedContent)) {
-        updatedContent = updatedContent.replace(regex, `${key}=${val}`);
-      } else {
-        updatedContent += `\n${key}=${val}`;
+
+      if (fileWritable) {
+        const regex = new RegExp(`^${key}=.*$`, "m");
+        if (regex.test(updatedContent)) {
+          updatedContent = updatedContent.replace(regex, `${key}=${val}`);
+        } else {
+          updatedContent += `\n${key}=${val}`;
+        }
       }
     }
 
-    fs.writeFileSync(envPath, updatedContent.trim() + "\n", "utf-8");
+    if (fileWritable) {
+      try {
+        fs.writeFileSync(envPath, updatedContent.trim() + "\n", "utf-8");
+      } catch (writeErr) {
+        console.warn("Could not write to .env.local (read-only filesystem); updated process.env only.");
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Credentials saved to .env.local and loaded into runtime.",
+      message: "Credentials successfully updated and applied to active runtime.",
     });
   } catch (err: any) {
     return NextResponse.json(

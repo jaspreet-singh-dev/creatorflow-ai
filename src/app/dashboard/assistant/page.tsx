@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useData } from "@/context/data-context";
+import { useChannel } from "@/context/channel-context";
 import { useToast } from "@/components/ui/toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ import Link from "next/link";
 
 export default function ContentAssistantPage() {
   const { ideas, addIdea, updateIdeaStatus, deleteIdea, convertIdeaToVideo, checkQuota } = useData();
+  const { activeChannel } = useChannel();
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState<"ideas" | "hooks" | "shorts" | "series">("ideas");
@@ -47,87 +49,86 @@ export default function ContentAssistantPage() {
   // Dynamic ideas state
   const [generatedIdeas, setGeneratedIdeas] = useState([
     {
-      title: "How I Built an Autonomous AI Agent in 24 Hours (Full Architecture)",
-      hook: "What if an AI could read your bug reports, write the patch, and submit the pull request while you sleep?",
-      format: "long_form" as IdeaFormat,
+      title: "CAN SWEET BERRIES SAVE ME?! 💀🌿 #minecraft",
+      hook: "You are falling from Y=320 with no armor, no totem, and only a single sweet berry bush. Can this tiny block stop lethal damage?",
+      format: "shorts" as IdeaFormat,
       outline: [
-        "1. Real-world problem: Manual bug fixing takes 40% of dev time",
-        "2. Architecture diagram: Tool routing, vector context & LLM orchestrator",
-        "3. Live coding: Building the agent loop in TypeScript",
-        "4. Stress test: Running the agent against a broken open-source repo",
-        "5. Safety guardrails & production deployment checklist",
+        "1. Build height drop from Y=320",
+        "2. Zero armor, hardcore mode test",
+        "3. Frame-by-frame hitbox calculation",
+        "4. Survival results & heart gauge reveal",
       ],
-      keywords: ["ai agent tutorial", "autonomous coding", "gemini pro", "typescript ai"],
+      keywords: ["minecraft", "shorts", "clutch", "survival", "minecraft clutch"],
     },
     {
-      title: "10 Mind-Blowing AI Developer Tools You Need to Try in 2026",
-      hook: "Most developers are using AI for simple autocompletion. Here are 10 tools that actually change your entire workflow.",
-      format: "long_form" as IdeaFormat,
+      title: "BED vs HAY BALE vs SLIME… WHO SAVES ME?! 💀 #minecraft",
+      hook: "Three iconic clutch blocks in Minecraft, but only ONE works from maximum build height without killing you.",
+      format: "shorts" as IdeaFormat,
       outline: [
-        "1. Tool 1-3: Next-gen AI terminals and terminal assistants",
-        "2. Tool 4-6: Visual design to full-stack code generators",
-        "3. Tool 7-10: Autonomous code review & synthetic test generators",
-        "4. Summary and tool comparison matrix",
+        "1. Block 1: Hay Bale (80% damage reduction test)",
+        "2. Block 2: Slime Block (Bounce timing & lethal miss risk)",
+        "3. Block 3: Nether Bed (Explosion vs bounce mechanics)",
+        "4. The Ultimate Champion block crowned",
       ],
-      keywords: ["developer tools 2026", "best ai tools", "productivity hacks"],
+      keywords: ["minecraft shorts", "bed clutch", "slime clutch", "hay bale test"],
     },
     {
-      title: "Why 90% of AI SaaS Startups Will Fail by the End of 2026",
-      hook: "If your startup is just a thin wrapper around an API call, you don't have a moat — you have a temporary feature.",
-      format: "long_form" as IdeaFormat,
+      title: "Can a Hay Bale Save You From ANY Fall in Minecraft? 🌾😱 #shorts",
+      hook: "Everyone thinks hay bales eliminate 100% of fall damage in Minecraft. Here is the exact mathematical limit before you die.",
+      format: "shorts" as IdeaFormat,
       outline: [
-        "1. The API wrapper trap: Why commodity wrappers get crushed",
-        "2. Real moats: Proprietary data loops, workflow lock-in & UX depth",
-        "3. Case study: 2 startups with identical tech, opposite outcomes",
-        "4. How to build defensible AI software in 2026",
+        "1. The myth: Infinite fall height with hay bales",
+        "2. Testing drops from 50, 100, 200, and 380 blocks",
+        "3. The exact heart threshold where hay bales fail",
+        "4. Pro clutch tips to survive higher drops",
       ],
-      keywords: ["ai saas", "startup strategy", "tech business", "building in public"],
+      keywords: ["minecraft myths", "hay bale clutch", "minecraft science", "shorts"],
     },
   ]);
 
   const [generatedHooks, setGeneratedHooks] = useState([
     {
-      hook: "If you lose 40% of viewers in the first 30 seconds, YouTube will stop recommending your video. Here are 3 visual pattern interrupts that doubled my retention.",
-      angle: "Curiosity & Loss Aversion",
+      hook: "You have exactly 0.4 seconds before hitting bedrock at terminal velocity. Can chorus fruit teleport you before impact?",
+      angle: "Extreme Clutch Survival",
+      retentionScore: "9.9 / 10",
+    },
+    {
+      hook: "99% of Minecraft players believe powder snow is identical to water buckets. They are completely wrong.",
+      angle: "Myth Busting & Shock",
       retentionScore: "9.7 / 10",
     },
     {
-      hook: "What if you could turn any Figma design into a responsive React component just by dropping a screenshot? Let me show you how in 60 seconds.",
-      angle: "Immediate High Value Payoff",
-      retentionScore: "9.4 / 10",
-    },
-    {
-      hook: "Everyone tells you to upload 3 times a week to grow on YouTube. In 2026, that advice will actually kill your channel.",
-      angle: "Contrarian Myth Buster",
-      retentionScore: "9.6 / 10",
+      hook: "What happens when you MLG cobweb from the world height limit? Watch the heart counter.",
+      angle: "Instant Visual Stakes",
+      retentionScore: "9.8 / 10",
     },
   ]);
 
   const [generatedShorts, setGeneratedShorts] = useState([
     {
-      title: "The 3-Second Rule That Fixes Dead Videos",
-      hook: "Stop starting your videos with 'Hey guys, welcome back!'",
-      concept: "Visual timer graphic + audio cut. Show how cutting intro banter increased viewer retention by 38%.",
-      action: "Tell viewers to check pinned comment for the full retention template.",
+      title: "CAN A PIG SAVE ME?! 🐷💀 #minecraft",
+      hook: "Can you dismount a pig at the exact tick you hit the ground?",
+      concept: "Fast drop from sky, slow-mo dismount tick test, surviving with half a heart.",
+      action: "Subscribe to NoVoiceCraft for more impossible clutch experiments.",
     },
     {
-      title: "This AI Secret Codes 10x Faster",
-      hook: "90% of developers use prompt engineering wrong.",
-      concept: "Split screen showing prompt with system instructions vs naive prompt. Side-by-side speed comparison.",
-      action: "Save this video for your next coding sprint.",
+      title: "COBWEB vs BERRY BUSH… THE ULTIMATE CLUTCH!",
+      hook: "Which block slows your fall faster without dealing tick damage?",
+      concept: "Side-by-side split screen timer comparing fall deceleration.",
+      action: "Comment which clutch block we test next!",
     },
   ]);
 
   const [generatedSeries, setGeneratedSeries] = useState([
     {
-      seriesTitle: "The Full-Stack AI SaaS Masterclass (4-Part Series)",
+      seriesTitle: "Minecraft Impossible Clutches & Survival Tests (4-Part Series)",
       episodes: [
-        { ep: "Part 1", title: "Architecture & Database: Supabase + Vector Embeddings", focus: "Database Schema & Auth" },
-        { ep: "Part 2", title: "The Agent Core: Next.js 15 Server Actions & Gemini API", focus: "LLM Pipeline & Streaming" },
-        { ep: "Part 3", title: "Resumable YouTube API v3 Video Uploader", focus: "Google OAuth 2.0 & Cloud Run" },
-        { ep: "Part 4", title: "Monetization & Scale: Subscriptions & Production Launch", focus: "Stripe & Rate Limiting" },
+        { ep: "Part 1", title: "The Build Limit Drop: Sweet Berries vs Powder Snow", focus: "Deceleration & Tick Mechanics" },
+        { ep: "Part 2", title: "Entity Dismount Mechanics: Pig vs Boat vs Minecart", focus: "Hitbox & Fall Reset" },
+        { ep: "Part 3", title: "Tick-Perfect Fall Damage Cancellation: Chorus Fruit & Slime", focus: "Teleport Frame Window" },
+        { ep: "Part 4", title: "Ultimate 1,000 Block Drop: Which Block Truly Saves You?", focus: "Survival Limit Benchmark" },
       ],
-      targetViews: "150,000+ Series Tally",
+      targetViews: "500,000+ Series Tally",
     },
   ]);
 
@@ -143,7 +144,7 @@ export default function ContentAssistantPage() {
 
     setIsLoading(true);
     try {
-      const mode = activeTab === "hooks" ? "hook" : activeTab === "shorts" ? "shorts" : "ideas";
+      const mode = activeTab === "hooks" ? "hook" : activeTab === "shorts" ? "shorts" : activeTab === "series" ? "series" : "ideas";
       const res = await fetch("/api/ai/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -151,18 +152,123 @@ export default function ContentAssistantPage() {
       });
       const json = await res.json();
       if (json.success && json.data) {
-        if (mode === "hook") {
-          setGeneratedHooks(json.data);
-        } else if (mode === "shorts") {
-          setGeneratedShorts(json.data);
-        } else {
-          setGeneratedIdeas(json.data);
+        let rawData = json.data;
+        if (!Array.isArray(rawData) && typeof rawData === "object" && rawData !== null) {
+          rawData =
+            rawData.ideas ||
+            rawData.content_ideas ||
+            rawData.hooks ||
+            rawData.shorts ||
+            rawData.series ||
+            rawData.data ||
+            rawData.results ||
+            Object.values(rawData).find((v) => Array.isArray(v)) ||
+            [];
         }
-        toast.success("Ideas Generated", "Refreshed content concepts for your channel niche.");
+
+        if (Array.isArray(rawData)) {
+          if (mode === "hook") {
+            const normalizedHooks = rawData.map((h: any) => ({
+              hook: h.hook || h.title || "Captivating Opening Hook",
+              angle: h.angle || "Curiosity Gap",
+              retentionScore: h.retentionScore || h.retentionRating || "9.5 / 10",
+            }));
+            setGeneratedHooks(normalizedHooks);
+          } else if (mode === "shorts") {
+            const normalizedShorts = rawData.map((s: any) => ({
+              title: s.title || "High-Impact YouTube Short",
+              hook: s.hook || "Wait until you see this...",
+              concept: s.concept || s.description || "Visual dynamic breakdown",
+              action: s.action || s.callToAction || s.actionPlan || "Subscribe for daily blueprints",
+            }));
+            setGeneratedShorts(normalizedShorts);
+          } else if (mode === "series") {
+            const normalizedSeries = rawData.map((ser: any, idx: number) => ({
+              seriesTitle: ser.seriesTitle || ser.title || `Masterclass Series Part ${idx + 1}`,
+              targetViews: ser.targetViews || "100k+ Target Views",
+              episodes: Array.isArray(ser.episodes)
+                ? ser.episodes.map((ep: any, eIdx: number) => ({
+                    ep: ep.ep || `Part ${eIdx + 1}`,
+                    title: ep.title || `Episode ${eIdx + 1}`,
+                    focus: ep.focus || "Core Workflow",
+                  }))
+                : [
+                    { ep: "Part 1", title: "Foundation & Architecture", focus: "Core Setup" },
+                    { ep: "Part 2", title: "Deep Dive & Execution", focus: "Workflow" },
+                  ],
+            }));
+            setGeneratedSeries(normalizedSeries);
+          } else {
+            const normalizedIdeas = rawData.map((item: any) => ({
+              title: item.title || "Untitled Video Concept",
+              hook: item.hook || item.description || "Compelling introductory hook",
+              format: (item.format || "long_form") as IdeaFormat,
+              outline: Array.isArray(item.outline)
+                ? item.outline
+                : typeof item.outline === "string"
+                ? [item.outline]
+                : ["1. Introduction & Hook", "2. Core Framework Breakdown", "3. Implementation & Results"],
+              keywords: Array.isArray(item.keywords)
+                ? item.keywords
+                : Array.isArray(item.suggested_keywords)
+                ? item.suggested_keywords
+                : [niche.toLowerCase(), "tutorial", "guide"],
+            }));
+            setGeneratedIdeas(normalizedIdeas);
+          }
+          toast.success("Ideas Generated", "Refreshed content concepts for your channel niche.");
+        } else {
+          toast.error("Format Notice", "Could not parse ideas into list format.");
+        }
       }
     } catch (e) {
       console.error(e);
       toast.error("Generation Issue", "Could not contact ideation engine.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDiscoverChannelIdeas = async () => {
+    const quota = checkQuota("ai");
+    if (!quota.allowed) {
+      toast.error("AI Quota Exceeded", "Monthly generation limit reached.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/ai/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          niche: niche || activeChannel?.title || "Minecraft & Gaming",
+          channelTitle: activeChannel?.title,
+          subscriberCount: activeChannel?.subscriber_count,
+          targetAudience,
+          preferredFormat: "Shorts & Gaming Experiments",
+        }),
+      });
+
+      const json = await res.json();
+      if (json.success && Array.isArray(json.ideas) && json.ideas.length > 0) {
+        const normalized = json.ideas.map((item: any) => ({
+          title: item.suggestedTitle || item.title || item.concept,
+          hook: item.hook || item.concept,
+          format: "long_form" as IdeaFormat,
+          outline: Array.isArray(item.contentOutline) ? item.contentOutline : ["1. Intro", "2. Core Framework", "3. Action Plan"],
+          keywords: Array.isArray(item.secondaryKeywords) ? item.secondaryKeywords : [niche.toLowerCase(), "tutorial"],
+          whyRelevant: item.whyRelevant,
+          thumbnailIdea: item.thumbnailConcept?.textSuggestion,
+        }));
+        setGeneratedIdeas(normalized);
+        setActiveTab("ideas");
+        toast.success("Channel Ideas Discovered", `Formulated ${normalized.length} channel-aligned ideas.`);
+      } else {
+        toast.error("Discovery Notice", json.error || "Could not retrieve channel ideas.");
+      }
+    } catch (e: any) {
+      toast.error("Connection Error", e?.message || "Failed to reach AI discovery server.");
     } finally {
       setIsLoading(false);
     }
@@ -191,11 +297,17 @@ export default function ContentAssistantPage() {
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  const filteredSavedIdeas = ideas.filter((i) => {
-    if (!savedSearchQuery.trim()) return true;
-    const q = savedSearchQuery.toLowerCase();
-    return i.title.toLowerCase().includes(q) || i.hook.toLowerCase().includes(q) || i.niche.toLowerCase().includes(q);
-  });
+  const filteredSavedIdeas = Array.isArray(ideas)
+    ? ideas.filter((i) => {
+        if (!savedSearchQuery.trim()) return true;
+        const q = savedSearchQuery.toLowerCase();
+        return (
+          (i.title || "").toLowerCase().includes(q) ||
+          (i.hook || "").toLowerCase().includes(q) ||
+          (i.niche || "").toLowerCase().includes(q)
+        );
+      })
+    : [];
 
   return (
     <DashboardLayout>
@@ -216,7 +328,7 @@ export default function ContentAssistantPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <Button
               variant="outline"
               size="sm"
@@ -227,6 +339,17 @@ export default function ContentAssistantPage() {
               Saved Ideas ({ideas.length})
             </Button>
             <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDiscoverChannelIdeas}
+              disabled={isLoading}
+              className="text-xs border-navy-700 bg-navy-900/60 text-slate-200 hover:text-white"
+              title="Tailor ideas using connected channel niche and topics"
+            >
+              <Sparkles className="w-3.5 h-3.5 mr-1.5 text-brand-purple" />
+              Discover Channel Ideas
+            </Button>
+            <Button
               variant="gradient"
               size="sm"
               onClick={handleGenerate}
@@ -234,7 +357,7 @@ export default function ContentAssistantPage() {
               className="text-xs font-semibold shadow-glow"
             >
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              Generate Content Ideas
+              Generate Concepts
             </Button>
           </div>
         </div>
@@ -247,7 +370,7 @@ export default function ContentAssistantPage() {
               <Input
                 value={niche}
                 onChange={(e) => setNiche(e.target.value)}
-                placeholder="e.g. AI & Tech"
+                placeholder="e.g. Minecraft & Gaming"
                 className="text-xs h-9"
               />
             </div>
@@ -256,7 +379,7 @@ export default function ContentAssistantPage() {
               <Input
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Next.js 15 or Autonomous Agents"
+                placeholder="e.g. CAN WATER CAULDRON SAVE ME?! or Survival Clutches"
                 className="text-xs h-9"
               />
             </div>
@@ -265,7 +388,7 @@ export default function ContentAssistantPage() {
               <Input
                 value={targetAudience}
                 onChange={(e) => setTargetAudience(e.target.value)}
-                placeholder="e.g. Developers & Creators"
+                placeholder="e.g. Minecraft players & Shorts viewers"
                 className="text-xs h-9"
               />
             </div>
@@ -323,7 +446,7 @@ export default function ContentAssistantPage() {
         {/* Tab 1: Video Ideas & Outlines */}
         {activeTab === "ideas" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {generatedIdeas.map((idea, idx) => (
+            {Array.isArray(generatedIdeas) && generatedIdeas.map((idea, idx) => (
               <Card
                 key={idx}
                 className="border-navy-800 bg-navy-900/80 flex flex-col justify-between hover:border-brand-purple/40 transition-all shadow-card"
@@ -363,7 +486,7 @@ export default function ContentAssistantPage() {
                       Script Outline:
                     </span>
                     <ul className="space-y-1 text-slate-300">
-                      {idea.outline.map((step, i) => (
+                      {Array.isArray(idea.outline) && idea.outline.map((step, i) => (
                         <li key={i} className="truncate">
                           {step}
                         </li>
@@ -372,7 +495,7 @@ export default function ContentAssistantPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-1 pt-1">
-                    {idea.keywords.map((kw, i) => (
+                    {Array.isArray(idea.keywords) && idea.keywords.map((kw, i) => (
                       <span
                         key={i}
                         className="text-[10px] px-2 py-0.5 rounded bg-navy-950 border border-navy-800 text-slate-400"
@@ -383,7 +506,7 @@ export default function ContentAssistantPage() {
                   </div>
                 </CardContent>
 
-                <CardFooter className="p-5 pt-3 border-t border-navy-800/80 flex justify-between items-center gap-2">
+                <CardFooter className="p-5 pt-3 border-t border-navy-800/80 flex flex-wrap justify-between items-center gap-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -393,10 +516,10 @@ export default function ContentAssistantPage() {
                     <BookmarkPlus className="w-3.5 h-3.5 mr-1.5 text-brand-purple" />
                     Save Idea
                   </Button>
-                  <Link href={`/dashboard/metadata`}>
-                    <Button variant="ghost" size="sm" className="text-xs h-8 text-brand-purple hover:text-white">
-                      <span>Create Metadata</span>
-                      <ArrowRight className="w-3 h-3 ml-1" />
+                  <Link href={`/dashboard/create?topic=${encodeURIComponent(idea.title)}&package=true`}>
+                    <Button variant="gradient" size="sm" className="text-xs h-8 font-semibold shadow-glow">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Complete Package
                     </Button>
                   </Link>
                 </CardFooter>
@@ -408,7 +531,7 @@ export default function ContentAssistantPage() {
         {/* Tab 2: Retention Hooks */}
         {activeTab === "hooks" && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {generatedHooks.map((h, idx) => (
+            {Array.isArray(generatedHooks) && generatedHooks.map((h, idx) => (
               <Card key={idx} className="border-navy-800 bg-navy-900/80 p-5 space-y-4 shadow-card flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -455,7 +578,7 @@ export default function ContentAssistantPage() {
         {/* Tab 3: Shorts & Reels */}
         {activeTab === "shorts" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {generatedShorts.map((short, idx) => (
+            {Array.isArray(generatedShorts) && generatedShorts.map((short, idx) => (
               <Card key={idx} className="border-navy-800 bg-navy-900/80 p-5 space-y-3.5 shadow-card">
                 <div className="flex items-center justify-between">
                   <Badge variant="blue" className="text-[10px]">
@@ -498,7 +621,7 @@ export default function ContentAssistantPage() {
         {/* Tab 4: Series Architect */}
         {activeTab === "series" && (
           <div className="space-y-4">
-            {generatedSeries.map((ser, idx) => (
+            {Array.isArray(generatedSeries) && generatedSeries.map((ser, idx) => (
               <Card key={idx} className="border-navy-800 bg-navy-900/80 p-6 space-y-4 shadow-card">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-navy-800 pb-3">
                   <div>
@@ -511,7 +634,7 @@ export default function ContentAssistantPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {ser.episodes.map((ep, i) => (
+                  {Array.isArray(ser.episodes) && ser.episodes.map((ep, i) => (
                     <div key={i} className="p-3.5 rounded-xl border border-navy-800 bg-navy-950/70 space-y-2">
                       <div className="flex items-center justify-between">
                         <Badge variant="blue" className="text-[10px]">
@@ -529,7 +652,7 @@ export default function ContentAssistantPage() {
                   <Button
                     variant="gradient"
                     size="sm"
-                    onClick={() => handleSaveIdea({ title: ser.seriesTitle, hook: "Multi-part playlist cluster", outline: ser.episodes.map(e => `${e.ep}: ${e.title}`) }, "series")}
+                    onClick={() => handleSaveIdea({ title: ser.seriesTitle, hook: "Multi-part playlist cluster", outline: Array.isArray(ser.episodes) ? ser.episodes.map(e => `${e.ep}: ${e.title}`) : [] }, "series")}
                     className="text-xs font-semibold"
                   >
                     <BookmarkPlus className="w-3.5 h-3.5 mr-1" />
@@ -568,7 +691,7 @@ export default function ContentAssistantPage() {
             </div>
           ) : (
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {filteredSavedIdeas.map((idea) => (
+              {Array.isArray(filteredSavedIdeas) && filteredSavedIdeas.map((idea) => (
                 <div
                   key={idea.id}
                   className="p-3.5 rounded-xl border border-navy-800 bg-navy-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-navy-700 transition-colors"

@@ -581,7 +581,7 @@ export default function ContentCalendarPage() {
             <Input
               value={dropTitle}
               onChange={(e) => setDropTitle(e.target.value)}
-              placeholder="e.g. Next.js 15 Full Tutorial & Roadmap"
+              placeholder="e.g. CAN WATER CAULDRON SAVE ME?! 💀 #shorts"
               className="text-xs"
             />
           </div>
