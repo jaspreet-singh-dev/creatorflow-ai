@@ -96,6 +96,10 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #070A12;
   color: #F8FAFC;
@@ -171,7 +175,11 @@ body {
    LIGHT / DAYLIGHT STUDIO OVERRIDES (#F8FAFC Slate Palette)
    Zero Invisible Words — High-Contrast Accessible Design
    ======================================================== */
-[data-theme="light"] body {
+[data-theme="light"] html {
+  scroll-behavior: smooth;
+}
+
+body {
   background-color: #F8FAFC !important;
   color: #0F172A !important;
 }

@@ -1000,39 +1000,95 @@ Leave your biggest question in the comments below, and subscribe for weekly blue
         </div>
 
         {/* 7-Step Guided Workflow Stepper Bar */}
-        <div className="bg-navy-900/60 border border-navy-800 rounded-2xl p-3 sm:p-4 overflow-x-auto">
-          <div className="flex items-center justify-between min-w-[620px] gap-2">
+        <div className="bg-navy-900/80 border border-navy-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+          {/* Stepper Header with Progress & Navigation Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-navy-800/80">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-brand-purple/20 text-brand-purple border border-brand-purple/30 font-mono">
+                Step {currentStep} of 7
+              </span>
+              <div>
+                <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+                  <span>{STEPS[currentStep - 1]?.title}</span>
+                  <span className="text-slate-500">•</span>
+                  <span className="text-xs text-slate-400 font-medium">{STEPS[currentStep - 1]?.desc}</span>
+                </h3>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 justify-between sm:justify-end">
+              <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                {Math.round((currentStep / 7) * 100)}% Complete
+              </span>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1))}
+                  disabled={currentStep === 1}
+                  className="h-7 px-2.5 text-xs border-navy-700 bg-navy-950 text-slate-300 hover:text-white"
+                >
+                  <ArrowLeft className="w-3 h-3 mr-1" />
+                  Prev
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentStep((prev) => Math.min(7, prev + 1))}
+                  disabled={currentStep === 7}
+                  className="h-7 px-2.5 text-xs border-navy-700 bg-navy-950 text-slate-300 hover:text-white"
+                >
+                  Next
+                  <ArrowRight className="w-3 h-3 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Bar Line */}
+          <div className="w-full bg-navy-950 h-1.5 rounded-full overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-brand-purple to-brand-blue h-full transition-all duration-300"
+              style={{ width: `${(currentStep / 7) * 100}%` }}
+            />
+          </div>
+
+          {/* Stepper Buttons (Full Width Responsive Grid) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
             {STEPS.map((s) => {
               const isActive = currentStep === s.step;
               const isPast = currentStep > s.step;
               return (
                 <button
+                  type="button"
                   key={s.step}
                   onClick={() => setCurrentStep(s.step)}
-                  className={`flex-1 flex items-center gap-2.5 p-2 rounded-xl transition-all text-left ${
+                  className={`flex items-center gap-2.5 p-2.5 rounded-xl transition-all text-left cursor-pointer ${
                     isActive
-                      ? "bg-navy-800 border border-brand-purple/40 shadow-sm"
+                      ? "bg-navy-800 border-2 border-brand-purple shadow-lg shadow-brand-purple/20 text-white"
                       : isPast
-                      ? "hover:bg-navy-800/50 text-slate-300"
-                      : "opacity-60 hover:opacity-100"
+                      ? "bg-navy-950/80 hover:bg-navy-800/60 border border-emerald-500/30 text-slate-300"
+                      : "bg-navy-950/40 hover:bg-navy-900/60 border border-navy-800/80 text-slate-400 hover:text-slate-200"
                   }`}
                 >
                   <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
                       isActive
-                        ? "bg-brand-purple text-white ring-2 ring-brand-purple/30"
+                        ? "bg-brand-purple text-white shadow-glow"
                         : isPast
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : "bg-navy-700 text-slate-400"
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                        : "bg-navy-800 text-slate-400 border border-navy-700"
                     }`}
                   >
                     {isPast ? <Check className="w-3.5 h-3.5" /> : s.step}
                   </div>
-                  <div className="truncate">
+                  <div className="min-w-0 flex-1">
                     <p className={`text-xs font-bold truncate ${isActive ? "text-white" : "text-slate-300"}`}>
                       {s.title}
                     </p>
-                    <p className="text-[10px] text-slate-400 truncate hidden sm:block">{s.desc}</p>
+                    <p className="text-[10px] text-slate-500 truncate">{s.desc}</p>
                   </div>
                 </button>
               );
@@ -1329,8 +1385,44 @@ Leave your biggest question in the comments below, and subscribe for weekly blue
             </div>
 
             {/* Opening Hooks Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {openingHooks.map((h, idx) => (
+            {openingHooks.length === 0 ? (
+              <div className="p-8 rounded-2xl border border-dashed border-navy-800 bg-navy-900/40 text-center space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-brand-purple/10 text-brand-purple flex items-center justify-center mx-auto border border-brand-purple/20">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-base font-bold text-white">No Opening Hooks Formulated Yet</h4>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                    {topic ? `Generate high-retention opening hooks for "${topic}".` : "Enter a core topic in Step 1 or trigger AI package generation below."}
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs border-navy-700 bg-navy-900"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
+                    Go to Step 1
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleGenerateAll}
+                    disabled={isGeneratingAll}
+                    variant="gradient"
+                    size="sm"
+                    className="text-xs font-semibold px-4"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                    Generate AI Hooks Now
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {openingHooks.map((h, idx) => (
                 <Card key={idx} className="border-navy-800 bg-navy-900/60 hover:border-navy-700 transition-all flex flex-col justify-between">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -1361,6 +1453,7 @@ Leave your biggest question in the comments below, and subscribe for weekly blue
                 </Card>
               ))}
             </div>
+            )}
 
             <div className="flex items-center justify-between pt-4 border-t border-navy-800">
               <Button
@@ -1422,8 +1515,44 @@ Leave your biggest question in the comments below, and subscribe for weekly blue
             </div>
 
             {/* 5 Title Options */}
-            <div className="space-y-3">
-              {(generatedOutput?.titles || []).map((t, idx) => {
+            {(!generatedOutput?.titles || generatedOutput.titles.length === 0) ? (
+              <div className="p-8 rounded-2xl border border-dashed border-navy-800 bg-navy-900/40 text-center space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-brand-purple/10 text-brand-purple flex items-center justify-center mx-auto border border-brand-purple/20">
+                  <Tag className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-base font-bold text-white">No Title Variations Generated Yet</h4>
+                  <p className="text-xs text-slate-400 max-w-md mx-auto">
+                    {topic ? `Formulate high-CTR, curious title options for "${topic}".` : "Enter your video topic in Step 1 or generate title variations below."}
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs border-navy-700 bg-navy-900"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
+                    Go to Step 1
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleGenerateAll}
+                    disabled={isGeneratingAll}
+                    variant="gradient"
+                    size="sm"
+                    className="text-xs font-semibold px-4"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                    Generate 5 AI Titles
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {generatedOutput.titles.map((t, idx) => {
                 const isSelected = selectedTitleIndex === idx;
                 return (
                   <div
@@ -1473,6 +1602,7 @@ Leave your biggest question in the comments below, and subscribe for weekly blue
                 );
               })}
             </div>
+            )}
 
             {/* Live YouTube Browse Simulator */}
             <Card className="border-navy-800 bg-navy-950/80">

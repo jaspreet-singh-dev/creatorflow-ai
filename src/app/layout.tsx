@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   title: "CreatorFlow AI — AI-Powered YouTube Creator Workspace",
   description:
     "Manage your entire YouTube publishing workflow from one dashboard. AI metadata studio, thumbnail concepts, channel manager, analytics, and video uploads.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

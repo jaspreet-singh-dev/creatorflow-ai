@@ -42,7 +42,9 @@ import {
   Redo2,
   Sliders,
   RotateCcw,
+  RefreshCw,
   Tag,
+  Hash,
   AlertCircle,
   CalendarDays,
 } from "lucide-react";
@@ -137,8 +139,8 @@ function PublishWorkspaceContent() {
   } = useData();
   const { toast } = useToast();
 
-  const [activeTab, setActiveTab] = useState<"projects" | "thumbnails" | "uploads" | "calendar">(
-    ["projects", "thumbnails", "uploads", "calendar"].includes(initialTab) ? initialTab : "projects"
+  const [activeTab, setActiveTab] = useState<"uploads" | "projects" | "thumbnails" | "calendar">(
+    ["uploads", "projects", "thumbnails", "calendar"].includes(initialTab) ? (initialTab as any) : "uploads"
   );
 
   // ---------------------------------------------------------------------------
@@ -461,7 +463,7 @@ function PublishWorkspaceContent() {
   };
 
   // ---------------------------------------------------------------------------
-  // 3. UPLOAD MANAGER STATE (REAL YOUTUBE RESUMABLE CHUNKED UPLOADS - OPTION B)
+  // 3. UPLOAD MANAGER & AI PUBLISHING STUDIO STATE
   // ---------------------------------------------------------------------------
   const [uploadSelectedProjectId, setUploadSelectedProjectId] = useState<string>(projects[0]?.id || "");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -478,33 +480,173 @@ function PublishWorkspaceContent() {
   const currentUploadSessionUrlRef = useRef<string | null>(null);
   const currentUploadAccessTokenRef = useRef<string | null>(null);
 
+  // AI Publishing Studio State
+  const [publishContentType, setPublishContentType] = useState<"video" | "shorts" | "post">("shorts");
+  const [publishTopic, setPublishTopic] = useState("");
+  const [publishTitle, setPublishTitle] = useState("");
+  const [publishDescription, setPublishDescription] = useState("");
+  const [publishTags, setPublishTags] = useState<string[]>([]);
+  const [publishHashtags, setPublishHashtags] = useState<string[]>([]);
+  const [newTagInput, setNewTagInput] = useState("");
+  const [customThumbPreview, setCustomThumbPreview] = useState<string | null>(null);
+
+  // Creative Angle & Style Selector for Regeneration
+  const [publishStyleAngle, setPublishStyleAngle] = useState<
+    "viral_shorts" | "curiosity_gap" | "seo_search" | "contrarian_shock" | "story_challenge"
+  >("viral_shorts");
+  const [isOptimizingAi, setIsOptimizingAi] = useState(false);
+  const [aiOptimizerData, setAiOptimizerData] = useState<any | null>(null);
+  const [selectedTitleIdx, setSelectedTitleIdx] = useState<number | null>(null);
+
   const activeUploadProject = projects.find((p) => p.id === uploadSelectedProjectId);
 
+  // Synchronize inputs when a project is selected
+  useEffect(() => {
+    if (activeUploadProject) {
+      if (activeUploadProject.selectedTitle || activeUploadProject.name) {
+        setPublishTitle(activeUploadProject.selectedTitle || activeUploadProject.name);
+      }
+      if (activeUploadProject.topic) {
+        setPublishTopic(activeUploadProject.topic);
+      }
+      if (activeUploadProject.description) {
+        setPublishDescription(activeUploadProject.description);
+      }
+      if (activeUploadProject.tags && activeUploadProject.tags.length > 0) {
+        setPublishTags(activeUploadProject.tags);
+      }
+      if (activeUploadProject.hashtags && activeUploadProject.hashtags.length > 0) {
+        setPublishHashtags(activeUploadProject.hashtags);
+      }
+      if (activeUploadProject.contentType) {
+        setPublishContentType(activeUploadProject.contentType === "shorts" ? "shorts" : "video");
+      }
+      if (activeUploadProject.thumbnailUrl) {
+        setCustomThumbPreview(activeUploadProject.thumbnailUrl);
+      }
+    }
+  }, [activeUploadProject]);
+
+  const handleOptimizeWithAi = async (overrideAngle?: string) => {
+    const topicToUse =
+      publishTopic.trim() ||
+      publishTitle.trim() ||
+      activeUploadProject?.name ||
+      "Minecraft & Gaming viral video";
+    const angleToUse = overrideAngle || publishStyleAngle;
+
+    setIsOptimizingAi(true);
+    try {
+      const res = await fetch("/api/ai/publish-optimizer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          topic: topicToUse,
+          niche: (activeChannel as any)?.niche || "Minecraft & Gaming",
+          contentType: publishContentType,
+          styleAngle: angleToUse,
+          channelName: activeChannel?.title,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setAiOptimizerData(data.data);
+        if (data.data.titles?.[0]) {
+          setPublishTitle(data.data.titles[0].title);
+          setSelectedTitleIdx(0);
+        }
+        if (data.data.description?.text && !publishDescription.trim()) {
+          setPublishDescription(data.data.description.text);
+        }
+        if (data.data.tags?.length && publishTags.length === 0) {
+          setPublishTags(data.data.tags.map((t: any) => t.tag));
+        }
+        if (data.data.hashtags?.length && publishHashtags.length === 0) {
+          setPublishHashtags(data.data.hashtags.map((h: any) => h.tag));
+        }
+        toast.success("AI Suggestions Formulated", `Ranked titles, SEO description, and high-ranking tags ready.`);
+      } else {
+        toast.error("Generation Failed", data.error || "Could not generate optimization package.");
+      }
+    } catch (e: any) {
+      toast.error("Error", e?.message || "Failed to reach AI optimizer.");
+    } finally {
+      setIsOptimizingAi(false);
+    }
+  };
+
+  const handleApplyTitle = (item: any, idx: number) => {
+    setPublishTitle(item.title);
+    setSelectedTitleIdx(idx);
+    toast.success("Title Selected", `Set primary title: "${item.title}" (${item.score}/10)`);
+  };
+
+  const handleApplyDescription = () => {
+    if (!aiOptimizerData?.description?.text) return;
+    setPublishDescription(aiOptimizerData.description.text);
+    toast.success("Description Applied", `SEO score ${aiOptimizerData.description.score}/10 applied.`);
+  };
+
+  const handleApplyAllHashtags = () => {
+    if (!aiOptimizerData?.hashtags) return;
+    const tagsToAdd = aiOptimizerData.hashtags.map((h: any) => h.tag);
+    setPublishHashtags(Array.from(new Set([...publishHashtags, ...tagsToAdd])));
+    toast.success("Hashtags Added", `Added ${tagsToAdd.length} high-ranking hashtags.`);
+  };
+
+  const handleToggleHashtag = (tag: string) => {
+    if (publishHashtags.includes(tag)) {
+      setPublishHashtags(publishHashtags.filter((h) => h !== tag));
+    } else {
+      setPublishHashtags([...publishHashtags, tag]);
+    }
+  };
+
+  const handleApplyAllTags = () => {
+    if (!aiOptimizerData?.tags) return;
+    const tagsToAdd = aiOptimizerData.tags.map((t: any) => t.tag);
+    setPublishTags(Array.from(new Set([...publishTags, ...tagsToAdd])));
+    toast.success("Tags Added", `Added ${tagsToAdd.length} high-ranking video tags.`);
+  };
+
+  const handleAddCustomTag = () => {
+    if (!newTagInput.trim()) return;
+    if (!publishTags.includes(newTagInput.trim())) {
+      setPublishTags([...publishTags, newTagInput.trim()]);
+    }
+    setNewTagInput("");
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setPublishTags(publishTags.filter((t) => t !== tagToRemove));
+  };
+
+  const handleCustomThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setCustomThumbPreview(event.target.result as string);
+          toast.success("Thumbnail Attached", "Custom thumbnail set for release preview.");
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleStartUploadProcess = () => {
-    if (!uploadSelectedProjectId) {
-      toast.warning("Project Required", "Please select a video project.");
+    if (!publishTitle.trim()) {
+      toast.warning("Title Required", "Please enter or select a video title.");
       return;
     }
 
-    if (activeUploadProject?.status === "uploading") {
-      toast.error("Upload in Progress", "This video project is already currently uploading.");
-      return;
-    }
-
-    if (activeUploadProject?.status === "cancelled") {
-      toast.warning(
-        "Project Cancelled",
-        "This project was cancelled. Edit details or reset status to re-upload."
-      );
-      return;
-    }
-
-    if (activeUploadProject?.status === "published" && activeUploadProject?.youtubeVideoId) {
-      toast.warning(
-        "Already Published",
-        "This project has already been published to YouTube. Select another project or reset status to re-upload."
-      );
-      return;
+    if (uploadSelectedProjectId) {
+      const proj = projects.find((p) => p.id === uploadSelectedProjectId);
+      if (proj?.status === "uploading") {
+        toast.error("Upload in Progress", "This video project is already currently uploading.");
+        return;
+      }
     }
 
     setShowConfirmModal(true);
@@ -565,11 +707,66 @@ function PublishWorkspaceContent() {
     }
 
     try {
-      const activeProj = projects.find((p) => p.id === uploadSelectedProjectId);
-      if (!activeProj) throw new Error("Selected project could not be found.");
+      let activeProj = projects.find((p) => p.id === uploadSelectedProjectId);
+      let targetProjectId = uploadSelectedProjectId;
 
-      // Set project status to uploading to prevent concurrent triggers
-      updateProject(uploadSelectedProjectId, { status: "uploading" });
+      if (!activeProj) {
+        targetProjectId = `proj-${Date.now()}`;
+        const newProject: VideoProject = {
+          id: targetProjectId,
+          user_id: user?.id || "demo-session",
+          channel_id: activeChannel?.id || null,
+          name: publishTitle || "New Video Release",
+          topic: publishTopic || publishTitle || "New Video",
+          contentType: publishContentType,
+          selectedTitle: publishTitle,
+          description: publishDescription,
+          tags: publishTags,
+          hashtags: publishHashtags,
+          status: "uploading",
+          niche: (activeChannel as any)?.niche || "Minecraft & Gaming",
+          targetAudience: "YouTube Viewers",
+          language: "English",
+          idea: publishTopic || publishTitle,
+          hook: "High retention opening hook",
+          hookSuggestions: [],
+          titleSuggestions: aiOptimizerData?.titles?.map((t: any) => t.title) || [],
+          outline: [],
+          script: "",
+          thumbnailText: "",
+          pinnedComment: aiOptimizerData?.pinnedComment || "",
+          chapters: [],
+          qualityScore: {
+            overall: 95,
+            clarity: 95,
+            relevance: 95,
+            readability: 95,
+            keywordCoverage: 95,
+            critique: ["Generated via CreatorFlow AI Studio"],
+          },
+          thumbnailUrl: customThumbPreview || null,
+          thumbnailOverlayText: null,
+          privacyStatus: uploadPrivacy,
+          selfDeclaredMadeForKids: uploadMadeForKids,
+          scheduledAt: uploadPublishDate || null,
+          publishedAt: null,
+          youtubeVideoId: null,
+          youtubeVideoUrl: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        addProject(newProject);
+        activeProj = newProject;
+        setUploadSelectedProjectId(targetProjectId);
+      } else {
+        updateProject(targetProjectId, {
+          selectedTitle: publishTitle || activeProj.selectedTitle,
+          description: publishDescription || activeProj.description,
+          tags: publishTags.length > 0 ? publishTags : activeProj.tags,
+          hashtags: publishHashtags.length > 0 ? publishHashtags : activeProj.hashtags,
+          status: "uploading",
+        });
+      }
 
       // 1. Call server API to initiate session
       const initRes = await fetch("/api/youtube/upload", {
@@ -580,16 +777,16 @@ function PublishWorkspaceContent() {
         },
         body: JSON.stringify({
           action: "initiate",
-          title: activeProj.selectedTitle || activeProj.name,
-          description: activeProj.description || "",
-          tags: activeProj.tags || [],
+          title: publishTitle || activeProj.selectedTitle || activeProj.name,
+          description: publishDescription || activeProj.description || "",
+          tags: publishTags.length > 0 ? publishTags : (activeProj.tags || []),
           privacyStatus: uploadPrivacy,
           selfDeclaredMadeForKids: uploadMadeForKids,
           publishAt: uploadPublishDate || null,
           channelId: activeChannel?.id,
           fileSize: uploadFile ? uploadFile.size : 150000000,
           fileType: uploadFile ? uploadFile.type : "video/mp4",
-          projectId: uploadSelectedProjectId,
+          projectId: targetProjectId,
         }),
       });
 
@@ -850,9 +1047,9 @@ function PublishWorkspaceContent() {
         {/* 4 Consolidated Sub-Navigation Tabs */}
         <div className="flex border-b border-navy-800 gap-2 overflow-x-auto pb-1">
           {[
+            { id: "uploads", label: "Upload & AI Publish", icon: UploadCloud },
             { id: "projects", label: `Video Projects (${projects.length})`, icon: Layers },
             { id: "thumbnails", label: "Thumbnail Studio", icon: ImageIcon },
-            { id: "uploads", label: "Upload Manager", icon: UploadCloud },
             { id: "calendar", label: "Publishing Calendar", icon: CalendarIcon },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -1449,178 +1646,749 @@ function PublishWorkspaceContent() {
         )}
 
         {/* =====================================================================
-            TAB 3: UPLOAD MANAGER (VERIFIED YOUTUBE RESUMABLE CHUNKED UPLOADS)
+            TAB 3: AI VIDEO PUBLISHING WIZARD & OPTIMIZATION STUDIO
             ===================================================================== */}
         {activeTab === "uploads" && (
           <div className="space-y-6">
-            <Card className="border-navy-800 bg-navy-900/60 max-w-2xl mx-auto">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base text-white font-bold flex items-center gap-2">
-                    <UploadCloud className="w-5 h-5 text-brand-purple" />
-                    YouTube Video Publishing Wizard
-                  </CardTitle>
-                  {activeChannel && (
-                    <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-navy-800 border border-navy-700 text-slate-300 flex items-center gap-1.5">
-                      <Youtube className="w-3 h-3 text-red-500" />
-                      {activeChannel.title}
-                    </span>
-                  )}
+            {/* Top Workspace Header & Channel Scope */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-2xl bg-navy-900/80 border border-navy-800 shadow-xl">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-purple">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>AI Video Publishing & Upload Studio</span>
+                  <span>•</span>
+                  <span className="text-slate-400">{activeChannel?.title || "Demo Studio"}</span>
                 </div>
-                <CardDescription className="text-xs text-slate-400">
-                  Select your project, attach video file, review metadata, and confirm publish via YouTube Data API v3.
-                </CardDescription>
-              </CardHeader>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mt-1">
+                  Publish to YouTube with AI Title & SEO
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                  Select your content type, optimize title & metadata with AI scored out of 10, and publish directly to YouTube.
+                </p>
+              </div>
 
-              <CardContent className="space-y-5">
-                {/* Step 1: Select Project */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-200">1. Select Video Project</label>
-                  <select
-                    value={uploadSelectedProjectId}
-                    onChange={(e) => setUploadSelectedProjectId(e.target.value)}
-                    className="w-full h-10 rounded-lg bg-navy-950 border border-navy-700 text-xs text-slate-200 px-3 font-medium"
-                  >
-                    {projects.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.selectedTitle || p.name} ({p.status})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Content Format Switcher */}
+              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-navy-950 border border-navy-800 self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setPublishContentType("video")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    publishContentType === "video"
+                      ? "bg-brand-purple text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <FileVideo className="w-3.5 h-3.5" />
+                  <span>Long-form Video</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPublishContentType("shorts")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    publishContentType === "shorts"
+                      ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>YouTube Shorts</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPublishContentType("post")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    publishContentType === "post"
+                      ? "bg-brand-blue text-white shadow-sm"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Community Post</span>
+                </button>
+              </div>
+            </div>
 
-                {/* Step 2: Upload Video File */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-200">2. Select Video Binary (.mp4, .mov)</label>
-                  <div className="border-2 border-dashed border-navy-700 rounded-xl p-5 text-center bg-navy-950/60 hover:bg-navy-900/40 transition-colors">
-                    <input
-                      type="file"
-                      id="video-upload-file"
-                      accept="video/*"
-                      onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                      className="hidden"
-                    />
-                    <label htmlFor="video-upload-file" className="cursor-pointer block space-y-2">
-                      <FileVideo className="w-8 h-8 text-brand-purple mx-auto opacity-80" />
-                      <div className="text-xs text-slate-300">
-                        {uploadFile ? (
-                          <span className="font-bold text-emerald-400">
-                            {uploadFile.name} ({(uploadFile.size / 1024 / 1024).toFixed(1)} MB)
-                          </span>
+            {/* Main 2-Column Responsive Publishing Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* LEFT COLUMN: Media Files, Project Linking, Release Settings (5 Cols) */}
+              <div className="lg:col-span-5 space-y-5">
+                {/* 1. Video Binary Uploader */}
+                <Card className="border-navy-800 bg-navy-900/60 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <FileVideo className="w-4 h-4 text-brand-purple" />
+                        1. Video Binary (.mp4, .mov, .webm)
+                      </span>
+                      {uploadFile && (
+                        <Badge variant="success" className="text-[10px]">
+                          Attached
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-400">
+                      Direct resumable chunk transmission to YouTube Data API v3.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="border-2 border-dashed border-navy-700 rounded-xl p-4 text-center bg-navy-950/70 hover:bg-navy-900/50 transition-colors cursor-pointer">
+                      <input
+                        type="file"
+                        id="wizard-video-file"
+                        accept="video/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setUploadFile(file);
+                          if (file && !publishTitle) {
+                            const cleanName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+                            setPublishTitle(cleanName);
+                            setPublishTopic(cleanName);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                      <label htmlFor="wizard-video-file" className="cursor-pointer block space-y-2">
+                        <FileVideo className="w-8 h-8 text-brand-purple mx-auto opacity-80" />
+                        <div className="text-xs text-slate-300">
+                          {uploadFile ? (
+                            <span className="font-bold text-emerald-400 block truncate">
+                              {uploadFile.name} ({(uploadFile.size / 1024 / 1024).toFixed(1)} MB)
+                            </span>
+                          ) : (
+                            <span className="font-medium text-slate-300">Click to choose or drop video file</span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500">Supports standard MP4, WebM, MOV up to 256GB</p>
+                      </label>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 2. Custom Thumbnail Card */}
+                <Card className="border-navy-800 bg-navy-900/60 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-bold text-white flex items-center justify-between">
+                      <span className="flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4 text-brand-blue" />
+                        2. Thumbnail Image (Optional)
+                      </span>
+                      {customThumbPreview && (
+                        <Badge variant="blue" className="text-[10px]">
+                          Custom Set
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-400">
+                      Upload custom 16:9 thumbnail or use project thumbnail.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="border border-navy-800 rounded-xl overflow-hidden bg-navy-950 p-2 flex items-center gap-3">
+                      <div className="w-24 h-14 bg-navy-900 rounded-lg overflow-hidden border border-navy-800 shrink-0 flex items-center justify-center">
+                        {customThumbPreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={customThumbPreview}
+                            alt="Custom Thumbnail"
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <span>Click to browse video file from device</span>
+                          <ImageIcon className="w-5 h-5 text-slate-600" />
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-500">
-                        Resumable chunk transmission directly to YouTube Data API v3.
-                      </p>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Step 3: Audience Declaration (COPPA Compliance) */}
-                <div className="space-y-2 p-3.5 rounded-xl bg-navy-950/80 border border-navy-800">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-200">
-                      3. Audience Declaration (COPPA Compliance)
-                    </label>
-                    <Badge variant={uploadMadeForKids ? "default" : "outline"} className="text-[10px]">
-                      {uploadMadeForKids ? "Made for Kids" : "Standard Audience"}
-                    </Badge>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    Regardless of your location, YouTube requires all creators to legally declare whether videos are made for kids.
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setUploadMadeForKids(false)}
-                      className={`p-2.5 rounded-lg border text-left transition-all flex flex-col gap-1 ${
-                        !uploadMadeForKids
-                          ? "bg-brand-purple/10 border-brand-purple/50 ring-1 ring-brand-purple/40"
-                          : "bg-navy-900/60 border-navy-800 hover:border-navy-700"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-xs font-bold text-white">No, not made for kids</span>
-                        {!uploadMadeForKids && <Check className="w-3.5 h-3.5 text-brand-purple" />}
+                      <div className="flex-1 min-w-0">
+                        <input
+                          type="file"
+                          id="wizard-thumb-file"
+                          accept="image/*"
+                          onChange={handleCustomThumbnailUpload}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="wizard-thumb-file"
+                          className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-navy-800 hover:bg-navy-700 text-xs text-slate-200 font-semibold border border-navy-700 transition-colors"
+                        >
+                          <UploadCloud className="w-3.5 h-3.5" />
+                          <span>Choose Thumbnail</span>
+                        </label>
+                        <p className="text-[10px] text-slate-500 mt-1">Recommended: 1280x720 (16:9), under 2MB</p>
                       </div>
-                      <span className="text-[10px] text-slate-400 leading-tight">
-                        Standard audience setting under COPPA. Content is not directed primarily at children.
-                      </span>
-                    </button>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                    <button
-                      type="button"
-                      onClick={() => setUploadMadeForKids(true)}
-                      className={`p-2.5 rounded-lg border text-left transition-all flex flex-col gap-1 ${
-                        uploadMadeForKids
-                          ? "bg-brand-purple/10 border-brand-purple/50 ring-1 ring-brand-purple/40"
-                          : "bg-navy-900/60 border-navy-800 hover:border-navy-700"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className="text-xs font-bold text-white">Yes, made for kids</span>
-                        {uploadMadeForKids && <Check className="w-3.5 h-3.5 text-brand-purple" />}
+                {/* 3. Release Settings & COPPA */}
+                <Card className="border-navy-800 bg-navy-900/60 shadow-lg">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
+                      <Sliders className="w-4 h-4 text-emerald-400" />
+                      3. Privacy & Scheduling
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Project Association Dropdown */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-slate-300">Link to Workspace Project</label>
+                      <select
+                        value={uploadSelectedProjectId}
+                        onChange={(e) => setUploadSelectedProjectId(e.target.value)}
+                        className="w-full h-9 rounded-lg bg-navy-950 border border-navy-700 text-xs text-slate-200 px-3 font-medium"
+                      >
+                        <option value="">Direct Release (Create Project on Publish)</option>
+                        {projects.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.selectedTitle || p.name} ({p.status})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Privacy & Schedule */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-300">Privacy Status</label>
+                        <select
+                          value={uploadPrivacy}
+                          onChange={(e) => setUploadPrivacy(e.target.value as VideoPrivacy)}
+                          className="w-full h-9 rounded-lg bg-navy-950 border border-navy-700 text-xs text-slate-200 px-3 font-medium"
+                        >
+                          <option value="public">Public</option>
+                          <option value="unlisted">Unlisted</option>
+                          <option value="private">Private</option>
+                        </select>
                       </div>
-                      <span className="text-[10px] text-slate-400 leading-tight">
-                        Child-directed content per COPPA and YouTube policy. Certain features are restricted by YouTube.
-                      </span>
-                    </button>
-                  </div>
-                </div>
 
-                {/* Step 4: Privacy and Scheduling */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-200">4. Privacy Status</label>
-                    <select
-                      value={uploadPrivacy}
-                      onChange={(e) => setUploadPrivacy(e.target.value as VideoPrivacy)}
-                      className="w-full h-9 rounded-lg bg-navy-950 border border-navy-700 text-xs text-slate-200 px-3"
-                    >
-                      <option value="public">Public</option>
-                      <option value="unlisted">Unlisted</option>
-                      <option value="private">Private</option>
-                    </select>
-                  </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-300">Schedule Date (Optional)</label>
+                        <Input
+                          type="datetime-local"
+                          value={uploadPublishDate}
+                          onChange={(e) => setUploadPublishDate(e.target.value)}
+                          className="h-9 bg-navy-950 border-navy-700 text-xs text-slate-200"
+                        />
+                      </div>
+                    </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-slate-200">Scheduled Date (Optional)</label>
-                    <Input
-                      type="datetime-local"
-                      value={uploadPublishDate}
-                      onChange={(e) => setUploadPublishDate(e.target.value)}
-                      className="h-9 bg-navy-950 border-navy-700 text-xs text-slate-200"
-                    />
-                  </div>
-                </div>
+                    {/* COPPA Declaration Toggle */}
+                    <div className="space-y-2 p-3 rounded-xl bg-navy-950/80 border border-navy-800">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-slate-300">Audience Declaration (COPPA)</span>
+                        <Badge variant={uploadMadeForKids ? "default" : "outline"} className="text-[10px]">
+                          {uploadMadeForKids ? "Made for Kids" : "Standard"}
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setUploadMadeForKids(false)}
+                          className={`p-2 rounded-lg border text-left transition-all ${
+                            !uploadMadeForKids
+                              ? "bg-brand-purple/10 border-brand-purple/50 ring-1 ring-brand-purple/40 text-white font-bold"
+                              : "bg-navy-900 border-navy-800 text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs">No, not for kids</span>
+                            {!uploadMadeForKids && <Check className="w-3 h-3 text-brand-purple" />}
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUploadMadeForKids(true)}
+                          className={`p-2 rounded-lg border text-left transition-all ${
+                            uploadMadeForKids
+                              ? "bg-brand-purple/10 border-brand-purple/50 ring-1 ring-brand-purple/40 text-white font-bold"
+                              : "bg-navy-900 border-navy-800 text-slate-400 hover:text-slate-200"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs">Yes, made for kids</span>
+                            {uploadMadeForKids && <Check className="w-3 h-3 text-brand-purple" />}
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-                {/* YouTube Official Scheduling Requirement Notice */}
-                {uploadPublishDate && (
-                  <div className="p-3 rounded-lg bg-brand-purple/10 border border-brand-purple/20 text-brand-purple text-[11px] flex items-start gap-2">
-                    <Clock className="w-4 h-4 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="block text-white">YouTube Scheduling Requirement:</strong>
-                      <span>
-                        YouTube requires scheduled uploads to start in <strong>Private</strong> mode. YouTube servers will automatically flip the video to <strong>{uploadPrivacy.toUpperCase()}</strong> at {new Date(uploadPublishDate).toLocaleString()}.
+                {/* 4. Live YouTube Feed Card Preview */}
+                <Card className="border-navy-800 bg-navy-900/60 shadow-lg">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                      <Play className="w-3.5 h-3.5 text-red-500" />
+                      Live YouTube Feed Preview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-navy-950 border border-navy-800 rounded-xl overflow-hidden shadow-md">
+                      <div className="aspect-video bg-navy-900 relative flex items-center justify-center">
+                        {customThumbPreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={customThumbPreview}
+                            alt="Thumbnail"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center gap-1.5 text-slate-600">
+                            <Youtube className="w-10 h-10 text-red-500/40" />
+                            <span className="text-[10px] font-mono">16:9 Thumbnail</span>
+                          </div>
+                        )}
+                        <span className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-white">
+                          {publishContentType === "shorts" ? "0:45" : "11:24"}
+                        </span>
+                      </div>
+                      <div className="p-3 space-y-1">
+                        <p className="text-xs font-bold text-white line-clamp-2">
+                          {publishTitle || "Your Engaging AI Video Title Will Appear Here"}
+                        </p>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                          <span>{activeChannel?.title || "CreatorFlow"}</span>
+                          <span>•</span>
+                          <span>Verified Channel</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* RIGHT COLUMN: AI Title & SEO Optimization Studio (7 Cols) */}
+              <div className="lg:col-span-7 space-y-5">
+                <Card className="border-brand-purple/30 bg-navy-900/80 shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-purple via-brand-blue to-emerald-400" />
+                  <CardHeader>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-brand-purple animate-pulse" />
+                          <CardTitle className="text-base font-extrabold text-white flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-brand-purple" />
+                            AI Title, SEO & Tag Studio
+                          </CardTitle>
+                        </div>
+                        <CardDescription className="text-xs text-slate-400 mt-0.5">
+                          Formulate short, curious, high-CTR titles and top-ranking tags with numerical ratings (/10).
+                        </CardDescription>
+                      </div>
+
+                      <Badge variant="blue" className="text-[10px] shrink-0 self-start sm:self-auto">
+                        Niche: {(activeChannel as any)?.niche || "Minecraft & Gaming"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-6">
+                    {/* Topic Input & AI Action Bar */}
+                    <div className="space-y-3 p-4 rounded-xl bg-navy-950/80 border border-navy-800">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-white flex items-center justify-between">
+                          <span>Video Premise or Working Topic</span>
+                          <span className="text-[11px] text-slate-400 font-normal">
+                            Core idea for AI suggestions
+                          </span>
+                        </label>
+                        <div className="flex gap-2">
+                          <Input
+                            value={publishTopic}
+                            onChange={(e) => setPublishTopic(e.target.value)}
+                            placeholder="e.g. Can you survive water cauldrons from 1,000 blocks in Minecraft hardcore?"
+                            className="bg-navy-900 border-navy-700 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Immersive Creative Angle / Style Selector */}
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
+                          Creative Generation Angle
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {[
+                            { id: "viral_shorts", label: "🚀 Viral Shorts Hook", desc: "Punchy, under 45 chars, extreme curiosity" },
+                            { id: "curiosity_gap", label: "🤯 Curiosity Mystery", desc: "Open loops and high CTR cliffhangers" },
+                            { id: "seo_search", label: "🔍 Search & SEO Intent", desc: "Target high-volume search queries" },
+                            { id: "contrarian_shock", label: "⚡ Contrarian & Shock", desc: "Defies consensus, 'Stop doing X'" },
+                            { id: "story_challenge", label: "🏆 Epic Challenge", desc: "High stakes, 100 days, extreme test" },
+                          ].map((style) => (
+                            <button
+                              type="button"
+                              key={style.id}
+                              onClick={() => {
+                                setPublishStyleAngle(style.id as any);
+                                if (aiOptimizerData) {
+                                  handleOptimizeWithAi(style.id);
+                                }
+                              }}
+                              className={`p-2 rounded-lg border text-left transition-all ${
+                                publishStyleAngle === style.id
+                                  ? "bg-brand-purple/20 border-brand-purple text-white shadow-sm ring-1 ring-brand-purple/40"
+                                  : "bg-navy-900/60 border-navy-800 text-slate-400 hover:text-slate-200 hover:border-navy-700"
+                              }`}
+                            >
+                              <p className="text-xs font-bold truncate">{style.label}</p>
+                              <p className="text-[10px] text-slate-500 line-clamp-1">{style.desc}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Generate / Regenerate Controls */}
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                        <Button
+                          type="button"
+                          onClick={() => handleOptimizeWithAi()}
+                          disabled={isOptimizingAi}
+                          variant="gradient"
+                          size="sm"
+                          className="w-full sm:w-auto font-semibold text-xs shadow-glow px-5"
+                        >
+                          {isOptimizingAi ? (
+                            <>
+                              <RefreshCw className="w-3.5 h-3.5 mr-2 animate-spin" />
+                              Formulating AI Package...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-3.5 h-3.5 mr-2" />
+                              {aiOptimizerData ? "Regenerate Suggestions" : "Generate AI Package"}
+                            </>
+                          )}
+                        </Button>
+
+                        {aiOptimizerData && (
+                          <span className="text-[11px] text-slate-400">
+                            Switched angles automatically trigger fresh scored suggestions.
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Ranked Title Suggestions Scored Out of 10 */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+                          <Tag className="w-3.5 h-3.5 text-brand-purple" />
+                          Ranked Title Suggestions (Scored out of 10)
+                        </label>
+                        <span className="text-[11px] text-slate-400">
+                          Click any suggestion to set as release title
+                        </span>
+                      </div>
+
+                      {aiOptimizerData?.titles ? (
+                        <div className="space-y-2.5">
+                          {aiOptimizerData.titles.map((item: any, idx: number) => {
+                            const isSelected = publishTitle === item.title || selectedTitleIdx === idx;
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => handleApplyTitle(item, idx)}
+                                className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 ${
+                                  isSelected
+                                    ? "bg-navy-800/90 border-brand-purple ring-1 ring-brand-purple/40 shadow-sm"
+                                    : "bg-navy-950/60 border-navy-800 hover:border-navy-700 hover:bg-navy-900/50"
+                                }`}
+                              >
+                                <div className="space-y-1 min-w-0 flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                      Score: {item.score} / 10
+                                    </span>
+                                    <Badge variant="outline" className="text-[10px] text-brand-purple border-brand-purple/30">
+                                      {item.category || "Viral Hook"}
+                                    </Badge>
+                                    <span className="text-[10px] text-slate-400 font-mono">
+                                      {item.charCount || item.title.length} chars
+                                    </span>
+                                  </div>
+                                  <p className="text-xs sm:text-sm font-bold text-white leading-snug">
+                                    {item.title}
+                                  </p>
+                                  {item.reasoning && (
+                                    <p className="text-[11px] text-slate-400 italic">
+                                      💡 {item.reasoning}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="shrink-0 flex items-center gap-2 self-end sm:self-center">
+                                  {isSelected ? (
+                                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                                      <Check className="w-3.5 h-3.5" />
+                                      Active
+                                    </span>
+                                  ) : (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7 text-xs border-navy-700 bg-navy-900 text-slate-300 hover:text-white"
+                                    >
+                                      Use Title
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="p-4 rounded-xl border border-dashed border-navy-800 bg-navy-950/40 text-center text-xs text-slate-400">
+                          Click &quot;Generate AI Package&quot; above to formulate titles ranked by predicted CTR and curiosity.
+                        </div>
+                      )}
+
+                      {/* Active Editable Title Input */}
+                      <div className="space-y-1.5 pt-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-white">Active Video Release Title *</label>
+                          <span
+                            className={`text-[11px] font-mono ${
+                              publishTitle.length > 70 ? "text-amber-400" : "text-emerald-400"
+                            }`}
+                          >
+                            {publishTitle.length} / 100 characters {publishTitle.length <= 60 && "(Optimal for Mobile Feed)"}
+                          </span>
+                        </div>
+                        <Input
+                          value={publishTitle}
+                          onChange={(e) => setPublishTitle(e.target.value)}
+                          placeholder="Your release title..."
+                          className="bg-navy-950 border-navy-700 text-sm font-bold text-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* High-Level SEO Description */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs font-bold uppercase tracking-wider text-slate-200">
+                            SEO Video Description
+                          </label>
+                          {aiOptimizerData?.description?.score && (
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                              Score: {aiOptimizerData.description.score} / 10
+                            </span>
+                          )}
+                        </div>
+                        {aiOptimizerData?.description?.text && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleApplyDescription}
+                            className="text-xs text-brand-purple hover:text-brand-purple/80 h-6 px-2"
+                          >
+                            <Check className="w-3 h-3 mr-1" />
+                            Apply AI Description
+                          </Button>
+                        )}
+                      </div>
+                      <Textarea
+                        rows={6}
+                        value={publishDescription}
+                        onChange={(e) => setPublishDescription(e.target.value)}
+                        placeholder="Video description with hook, chapters, keywords, and links..."
+                        className="bg-navy-950 border-navy-700 text-xs font-mono text-slate-300 leading-relaxed"
+                      />
+                    </div>
+
+                    {/* High-Ranking Hashtags (Relevant to Title) */}
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                          <Hash className="w-3.5 h-3.5 text-brand-purple" />
+                          High-Ranking Hashtags
+                        </label>
+                        {aiOptimizerData?.hashtags && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleApplyAllHashtags}
+                            className="text-xs text-brand-purple hover:text-brand-purple/80 h-6 px-2"
+                          >
+                            Add All Hashtags
+                          </Button>
+                        )}
+                      </div>
+
+                      {aiOptimizerData?.hashtags ? (
+                        <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-navy-950/80 border border-navy-800">
+                          {aiOptimizerData.hashtags.map((h: any, idx: number) => {
+                            const isAdded = publishHashtags.includes(h.tag);
+                            return (
+                              <button
+                                type="button"
+                                key={idx}
+                                onClick={() => handleToggleHashtag(h.tag)}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                                  isAdded
+                                    ? "bg-brand-purple text-white shadow-sm"
+                                    : "bg-navy-900 border border-navy-700 text-slate-300 hover:text-white"
+                                }`}
+                              >
+                                <span>{h.tag}</span>
+                                <span className="text-[10px] opacity-80 font-mono">({h.score}/10)</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+
+                      {publishHashtags.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {publishHashtags.map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[11px] font-mono px-2 py-0.5 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 flex items-center gap-1"
+                            >
+                              <span>{tag}</span>
+                              <button
+                                type="button"
+                                onClick={() => setPublishHashtags(publishHashtags.filter((h) => h !== tag))}
+                                className="hover:text-red-400"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* High-Ranking Video Tags (Relevant to Title) */}
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+                          <Tag className="w-3.5 h-3.5 text-brand-blue" />
+                          High-Ranking Video Tags ({publishTags.length} tags)
+                        </label>
+                        {aiOptimizerData?.tags && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleApplyAllTags}
+                            className="text-xs text-brand-blue hover:text-brand-blue/80 h-6 px-2"
+                          >
+                            Add All Video Tags
+                          </Button>
+                        )}
+                      </div>
+
+                      {aiOptimizerData?.tags ? (
+                        <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-navy-950/80 border border-navy-800">
+                          {aiOptimizerData.tags.map((t: any, idx: number) => {
+                            const isAdded = publishTags.includes(t.tag);
+                            return (
+                              <button
+                                type="button"
+                                key={idx}
+                                onClick={() => {
+                                  if (isAdded) {
+                                    handleRemoveTag(t.tag);
+                                  } else {
+                                    setPublishTags([...publishTags, t.tag]);
+                                  }
+                                }}
+                                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-all flex items-center gap-1 ${
+                                  isAdded
+                                    ? "bg-brand-blue text-white shadow-sm"
+                                    : "bg-navy-900 border border-navy-800 text-slate-400 hover:text-white"
+                                }`}
+                              >
+                                <span>{t.tag}</span>
+                                <span className="text-[9px] opacity-75 font-mono">({t.score}/10)</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+
+                      {/* Custom Tag Input & Tag Badges */}
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <Input
+                            value={newTagInput}
+                            onChange={(e) => setNewTagInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddCustomTag();
+                              }
+                            }}
+                            placeholder="Add custom search tag (e.g. minecraft survival 2026)..."
+                            className="h-8 bg-navy-950 border-navy-700 text-xs text-slate-200"
+                          />
+                          <Button
+                            type="button"
+                            onClick={handleAddCustomTag}
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs border-navy-700 bg-navy-900"
+                          >
+                            <Plus className="w-3.5 h-3.5 mr-1" />
+                            Add Tag
+                          </Button>
+                        </div>
+
+                        {publishTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 p-2.5 rounded-lg bg-navy-950 border border-navy-800 max-h-36 overflow-y-auto">
+                            {publishTags.map((tag, idx) => (
+                              <Badge
+                                key={idx}
+                                variant="outline"
+                                className="text-[11px] bg-navy-900 border-navy-700 text-slate-300 flex items-center gap-1.5 py-1"
+                              >
+                                <span>{tag}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveTag(tag)}
+                                  className="text-slate-400 hover:text-red-400"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Final Review & Launch Bar */}
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-navy-900 via-navy-900 to-brand-purple/20 border border-brand-purple/30 shadow-2xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="text-xs font-bold text-white uppercase tracking-wider">
+                        Ready to Release: {activeChannel?.title || "Demo Channel"}
                       </span>
                     </div>
+                    <p className="text-xs text-slate-400 line-clamp-1">
+                      {publishTitle || "No title specified yet"}
+                    </p>
                   </div>
-                )}
 
-                {/* YouTube Quota Accounting Transparency */}
-                <div className="p-2.5 rounded-lg bg-navy-950/90 border border-navy-800 text-[11px] text-slate-400 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <ShieldAlert className="w-3.5 h-3.5 text-brand-purple shrink-0" />
-                    <span>
-                      <strong className="text-slate-300">YouTube Quota:</strong> videos.insert = 1 call (dedicated 100/day upload bucket) • thumbnails.set = 50 units • chunk streaming = 0 units.
-                    </span>
-                  </span>
-                  <Badge variant="outline" className="text-[10px] text-slate-400 border-navy-700 shrink-0">Official V3 Quota</Badge>
+                  <Button
+                    type="button"
+                    onClick={handleStartUploadProcess}
+                    disabled={isUploading}
+                    variant="gradient"
+                    size="lg"
+                    className="font-bold text-sm shadow-glow px-8 shrink-0"
+                  >
+                    <UploadCloud className="w-4 h-4 mr-2" />
+                    Review & Publish Video
+                  </Button>
                 </div>
 
-                {/* Progress Indicator */}
+                {/* Upload Progress Indicator */}
                 {isUploading && (
                   <div className="space-y-2.5 p-4 rounded-xl bg-navy-950 border border-navy-800 animate-in fade-in-50">
                     <div className="flex items-center justify-between text-xs">
@@ -1636,6 +2404,7 @@ function PublishWorkspaceContent() {
                         {isLiveUploaded ? "Google Resumable Upload Session" : "Sandbox Simulation Mode"}
                       </span>
                       <Button
+                        type="button"
                         onClick={handleCancelUpload}
                         variant="ghost"
                         size="sm"
@@ -1646,31 +2415,15 @@ function PublishWorkspaceContent() {
                     </div>
                   </div>
                 )}
-              </CardContent>
-
-              <CardFooter className="flex items-center justify-between border-t border-navy-800 pt-4">
-                <span className="text-xs text-slate-400">
-                  Target: <strong className="text-slate-200">{activeChannel?.title || "Demo Channel"}</strong>
-                </span>
-                <Button
-                  onClick={handleStartUploadProcess}
-                  disabled={isUploading}
-                  variant="gradient"
-                  size="sm"
-                  className="font-semibold text-xs shadow-glow px-6"
-                >
-                  <UploadCloud className="w-3.5 h-3.5 mr-2" />
-                  Review & Publish Video
-                </Button>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
 
             {/* Explicit Confirmation Modal */}
             <Modal
               isOpen={showConfirmModal}
               onClose={() => setShowConfirmModal(false)}
               title="Confirm Video Release"
-              description="Please review publishing parameters before confirming transmission."
+              description="Please review publishing parameters before confirming transmission to YouTube."
               maxWidth="md"
               footer={
                 <div className="flex items-center justify-end gap-2 w-full">
@@ -1685,22 +2438,22 @@ function PublishWorkspaceContent() {
             >
               <div className="space-y-3 text-xs text-slate-300">
                 <div className="p-3 rounded-lg bg-navy-950 border border-navy-800 space-y-1.5">
-                  <span className="text-[10px] text-slate-400 uppercase font-semibold">Project Title</span>
-                  <p className="font-bold text-white text-sm">{activeUploadProject?.selectedTitle}</p>
+                  <span className="text-[10px] text-slate-400 uppercase font-semibold">Video Title</span>
+                  <p className="font-bold text-white text-sm">{publishTitle}</p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 text-[11px]">
+                  <div className="p-2.5 rounded-lg bg-navy-950 border border-navy-800">
+                    <span className="text-slate-400 block">Format</span>
+                    <strong className="text-white uppercase">{publishContentType}</strong>
+                  </div>
                   <div className="p-2.5 rounded-lg bg-navy-950 border border-navy-800">
                     <span className="text-slate-400 block">Privacy</span>
                     <strong className="text-white uppercase">{uploadPrivacy}</strong>
                   </div>
                   <div className="p-2.5 rounded-lg bg-navy-950 border border-navy-800">
-                    <span className="text-slate-400 block">Release Type</span>
+                    <span className="text-slate-400 block">Release</span>
                     <strong className="text-white">{uploadPublishDate ? "Scheduled" : "Instant"}</strong>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-navy-950 border border-navy-800">
-                    <span className="text-slate-400 block">Audience (COPPA)</span>
-                    <strong className="text-white">{uploadMadeForKids ? "For Kids" : "Standard"}</strong>
                   </div>
                 </div>
 

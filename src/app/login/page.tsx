@@ -12,7 +12,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, user, isDemoMode, isLoading: authLoading } = useAuth();
+  const { signIn, signInDemo, user, isDemoMode, isLoading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -75,17 +75,32 @@ export default function LoginPage() {
               Explore the sample project & publishing preview without signing in.
             </p>
           </div>
-          <Link href="/demo">
+          <div className="flex items-center gap-2">
             <Button
               type="button"
+              onClick={() => {
+                signInDemo();
+                router.push("/dashboard");
+              }}
               variant="outline"
               size="sm"
-              className="text-xs h-8 px-3 shrink-0 border-navy-700 bg-navy-850/60"
+              className="text-xs h-8 px-3 shrink-0 border-brand-purple/40 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20"
             >
-              <PlayCircle className="w-3.5 h-3.5 mr-1 text-brand-purple" />
-              View Demo
+              <Sparkles className="w-3.5 h-3.5 mr-1" />
+              Demo Access
             </Button>
-          </Link>
+            <Link href="/demo">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs h-8 px-2 shrink-0 text-slate-400 hover:text-white"
+              >
+                <PlayCircle className="w-3.5 h-3.5 mr-1 text-brand-purple" />
+                View Demo
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <Card className="border-navy-800 bg-navy-900/90 shadow-2xl backdrop-blur-md">

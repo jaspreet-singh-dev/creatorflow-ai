@@ -263,6 +263,110 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Guided Workflow Section */}
+      <section id="workflow" className="py-24 px-6 lg:px-12 bg-navy-950 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto space-y-16">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <Badge variant="default" className="text-xs font-semibold">The CreatorFlow Lifecycle</Badge>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+              From Raw Idea to Published Video in 4 Steps
+            </h2>
+            <p className="text-sm sm:text-base text-slate-400">
+              Eliminate creative block and tedious publishing chores with our connected, AI-guided creator pipeline.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+            {/* Step 1 */}
+            <div className="p-6 rounded-2xl border border-navy-800 bg-navy-900/70 hover:border-brand-purple/50 transition-all flex flex-col justify-between space-y-4 relative group">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-brand-purple px-2 py-0.5 rounded-full bg-brand-purple/10 border border-brand-purple/20">
+                    STEP 01
+                  </span>
+                  <Sparkles className="w-4 h-4 text-brand-purple group-hover:scale-110 transition-transform" />
+                </div>
+                <h3 className="text-base font-bold text-white">AI Concept Discovery</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Enter any working idea. AI extracts viral angles, audience hooks, and curiosity loops tailored to your niche.
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-navy-950/80 border border-navy-800 text-[11px] text-slate-300 font-mono">
+                &quot;Can cauldrons survive 1,000 blocks?&quot;
+              </div>
+            </div>
+
+            {/* Step 2 */}
+            <div className="p-6 rounded-2xl border border-navy-800 bg-navy-900/70 hover:border-brand-blue/50 transition-all flex flex-col justify-between space-y-4 relative group">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-brand-blue px-2 py-0.5 rounded-full bg-brand-blue/10 border border-brand-blue/20">
+                    STEP 02
+                  </span>
+                  <Zap className="w-4 h-4 text-brand-blue group-hover:scale-110 transition-transform" />
+                </div>
+                <h3 className="text-base font-bold text-white">Viral Script & Hooks</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Craft high-retention openings, structured pacing cues, and full-length drafts with independent section regeneration.
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-navy-950/80 border border-navy-800 text-[11px] text-slate-300 font-mono">
+                3 Hooks • 140 WPM Pacing Cues
+              </div>
+            </div>
+
+            {/* Step 3 */}
+            <div className="p-6 rounded-2xl border border-navy-800 bg-navy-900/70 hover:border-emerald-500/50 transition-all flex flex-col justify-between space-y-4 relative group">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                    STEP 03
+                  </span>
+                  <PlayCircle className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                </div>
+                <h3 className="text-base font-bold text-white">Thumbnail Studio & Feed</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Preview your thumbnail against real YouTube search feeds. Customize typography, badges, and test pattern interrupts.
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-navy-950/80 border border-navy-800 text-[11px] text-slate-300 font-mono">
+                Live YouTube Feed Simulator
+              </div>
+            </div>
+
+            {/* Step 4 */}
+            <div className="p-6 rounded-2xl border border-navy-800 bg-navy-900/70 hover:border-brand-purple/50 transition-all flex flex-col justify-between space-y-4 relative group">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-brand-purple px-2 py-0.5 rounded-full bg-brand-purple/10 border border-brand-purple/20">
+                    STEP 04
+                  </span>
+                  <UploadCloud className="w-4 h-4 text-brand-purple group-hover:scale-110 transition-transform" />
+                </div>
+                <h3 className="text-base font-bold text-white">1-Click YouTube Publish</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Publish Videos, Shorts, and Community Posts with ranked SEO tags and COPPA compliance directly to your channel.
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-navy-950/80 border border-navy-800 text-[11px] text-emerald-400 font-mono flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>YouTube Data API v3 Connected</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center pt-4">
+            <Link href="/dashboard/create">
+              <Button variant="gradient" size="lg" className="font-semibold text-sm shadow-glow px-8">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Start Creating Free Now
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
       <section id="pricing" className="py-24 px-6 lg:px-12">
         <div className="max-w-5xl mx-auto space-y-16">
