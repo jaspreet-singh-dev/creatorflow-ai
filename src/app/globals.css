@@ -179,7 +179,7 @@ body {
   scroll-behavior: smooth;
 }
 
-body {
+[data-theme="light"] body {
   background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
@@ -497,5 +497,90 @@ input:focus, textarea:focus, select:focus {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* ========================================================
+   MODERN HIGH-END SAAS STYLING TOKENS
+   Inspired by Linear, Raycast, Vercel & Supabase
+   ======================================================== */
+.saas-glass-card {
+  background: rgba(11, 16, 30, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+}
+
+[data-theme="amoled"] .saas-glass-card {
+  background: rgba(10, 10, 12, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 36px -4px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .saas-glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.05), 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.saas-gradient-text {
+  background: linear-gradient(135deg, #FFFFFF 10%, #E2E8F0 60%, #94A3B8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .saas-gradient-text {
+  background: linear-gradient(135deg, #0F172A 10%, #1E293B 60%, #475569 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.saas-gradient-accent {
+  background: linear-gradient(135deg, #C084FC 0%, #A855F7 35%, #6366F1 70%, #38BDF8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.saas-chip {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(22, 32, 56, 0.45);
+}
+
+.saas-chip:hover {
+  border-color: rgba(168, 85, 247, 0.4);
+  background: rgba(168, 85, 247, 0.12);
+  transform: translateY(-1px);
+}
+
+[data-theme="amoled"] .saas-chip {
+  background: rgba(24, 24, 27, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="amoled"] .saas-chip:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  background: rgba(168, 85, 247, 0.16);
+}
+
+[data-theme="light"] .saas-chip {
+  background: #F1F5F9;
+  border-color: #E2E8F0;
+  color: #334155;
+}
+
+[data-theme="light"] .saas-chip:hover {
+  border-color: #A855F7;
+  background: #FAF5FF;
+  color: #6B21A8;
+}
+
+.saas-glow-radial {
+  background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 50%, transparent 80%);
+}
+
+.saas-phone-bezel {
+  box-shadow: 0 0 0 10px #18181b, 0 0 0 12px #27272a, 0 25px 50px -12px rgba(0, 0, 0, 0.85);
 }
 

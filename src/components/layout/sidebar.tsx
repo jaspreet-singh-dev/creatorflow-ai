@@ -127,8 +127,8 @@ export function Sidebar() {
                   className={cn(
                     "flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all group",
                     isActive
-                      ? "bg-navy-800 text-slate-900 dark:text-white border border-navy-700 shadow-sm"
-                      : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-navy-900/60"
+                      ? "bg-gradient-to-r from-brand-purple/20 via-navy-800/90 to-navy-850 text-white border border-brand-purple/40 shadow-md shadow-brand-purple/10 font-bold"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-navy-900/60 font-medium"
                   )}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
