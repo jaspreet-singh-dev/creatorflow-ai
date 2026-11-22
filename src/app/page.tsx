@@ -43,10 +43,12 @@ export default function HomePage() {
           </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8 text-sm text-slate-300 font-medium">
+        <div className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-slate-300 font-medium">
           <a href="#features" className="hover:text-white transition-colors">Features</a>
           <a href="#workflow" className="hover:text-white transition-colors">Workflow</a>
-          <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+          <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+          <Link href="/about" className="hover:text-white transition-colors">About</Link>
+          <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
         </div>
 
         <div className="flex items-center gap-3">
@@ -396,17 +398,23 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="border-t border-navy-800 py-12 px-6 lg:px-12 bg-navy-950 text-xs text-slate-400">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg bg-brand-purple/20 text-brand-purple flex items-center justify-center">
               <Sparkles className="w-3.5 h-3.5" />
             </div>
             <span className="font-bold text-slate-200">CreatorFlow AI</span>
-            <span>— The YouTube Creator Automation Platform</span>
+            <span className="hidden sm:inline text-slate-500">— The YouTube Creator Studio</span>
           </div>
-          <div className="flex items-center gap-4 text-xs">
-            <Link href="/demo" className="hover:text-white transition-colors">
-              Product Demo
+          <div className="flex items-center gap-4 sm:gap-6 text-xs flex-wrap justify-center">
+            <Link href="/about" className="hover:text-white transition-colors">
+              About
+            </Link>
+            <Link href="/pricing" className="hover:text-white transition-colors">
+              Pricing
+            </Link>
+            <Link href="/contact" className="hover:text-white transition-colors">
+              Contact
             </Link>
             <Link href="/terms" className="hover:text-white transition-colors">
               Terms of Service
@@ -415,10 +423,13 @@ export default function HomePage() {
               Privacy Policy
             </Link>
             <Link href="/refund" className="hover:text-white transition-colors">
-              Refund Policy
+              Refund & Cancellation
+            </Link>
+            <Link href="/security" className="hover:text-white transition-colors">
+              Security
             </Link>
           </div>
-          <p>© 2026 CreatorFlow AI. All rights reserved.</p>
+          <p className="text-slate-500 text-[11px]">© 2026 CreatorFlow AI. All rights reserved.</p>
         </div>
       </footer>
     </div>

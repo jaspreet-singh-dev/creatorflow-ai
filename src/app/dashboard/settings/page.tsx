@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { useAuth } from "@/context/auth-context";
 import { useData } from "@/context/data-context";
@@ -32,13 +33,15 @@ import {
   Moon,
   Monitor,
   Palette,
+  Trash2,
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { profile, user, updateProfile } = useAuth();
+  const { profile, user, updateProfile, deleteAccount } = useAuth();
   const { resetToDemoDefaults } = useData();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const [fullName, setFullName] = useState(profile?.full_name || "Alex Rivera");
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
@@ -490,6 +493,72 @@ export default function SettingsPage() {
                 </form>
               </CardContent>
             </Card>
+
+            {/* Account Privacy & Data Erasure (DPDP Act Compliance) */}
+            <Card className="border-red-500/30 bg-red-500/5 shadow-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base text-red-400 flex items-center gap-2">
+                  <Trash2 className="w-4 h-4" />
+                  Account Deletion & Data Erasure
+                </CardTitle>
+                <CardDescription className="text-xs text-slate-400">
+                  Permanently delete your account, connected channel credentials, and video projects.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Under the Indian DPDP Act 2023 and Google API Services policy, you have the right to permanent data erasure. Deleting your account will immediately revoke OAuth access tokens and wipe all channel records from our database.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  isLoading={isDeletingAccount}
+                  onClick={async () => {
+                    const confirmed = window.confirm(
+                      "Are you absolutely sure you want to delete your account? This action cannot be undone and permanently deletes all your channels, projects, and metadata."
+                    );
+                    if (!confirmed) return;
+                    setIsDeletingAccount(true);
+                    try {
+                      const res = await deleteAccount();
+                      if (res.error) {
+                        toast.error("Deletion Notice", res.error.message);
+                      } else {
+                        toast.success("Account Deleted", "Your account and data have been permanently wiped.");
+                        window.location.href = "/";
+                      }
+                    } catch {
+                      toast.error("Error", "Failed to complete account deletion.");
+                    } finally {
+                      setIsDeletingAccount(false);
+                    }
+                  }}
+                  className="text-xs border-red-500/40 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                  Permanently Delete My Account
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Public Trust Links */}
+        <div className="border-t border-navy-800/80 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <p>© 2026 CreatorFlow AI. All rights reserved.</p>
+          <div className="flex items-center gap-4 flex-wrap justify-center text-[11px]">
+            <Link href="/pricing" className="hover:text-slate-300 transition-colors">Pricing</Link>
+            <span>•</span>
+            <Link href="/terms" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
+            <span>•</span>
+            <Link href="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
+            <span>•</span>
+            <Link href="/refund" className="hover:text-slate-300 transition-colors">Refund & Cancellation</Link>
+            <span>•</span>
+            <Link href="/security" className="hover:text-slate-300 transition-colors">Security Architecture</Link>
+            <span>•</span>
+            <Link href="/contact" className="hover:text-slate-300 transition-colors">Support & Grievances</Link>
           </div>
         </div>
       </div>

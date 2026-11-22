@@ -135,6 +135,13 @@ export default function SignUpPage() {
                   />
                 </div>
 
+                <div className="text-[11px] text-slate-400 text-center leading-relaxed">
+                  By clicking &quot;Get Started Free&quot;, you agree to our{" "}
+                  <Link href="/terms" className="text-brand-purple hover:underline">Terms of Service</Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" className="text-brand-purple hover:underline">Privacy Policy</Link>.
+                </div>
+
                 <Button
                   type="submit"
                   variant="gradient"
@@ -147,7 +154,7 @@ export default function SignUpPage() {
               </form>
             )}
           </CardContent>
-          <CardFooter className="flex justify-center border-t border-navy-800/80 pt-4">
+          <CardFooter className="flex flex-col items-center gap-3 border-t border-navy-800/80 pt-4">
             <p className="text-xs text-slate-400">
               Already have an account?{" "}
               <Link href="/login" className="text-brand-purple hover:underline font-semibold">
@@ -156,6 +163,19 @@ export default function SignUpPage() {
             </p>
           </CardFooter>
         </Card>
+
+        {/* Public Trust Links */}
+        <div className="flex items-center justify-center gap-3 text-[11px] text-slate-500 flex-wrap">
+          <Link href="/terms" className="hover:text-slate-300 transition-colors">Terms</Link>
+          <span>•</span>
+          <Link href="/privacy" className="hover:text-slate-300 transition-colors">Privacy</Link>
+          <span>•</span>
+          <Link href="/refund" className="hover:text-slate-300 transition-colors">Refund Policy</Link>
+          <span>•</span>
+          <Link href="/security" className="hover:text-slate-300 transition-colors">Security</Link>
+          <span>•</span>
+          <Link href="/contact" className="hover:text-slate-300 transition-colors">Contact</Link>
+        </div>
       </div>
     </div>
   );
