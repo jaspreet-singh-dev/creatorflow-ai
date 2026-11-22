@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
         publishedAt: v.publishedAt,
         thumbnail_url: v.thumbnailUrl,
         thumbnail: v.thumbnailUrl,
-        channelTitle: "NoVoiceCraft",
+        channelTitle: "CraftVortex Gaming",
         tags: ["minecraft", "shorts", "clutch", "gaming"],
         privacy_status: "public",
         privacyStatus: "public",
@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
         videos: formattedDefaultVideos,
         totalResults: NOVOICECRAFT_VIDEOS.length,
         isLive: false,
-        message: "Loaded authentic NoVoiceCraft verified video library.",
+        message: "Loaded CraftVortex Gaming demo video library.",
       });
     }
 

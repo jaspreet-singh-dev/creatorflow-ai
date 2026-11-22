@@ -16,6 +16,7 @@ import {
   PlayCircle,
   Zap,
   ShieldCheck,
+  Film,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
@@ -114,19 +115,29 @@ export default function HomePage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-4">
             <Link href="/signup">
-              <Button size="lg" variant="gradient" className="font-semibold text-sm px-8 shadow-glow w-full sm:w-auto">
+              <Button size="lg" variant="gradient" className="font-semibold text-sm px-8 shadow-glow w-full sm:w-auto hover-lift smooth-transition">
                 Start Creating Free
                 <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+            <Link href="/demo">
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-sm font-medium px-6 border-purple-500/30 bg-purple-950/20 hover:bg-purple-900/40 text-purple-200 hover:text-white w-full sm:w-auto hover-lift smooth-transition"
+              >
+                <Film className="w-4 h-4 mr-2 text-brand-purple" />
+                Watch 60s Demo Tour
               </Button>
             </Link>
             <Button
               size="lg"
               variant="secondary"
               onClick={handleLaunchDemo}
-              className="text-sm font-medium px-6 border-navy-700 w-full sm:w-auto"
+              className="text-sm font-medium px-6 border-navy-700 bg-navy-900/80 hover:bg-navy-800 w-full sm:w-auto hover-lift smooth-transition"
             >
-              <PlayCircle className="w-4 h-4 mr-2 text-brand-purple" />
-              Explore Interactive Sandbox
+              <PlayCircle className="w-4 h-4 mr-2 text-brand-blue" />
+              Interactive Sandbox
             </Button>
           </div>
 
@@ -157,13 +168,13 @@ export default function HomePage() {
                 <span className="w-3 h-3 rounded-full bg-emerald-500/80" />
                 <span className="ml-2 text-xs font-mono text-slate-400">creatorflow.ai/dashboard</span>
               </div>
-              <Badge variant="blue" className="text-[10px]">Connected: @novoice_craft</Badge>
+              <Badge variant="blue" className="text-[10px]">Connected: @craftvortex (Demo Channel)</Badge>
             </div>
             {/* Dashboard Content Teaser */}
             <div className="p-6 grid grid-cols-1 md:grid-cols-4 gap-4 text-left">
-              <div className="p-4 rounded-xl bg-navy-900/60 border border-navy-800">
+              <div className="p-4 rounded-xl bg-navy-900/60 border border-navy-800 hover-lift smooth-transition">
                 <span className="text-xs text-slate-400">Total Views Managed</span>
-                <p className="text-2xl font-bold text-white mt-1">619.5K</p>
+                <p className="text-2xl font-bold text-white mt-1">1.42M</p>
                 <span className="text-[11px] text-emerald-400 font-medium">↑ +18.4% this month</span>
               </div>
               <div className="p-4 rounded-xl bg-navy-900/60 border border-navy-800">

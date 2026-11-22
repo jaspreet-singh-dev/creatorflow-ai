@@ -109,7 +109,7 @@ export default function ContentAssistantPage() {
       title: "CAN A PIG SAVE ME?! 🐷💀 #minecraft",
       hook: "Can you dismount a pig at the exact tick you hit the ground?",
       concept: "Fast drop from sky, slow-mo dismount tick test, surviving with half a heart.",
-      action: "Subscribe to NoVoiceCraft for more impossible clutch experiments.",
+      action: "Subscribe to the channel for more impossible clutch experiments.",
     },
     {
       title: "COBWEB vs BERRY BUSH… THE ULTIMATE CLUTCH!",

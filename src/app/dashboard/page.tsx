@@ -176,7 +176,7 @@ export default function DashboardOverviewPage() {
             <div className="flex items-center gap-2.5">
               <Sparkles className="w-4 h-4 text-brand-purple shrink-0" />
               <p className="text-xs text-slate-200">
-                <strong className="text-white">Active Channel Workspace:</strong> Connected to <code className="text-purple-300">@novoice_craft</code> (NoVoiceCraft • 335 subs • 619.5K views). All workflows, Minecraft clutch analytics, and Shorts AI generation are active.
+                <strong className="text-white">Active Channel Workspace:</strong> Connected to <code className="text-purple-300">{activeChannel?.custom_url || "@craftvortex"}</code> ({activeChannel?.title || "CraftVortex Gaming"} • {activeChannel?.subscriber_count ? activeChannel.subscriber_count.toLocaleString() : "24,800"} subs). All workflows, Minecraft clutch analytics, and Shorts AI generation are active.
               </p>
             </div>
             <Link href="/dashboard/settings">

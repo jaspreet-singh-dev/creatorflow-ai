@@ -572,7 +572,7 @@ export default function ChannelManagerPage() {
                   Live YouTube Channel Search
                 </p>
                 <p className="text-[11px] text-slate-400">
-                  Enter your real YouTube handle (e.g. <code>@novoice_craft</code>, <code>@mkbhd</code>, or your gaming channel). We will fetch its actual subscribers, avatar, and total views.
+                  Enter your real YouTube handle (e.g. <code>@craftvortex</code>, <code>@mkbhd</code>, or your gaming channel). We will fetch its actual subscribers, avatar, and total views.
                 </p>
               </div>
 

@@ -40,7 +40,7 @@ export const MOCK_VIDEOS: Video[] = [
     user_id: "demo-user-123456",
     channel_id: "chan-demo-1",
     title: "Can a Hay Bale Save You From ANY Fall in Minecraft? 🌾😱 #shorts",
-    description: "Testing the 80% fall damage reduction of Hay Bales in Minecraft from build limit Y:320! Can you survive without armor?\n\n#shorts #minecraft #gaming #novoicecraft",
+    description: "Testing the 80% fall damage reduction of Hay Bales in Minecraft from build limit Y:320! Can you survive without armor?\n\n#shorts #minecraft #gaming #craftvortex",
     tags: ["hay bale clutch", "minecraft fall test", "can it save you", "minecraft bedrock", "minecraft java"],
     privacy_status: "public",
     status: "published",

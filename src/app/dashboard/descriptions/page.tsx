@@ -38,12 +38,12 @@ export default function DescriptionStudioPage() {
   const [timestampsInput, setTimestampsInput] = useState(
     "00:00 - The Impossible Drop\n00:05 - Sweet Berries vs Fall Damage\n00:11 - Slow Motion Hitbox Test\n00:16 - Survives or Dies?"
   );
-  const [customLinks, setCustomLinks] = useState("👉 Subscribe to NoVoiceCraft: https://youtube.com/@novoice_craft\n🎮 Share with a friend who fails their clutches!");
+  const [customLinks, setCustomLinks] = useState("👉 Subscribe to CraftVortex Gaming: https://youtube.com/@craftvortex\n🎮 Share with a friend who fails their clutches!");
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const [generatedDescription, setGeneratedDescription] = useState(
-    `CAN SWEET BERRIES SAVE ME FROM MAXIMUM BUILD LIMIT?! 💀🌿\n\nDropping from Y=320 all the way down with zero armor and testing if a single sweet berry bush can break lethal fall damage! Watch until the end to see the final heart count!\n\nTIMESTAMPS:\n00:00 - The Impossible Drop\n00:05 - Sweet Berries vs Fall Damage\n00:11 - Slow Motion Hitbox Test\n00:16 - Survives or Dies?\n\n🎮 Channel: @novoice_craft\n🔔 Subscribe for daily insane Minecraft clutch challenges!\n\n#minecraft #shorts #minecraftmemes #clutch #gaming #minecraftclutch #survival\n\nDISCLAIMER: Content optimization and SEO metadata improve organic search discoverability and viewer relevance. Platform distribution depends on real viewer retention, satisfaction, and engagement.`
+    `CAN SWEET BERRIES SAVE ME FROM MAXIMUM BUILD LIMIT?! 💀🌿\n\nDropping from Y=320 all the way down with zero armor and testing if a single sweet berry bush can break lethal fall damage! Watch until the end to see the final heart count!\n\nTIMESTAMPS:\n00:00 - The Impossible Drop\n00:05 - Sweet Berries vs Fall Damage\n00:11 - Slow Motion Hitbox Test\n00:16 - Survives or Dies?\n\n🎮 Channel: @craftvortex\n🔔 Subscribe for daily insane Minecraft clutch challenges!\n\n#minecraft #shorts #minecraftmemes #clutch #gaming #minecraftclutch #survival\n\nDISCLAIMER: Content optimization and SEO metadata improve organic search discoverability and viewer relevance. Platform distribution depends on real viewer retention, satisfaction, and engagement.`
   );
 
   const handleGenerate = async () => {

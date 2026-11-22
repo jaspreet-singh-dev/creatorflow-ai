@@ -5,8 +5,6 @@ import { User, Session } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { Profile } from "@/types/database.types";
 
-export const OWNER_EMAIL = "jaspreetsing3412@gmail.com";
-
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -14,6 +12,9 @@ interface AuthContextType {
   isLoading: boolean;
   isDemoMode: boolean;
   isOwner: boolean;
+  isAdminUnlocked: boolean;
+  unlockAdmin: (passkey: string) => Promise<{ success: boolean; error?: string }>;
+  lockAdmin: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -54,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
 
   const supabase = useMemo(() => createClient(), []);
   const hasSupabaseUrl = Boolean(
@@ -61,15 +63,76 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     !process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder")
   );
 
+  // Check admin status on client initialization
+  useEffect(() => {
+    async function checkAdminStatus() {
+      try {
+        const localUnlocked = typeof window !== "undefined" && localStorage.getItem("cf_admin_unlocked") === "true";
+        if (localUnlocked) {
+          setIsAdminUnlocked(true);
+        }
+        const res = await fetch("/api/admin/status");
+        const data = await res.json();
+        if (data.isAdminUnlocked) {
+          setIsAdminUnlocked(true);
+          try { localStorage.setItem("cf_admin_unlocked", "true"); } catch {}
+        } else if (!localUnlocked) {
+          setIsAdminUnlocked(false);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    checkAdminStatus();
+  }, []);
+
+  const unlockAdmin = useCallback(async (passkey: string) => {
+    try {
+      const res = await fetch("/api/admin/verify-passkey", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passkey }),
+      });
+      const data = await res.json();
+      if (data.success && data.isAdminUnlocked) {
+        setIsAdminUnlocked(true);
+        try { localStorage.setItem("cf_admin_unlocked", "true"); } catch {}
+        setProfile((prev) =>
+          prev
+            ? ({
+                ...prev,
+                plan_tier: "pro",
+                role: "owner",
+                is_owner: true,
+              } as any)
+            : prev
+        );
+        return { success: true };
+      } else {
+        return { success: false, error: data.error || "Invalid Master Passkey" };
+      }
+    } catch (err: any) {
+      return { success: false, error: err.message || "Failed to verify passkey" };
+    }
+  }, []);
+
+  const lockAdmin = useCallback(async () => {
+    try {
+      await fetch("/api/admin/lock", { method: "POST" });
+    } catch {}
+    setIsAdminUnlocked(false);
+    try { localStorage.removeItem("cf_admin_unlocked"); } catch {}
+  }, []);
+
   const isOwner = Boolean(
-    user?.email?.toLowerCase() === OWNER_EMAIL.toLowerCase() ||
+    isAdminUnlocked ||
     (profile as any)?.role === "owner" ||
     (profile as any)?.is_owner === true
   );
 
   const fetchProfile = useCallback(
     async (userId: string, email: string) => {
-      const isOwnerAccount = email.toLowerCase() === OWNER_EMAIL.toLowerCase();
+      const hasAdminRights = isAdminUnlocked;
 
       if (!hasSupabaseUrl) {
         setProfile({
@@ -77,7 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email,
           full_name: email.split("@")[0],
           avatar_url: null,
-          plan_tier: isOwnerAccount ? "pro" : "free",
+          plan_tier: hasAdminRights ? "pro" : "free",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
@@ -93,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (data && !error) {
           const profileData = data as Profile;
-          if (isOwnerAccount) {
+          if (hasAdminRights) {
             profileData.plan_tier = "pro";
             (profileData as any).role = "owner";
             (profileData as any).is_owner = true;
@@ -106,12 +169,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email,
             full_name: email.split("@")[0],
             avatar_url: null,
-            plan_tier: isOwnerAccount ? "pro" : "free",
+            plan_tier: hasAdminRights ? "pro" : "free",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           };
 
-          if (isOwnerAccount) {
+          if (hasAdminRights) {
             defaultProfile.role = "owner";
             defaultProfile.is_owner = true;
           }
@@ -128,7 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn("Could not load profile from Supabase:", e);
       }
     },
-    [hasSupabaseUrl, supabase]
+    [hasSupabaseUrl, supabase, isAdminUnlocked]
   );
 
   useEffect(() => {
@@ -403,6 +466,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isDemoMode,
         isOwner,
+        isAdminUnlocked,
+        unlockAdmin,
+        lockAdmin,
         signIn,
         signUp,
         signOut,

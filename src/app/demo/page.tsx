@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,8 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import {
   Sparkles,
   Play,
+  Pause,
+  RotateCcw,
   PlayCircle,
   Eye,
   Clock,
@@ -25,11 +27,100 @@ import {
   Info,
   Youtube,
   Share2,
+  Sliders,
+  Layers,
+  Film,
+  Smartphone,
+  ChevronRight,
+  Zap,
 } from "lucide-react";
+
+interface Chapter {
+  id: number;
+  title: string;
+  badge: string;
+  duration: string;
+  desc: string;
+  highlight: string;
+}
+
+const WALKTHROUGH_CHAPTERS: Chapter[] = [
+  {
+    id: 1,
+    title: "1. AI Concept & Viral Hook Discovery",
+    badge: "Ideation",
+    duration: "0:00 - 0:15",
+    desc: "AI identifies high-retention gaming concepts and ranks titles out of 10",
+    highlight: "Gemini 2.5 Flash analyzes YouTube Shorts trends and scores psychological CTR appeal",
+  },
+  {
+    id: 2,
+    title: "2. Fast-Paced Shorts Script Studio",
+    badge: "Scriptwriting",
+    duration: "0:15 - 0:30",
+    desc: "3-second pattern interrupts, retention beats, and sound design cues",
+    highlight: "Generates teleprompter timing [SFX: Slow-mo heartbeat] to maximize average watch time",
+  },
+  {
+    id: 3,
+    title: "3. Thumbnail Studio & YouTube Feed Simulator",
+    badge: "High-CTR Visuals",
+    duration: "0:30 - 0:45",
+    desc: "A/B test thumbnail concepts against real competing YouTube videos",
+    highlight: "Visual feed simulator previews your video title and thumbnail inside the live Shorts shelf",
+  },
+  {
+    id: 4,
+    title: "4. 1-Click Publishing & Resumable Direct Upload",
+    badge: "Publishing",
+    duration: "0:45 - 1:00",
+    desc: "Official YouTube Data API v3 binary transfer with complete SEO tags",
+    highlight: "Resumable chunked upload sends video, auto-generated description, tags, and timestamps",
+  },
+];
 
 export default function DemoExperiencePage() {
   const [activeTab, setActiveTab] = useState<"project" | "analytics" | "publishing">("project");
+  
+  // Interactive Video Player State
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
+  const [playbackSeconds, setPlaybackSeconds] = useState(0);
+
+  // Playback timer (60 seconds total, 15 seconds per chapter)
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setPlaybackSeconds((prev) => {
+          if (prev >= 60) {
+            setIsPlaying(false);
+            return 60;
+          }
+          const next = prev + 1;
+          const chapterIdx = Math.min(Math.floor(next / 15), 3);
+          setCurrentChapterIndex(chapterIdx);
+          return next;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isPlaying]);
+
+  const handleSeekChapter = (idx: number) => {
+    setCurrentChapterIndex(idx);
+    setPlaybackSeconds(idx * 15);
+  };
+
+  const handleRestart = () => {
+    setPlaybackSeconds(0);
+    setCurrentChapterIndex(0);
+    setIsPlaying(true);
+  };
+
+  const activeChapter = WALKTHROUGH_CHAPTERS[currentChapterIndex];
 
   return (
     <div className="min-h-screen bg-navy-950 text-slate-100 flex flex-col selection:bg-brand-purple/30">
@@ -38,7 +129,7 @@ export default function DemoExperiencePage() {
         <div className="flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 shrink-0 text-amber-500" />
           <span>
-            <strong>DEMO SHOWCASE:</strong> This is an interactive sample walkthrough. All videos, metadata, and analytics below are illustrative demonstration data and will not affect any real YouTube channels.
+            <strong>DEMO SHOWCASE:</strong> This is an interactive sample walkthrough with dummy channel <strong>CraftVortex Gaming (@craftvortex)</strong>. All data below is illustrative demonstration data.
           </span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -67,7 +158,7 @@ export default function DemoExperiencePage() {
                 CreatorFlow <span className="text-brand-purple">AI</span>
               </span>
               <Badge variant="warning" className="text-[9px] font-bold uppercase tracking-wider">
-                Demo Video
+                Product Tour
               </Badge>
             </div>
           </Link>
@@ -83,7 +174,7 @@ export default function DemoExperiencePage() {
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            Sample Project
+            Video Walkthrough
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
@@ -103,7 +194,7 @@ export default function DemoExperiencePage() {
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            Publishing Preview
+            Publishing Pipeline
           </button>
         </div>
 
@@ -120,52 +211,246 @@ export default function DemoExperiencePage() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* TAB 1: SAMPLE CREATOR PROJECT */}
+        {/* TAB 1: INTERACTIVE PRODUCT WALKTHROUGH VIDEO */}
         {activeTab === "project" && (
           <div className="space-y-6 animate-in fade-in duration-200">
-            {/* Project Overview Card */}
+            {/* CHAPTER NAVIGATION BAR */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+              {WALKTHROUGH_CHAPTERS.map((chap, idx) => {
+                const isCurrent = currentChapterIndex === idx;
+                const isPassed = playbackSeconds >= (idx + 1) * 15;
+                return (
+                  <button
+                    key={chap.id}
+                    onClick={() => handleSeekChapter(idx)}
+                    className={`p-3 rounded-xl border text-left transition-all relative overflow-hidden ${
+                      isCurrent
+                        ? "border-brand-purple bg-brand-purple/15 shadow-glow"
+                        : "border-navy-800 bg-navy-900/90 hover:border-navy-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-[11px] mb-1">
+                      <span className={`font-mono ${isCurrent ? "text-purple-300 font-bold" : "text-slate-400"}`}>
+                        {chap.duration}
+                      </span>
+                      <Badge
+                        variant={isCurrent ? "default" : "outline"}
+                        className="text-[9px] px-1.5 py-0"
+                      >
+                        {chap.badge}
+                      </Badge>
+                    </div>
+                    <p className="text-xs font-bold text-white truncate">{chap.title}</p>
+                    <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">{chap.desc}</p>
+                    {isCurrent && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-purple">
+                        <div
+                          className="h-full bg-white transition-all duration-300"
+                          style={{
+                            width: `${Math.min(100, Math.max(0, ((playbackSeconds - idx * 15) / 15) * 100))}%`,
+                          }}
+                        />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Video Player & Walkthrough Showcase */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Video Player & Thumbnail Container */}
+              {/* Interactive Player Screen (2 Cols) */}
               <div className="lg:col-span-2 space-y-4">
                 <Card className="border-navy-800 bg-navy-900/90 overflow-hidden shadow-card">
-                  <div className="relative aspect-video bg-black flex items-center justify-center group overflow-hidden">
-                    <img
-                      src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1280&auto=format&fit=crop&q=80"
-                      alt="Sample Video Thumbnail"
-                      className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
+                  {/* The Simulated Video Screen */}
+                  <div className="relative aspect-video bg-black flex flex-col justify-between overflow-hidden border-b border-navy-800">
+                    {/* Top Player HUD Overlay */}
+                    <div className="p-3 bg-gradient-to-b from-black/90 to-transparent flex items-center justify-between text-xs z-20">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        <span className="font-bold text-white tracking-wide uppercase text-[11px]">
+                          HOW CREATORFLOW AI WORKS
+                        </span>
+                        <span className="text-slate-400 text-[10px] hidden sm:inline">
+                          • {activeChapter.title}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="text-[10px] bg-brand-purple/40 border-purple-500/50">
+                          Interactive Tour
+                        </Badge>
+                        <span className="text-[11px] font-mono text-purple-300 bg-black/60 px-2 py-0.5 rounded border border-white/10">
+                          {Math.floor(playbackSeconds / 60)}:{String(playbackSeconds % 60).padStart(2, "0")} / 1:00
+                        </span>
+                      </div>
+                    </div>
 
-                    {/* Centered Play Button */}
-                    <button
-                      onClick={() => setIsPlaying(!isPlaying)}
-                      className="absolute z-10 w-16 h-16 rounded-full bg-brand-purple/90 hover:bg-brand-purple text-white flex items-center justify-center shadow-glow transition-transform hover:scale-110"
-                      aria-label="Play sample video preview"
-                    >
-                      <Play className="w-7 h-7 ml-1 fill-white" />
-                    </button>
+                    {/* DYNAMIC SCENE DISPLAY ACCORDING TO CHAPTER */}
+                    <div className="flex-1 flex items-center justify-center p-4 relative z-10">
+                      {/* Chapter 1: AI Ideation Scene */}
+                      {currentChapterIndex === 0 && (
+                        <div className="w-full max-w-lg space-y-3 p-4 rounded-xl bg-navy-950/90 border border-brand-purple/40 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200">
+                          <div className="flex items-center justify-between text-xs border-b border-navy-800 pb-2">
+                            <span className="font-bold text-purple-300 flex items-center gap-1.5">
+                              <Sparkles className="w-3.5 h-3.5" />
+                              AI Concept & Idea Discovery
+                            </span>
+                            <Badge variant="success" className="text-[10px]">Gaming & Minecraft Niche</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="p-2.5 rounded-lg bg-navy-900 border border-navy-800 text-xs flex items-center justify-between">
+                              <span className="font-semibold text-white">CAN WATER CAULDRON SAVE ME FROM 1000 BLOCKS?! 💀</span>
+                              <Badge variant="success" className="text-[10px] font-bold">Score: 9.8 / 10</Badge>
+                            </div>
+                            <div className="p-2.5 rounded-lg bg-navy-900/60 border border-navy-800 text-xs flex items-center justify-between text-slate-300">
+                              <span>I TESTED EVERY CLUTCH BLOCK AT Y=320… THIS HAPPENED 😱</span>
+                              <Badge variant="secondary" className="text-[10px]">Score: 9.6 / 10</Badge>
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-slate-400 italic">
+                            💡 Retention Engine: &quot;Tick-frame impact creates an immediate 3s curiosity loop.&quot;
+                          </p>
+                        </div>
+                      )}
 
-                    {/* Bottom Video Badge & Watermark */}
-                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
-                      <Badge variant="default" className="text-[10px] bg-black/60 border-white/20">
-                        SAMPLE CREATOR VIDEO (14:32)
-                      </Badge>
-                      <span className="text-[11px] font-mono bg-black/60 px-2 py-0.5 rounded border border-white/20">
-                        1080p 60fps
-                      </span>
+                      {/* Chapter 2: Script Studio Scene */}
+                      {currentChapterIndex === 1 && (
+                        <div className="w-full max-w-lg space-y-3 p-4 rounded-xl bg-navy-950/90 border border-blue-500/40 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200">
+                          <div className="flex items-center justify-between text-xs border-b border-navy-800 pb-2">
+                            <span className="font-bold text-blue-300 flex items-center gap-1.5">
+                              <FileText className="w-3.5 h-3.5" />
+                              Fast-Paced Shorts Script Studio
+                            </span>
+                            <Badge variant="blue" className="text-[10px]">Retention Hook</Badge>
+                          </div>
+                          <div className="space-y-1.5 text-xs font-mono text-slate-300">
+                            <p className="p-2 rounded bg-purple-950/40 border border-purple-800/40 text-purple-200">
+                              <strong className="text-amber-400">[00:00 - 00:03 HOOK]</strong> Dropping from world limit with NO armor. If I miss this cauldron, my hardcore world is gone!
+                            </p>
+                            <p className="p-2 rounded bg-navy-900 border border-navy-800 text-slate-300">
+                              <strong className="text-blue-400">[00:04 - 00:10 BODY]</strong> [SFX: Whoosh] Hitbox test: in Bedrock, you only survive if you land on water, not the rim!
+                            </p>
+                            <p className="p-2 rounded bg-emerald-950/40 border border-emerald-800/40 text-emerald-200">
+                              <strong className="text-emerald-400">[00:11 - 00:15 CLIMAX]</strong> Impact in 3, 2, 1... [SFX: Splash] SURVIVED WITH HALF A HEART!
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Chapter 3: Thumbnail Studio Scene */}
+                      {currentChapterIndex === 2 && (
+                        <div className="w-full max-w-lg p-4 rounded-xl bg-navy-950/90 border border-amber-500/40 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200">
+                          <div className="flex items-center justify-between text-xs border-b border-navy-800 pb-2 mb-3">
+                            <span className="font-bold text-amber-300 flex items-center gap-1.5">
+                              <Smartphone className="w-3.5 h-3.5" />
+                              Live YouTube Feed Simulator
+                            </span>
+                            <Badge variant="warning" className="text-[10px]">CTR: 14.8% Est.</Badge>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="w-28 aspect-[9/16] rounded-lg bg-black border-2 border-brand-purple overflow-hidden relative shadow-glow shrink-0 flex flex-col justify-between p-2">
+                              <div className="w-full h-full absolute inset-0 bg-gradient-to-t from-black via-transparent to-red-950/40 pointer-events-none" />
+                              <Badge variant="destructive" className="text-[8px] z-10 self-start">9:16 SHORTS</Badge>
+                              <div className="z-10 text-center">
+                                <p className="font-black text-amber-300 text-xs tracking-tighter drop-shadow-md">IMPOSSIBLE CLUTCH?!</p>
+                                <p className="text-[8px] text-white">💀 1000 BLOCKS</p>
+                              </div>
+                            </div>
+                            <div className="space-y-2 text-xs">
+                              <p className="font-semibold text-white">Algorithm Feed Benchmark:</p>
+                              <ul className="text-[11px] text-slate-300 space-y-1">
+                                <li>✓ High-contrast yellow headline text</li>
+                                <li>✓ Half-heart HUD emergency visual</li>
+                                <li>✓ Predicted in Top 5% gaming shelf CTR</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Chapter 4: 1-Click Publishing Scene */}
+                      {currentChapterIndex === 3 && (
+                        <div className="w-full max-w-lg p-4 rounded-xl bg-navy-950/90 border border-emerald-500/40 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 space-y-3">
+                          <div className="flex items-center justify-between text-xs border-b border-navy-800 pb-2">
+                            <span className="font-bold text-emerald-300 flex items-center gap-1.5">
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              Resumable YouTube Upload
+                            </span>
+                            <Badge variant="success" className="text-[10px]">100% Uploaded</Badge>
+                          </div>
+                          <div className="space-y-1.5 text-xs">
+                            <div className="flex justify-between text-slate-300">
+                              <span>Target: <strong>CraftVortex Gaming (@craftvortex)</strong></span>
+                              <span className="text-emerald-400 font-mono">Status: Ready</span>
+                            </div>
+                            <div className="w-full h-2 rounded-full bg-navy-900 overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-brand-purple to-emerald-400 rounded-full w-full" />
+                            </div>
+                            <p className="text-[11px] text-slate-400">
+                              Generated SEO: Complete title, description, timestamps & 10 high-ranking tags applied.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bottom Video Controls Scrubber */}
+                    <div className="p-3 bg-gradient-to-t from-black/95 to-transparent flex flex-col gap-2 z-20">
+                      {/* Timeline Scrubber */}
+                      <div className="relative w-full h-1.5 bg-navy-800 rounded-full cursor-pointer group">
+                        <div
+                          className="h-full bg-gradient-to-r from-brand-purple to-brand-blue rounded-full relative"
+                          style={{ width: `${(playbackSeconds / 60) * 100}%` }}
+                        >
+                          <div className="w-3 h-3 rounded-full bg-white shadow-glow absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+
+                      {/* Control Buttons */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setIsPlaying(!isPlaying)}
+                            className="p-1.5 rounded-lg bg-brand-purple hover:bg-brand-purple/80 text-white transition-all shadow-glow"
+                            aria-label={isPlaying ? "Pause tour" : "Play tour"}
+                          >
+                            {isPlaying ? <Pause className="w-4 h-4 fill-white" /> : <Play className="w-4 h-4 ml-0.5 fill-white" />}
+                          </button>
+                          <button
+                            onClick={handleRestart}
+                            className="p-1.5 rounded-lg bg-navy-800 hover:bg-navy-700 text-slate-300 hover:text-white transition-colors"
+                            aria-label="Restart tour"
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </button>
+                          <span className="text-xs font-mono text-slate-300 ml-1">
+                            {Math.floor(playbackSeconds / 60)}:{String(playbackSeconds % 60).padStart(2, "0")} / 1:00
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Link href="/dashboard">
+                            <Button size="sm" variant="gradient" className="h-7 text-xs font-semibold px-3 shadow-glow">
+                              Try Sandbox Live
+                              <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
+                  {/* Active Chapter Details */}
                   <CardContent className="p-5 space-y-3">
                     <div className="flex items-center gap-2">
                       <Badge variant="blue" className="text-[10px]">
-                        AI Optimized
+                        AI Studio
                       </Badge>
                       <Badge variant="success" className="text-[10px]">
-                        SEO Score: 94/100
+                        {activeChapter.badge}
                       </Badge>
                       <Badge variant="secondary" className="text-[10px]">
-                        Private Draft
+                        Demo Showcase
                       </Badge>
                     </div>
 
@@ -174,7 +459,7 @@ export default function DemoExperiencePage() {
                     </h2>
 
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Channel: <strong className="text-slate-700 dark:text-slate-200">@novoice_craft (NoVoiceCraft Showcase)</strong> • Real Performance: 55,032 views • 61.8h Watch Time
+                      Channel: <strong className="text-slate-700 dark:text-slate-200">@craftvortex (CraftVortex Gaming Showcase)</strong> • Sample Performance: 55,032 views • 61.8h Watch Time
                     </p>
                   </CardContent>
                 </Card>
@@ -201,6 +486,9 @@ Dropping from Y=320 all the way down with zero armor and testing if a single swe
 0:05 - Sweet Berries vs Fall Damage
 0:11 - Slow Motion Hitbox Test
 0:16 - Survives or Dies?
+
+🎮 Channel: @craftvortex
+🔔 Subscribe for daily insane Minecraft clutch challenges!
 
 #minecraft #shorts #minecraftmemes #clutch #gaming #minecraftclutch #survival`}
                   </div>
@@ -240,22 +528,22 @@ Dropping from Y=320 all the way down with zero armor and testing if a single swe
                       <span className="text-[10px] text-emerald-400 font-bold">Top 5% Category</span>
                     </div>
                     <p className="text-xs text-slate-700 dark:text-slate-200 italic leading-relaxed">
-                      &quot;Most developers fail with AI agents because they treat them like chatbots. Here is the 3-layer architecture Fortune 500 teams use instead...&quot;
+                      &quot;Can a water cauldron break a 1000-block fall in Minecraft Bedrock? Let&apos;s test the tick hitboxes before my world is gone...&quot;
                     </p>
                   </div>
 
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-slate-400">Click-Through Likelihood:</span>
-                      <span className="font-bold text-emerald-400">High (11.4% Est.)</span>
+                      <span className="font-bold text-emerald-400">High (14.8% Est.)</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Audience Alignment:</span>
-                      <span className="font-bold text-white">Full-Stack Engineers</span>
+                      <span className="font-bold text-white">Minecraft & Gaming Viewers</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Optimal Publish Window:</span>
-                      <span className="font-bold text-brand-blue">Tuesday, 6:00 PM IST</span>
+                      <span className="font-bold text-brand-blue">Friday, 5:30 PM IST</span>
                     </div>
                   </div>
 
@@ -273,10 +561,10 @@ Dropping from Y=320 all the way down with zero armor and testing if a single swe
                 <Card className="border-navy-800 bg-navy-900/60 p-5 space-y-3">
                   <h4 className="text-xs font-bold text-white flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    When you sign up:
+                    When you connect your channel:
                   </h4>
                   <ul className="text-xs text-slate-400 space-y-2">
-                    <li>• Connect your real YouTube channels via official Google OAuth.</li>
+                    <li>• Official Google Cloud OAuth 2.0 with zero token sharing.</li>
                     <li>• Real-time channel analytics without hardcoded multipliers.</li>
                     <li>• Resumable direct-to-YouTube video publishing with chunked resume.</li>
                     <li>• Unlimited draft versions and history restoration.</li>
@@ -294,7 +582,7 @@ Dropping from Y=320 all the way down with zero armor and testing if a single swe
               <div className="flex items-center gap-2.5 text-xs text-amber-500 dark:text-amber-300">
                 <Info className="w-4 h-4 shrink-0" />
                 <span>
-                  <strong>SAMPLE REPORTING:</strong> The figures below represent an illustrative sample channel dashboard. Real accounts receive verified YouTube Data API v3 and YouTube Analytics reports.
+                  <strong>SAMPLE REPORTING:</strong> The figures below represent an illustrative sample channel dashboard for <strong>CraftVortex Gaming</strong>. Real accounts receive live YouTube Data API v3 and YouTube Analytics reports.
                 </span>
               </div>
             </div>
@@ -322,7 +610,7 @@ Dropping from Y=320 all the way down with zero armor and testing if a single swe
               <Card className="border-navy-800 bg-navy-900/90 p-4">
                 <CardDescription className="text-xs uppercase font-semibold text-slate-400">Subscribers Gained</CardDescription>
                 <p className="text-2xl font-extrabold text-white mt-1">+1,850</p>
-                <span className="text-[11px] text-purple-400">148.5K Total Subscribers</span>
+                <span className="text-[11px] text-purple-400">24.8K Total Subscribers</span>
               </Card>
             </div>
 

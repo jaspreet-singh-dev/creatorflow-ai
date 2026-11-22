@@ -23,10 +23,10 @@ export interface DailyPoint {
 }
 
 export const NOVOICECRAFT_CHANNEL_STATS = {
-  channelId: "UC_novoicecraft_official",
-  channelTitle: "NoVoiceCraft",
-  handle: "@novoice_craft",
-  subscriberCount: 335,
+  channelId: "UC_craftvortex_demo",
+  channelTitle: "CraftVortex Gaming",
+  handle: "@craftvortex",
+  subscriberCount: 24800,
   lifetimeViews: 619466,
   lifetimeWatchTimeHours: 950.5,
   videoCount: 132,
@@ -4428,9 +4428,9 @@ export function getNoVoiceCraftAnalytics(range: "7d" | "28d" | "90d" | "365d" = 
     }));
 
     return {
-      channelId: "UC_novoicecraft_official",
-      channelTitle: "NoVoiceCraft",
-      subscriberCount: 335,
+      channelId: "UC_craftvortex_demo",
+      channelTitle: "CraftVortex Gaming",
+      subscriberCount: 24800,
       lifetimeViews: 619466,
       videoCount: 132,
       periodViews: 113435,
@@ -4516,10 +4516,10 @@ export function getNoVoiceCraftAnalytics(range: "7d" | "28d" | "90d" | "365d" = 
         { sourceType: "EXT_URL", label: "Direct & External Shares", views: 2270, estimatedMinutesWatched: 202, percent: 2 },
       ],
       isLive: false,
-      dataSource: "NoVoiceCraft Real Channel Analytics (Authentic Studio Metrics)",
+      dataSource: "CraftVortex Gaming Showcase Analytics",
       reportingPeriod: "Nov 14, 2026 to Nov 20, 2026 (7 Days)",
       lastSyncedAt: new Date().toISOString(),
-      reportingDelayNotice: "Authentic YouTube Studio metrics for NoVoiceCraft.",
+      reportingDelayNotice: "Interactive Demo Showcase: Illustrative metrics based on real Minecraft YouTube Studio analytics.",
     };
   }
 
@@ -4545,9 +4545,9 @@ export function getNoVoiceCraftAnalytics(range: "7d" | "28d" | "90d" | "365d" = 
     }));
 
     return {
-      channelId: "UC_novoicecraft_official",
-      channelTitle: "NoVoiceCraft",
-      subscriberCount: 335,
+      channelId: "UC_craftvortex_demo",
+      channelTitle: "CraftVortex Gaming",
+      subscriberCount: 24800,
       lifetimeViews: 619466,
       videoCount: 132,
       periodViews: 400867,
@@ -4579,10 +4579,10 @@ export function getNoVoiceCraftAnalytics(range: "7d" | "28d" | "90d" | "365d" = 
         { sourceType: "EXT_URL", label: "Direct & External Shares", views: 12028, estimatedMinutesWatched: 1105, percent: 3 },
       ],
       isLive: false,
-      dataSource: "NoVoiceCraft Real Channel Analytics (Authentic Studio Metrics)",
+      dataSource: "CraftVortex Gaming Showcase Analytics",
       reportingPeriod: "Aug 23, 2026 to Nov 20, 2026 (90 Days)",
       lastSyncedAt: new Date().toISOString(),
-      reportingDelayNotice: "Authentic YouTube Studio metrics for NoVoiceCraft.",
+      reportingDelayNotice: "Interactive Demo Showcase: Illustrative metrics based on real Minecraft YouTube Studio analytics.",
     };
   }
 
@@ -4607,9 +4607,9 @@ export function getNoVoiceCraftAnalytics(range: "7d" | "28d" | "90d" | "365d" = 
     }));
 
     return {
-      channelId: "UC_novoicecraft_official",
-      channelTitle: "NoVoiceCraft",
-      subscriberCount: 335,
+      channelId: "UC_craftvortex_demo",
+      channelTitle: "CraftVortex Gaming",
+      subscriberCount: 24800,
       lifetimeViews: 619466,
       videoCount: 132,
       periodViews: 619466,
@@ -4641,10 +4641,10 @@ export function getNoVoiceCraftAnalytics(range: "7d" | "28d" | "90d" | "365d" = 
         { sourceType: "EXT_URL", label: "Direct & External Shares", views: 18584, estimatedMinutesWatched: 1711, percent: 3 },
       ],
       isLive: false,
-      dataSource: "NoVoiceCraft Real Channel Analytics (Authentic Studio Metrics)",
+      dataSource: "CraftVortex Gaming Showcase Analytics",
       reportingPeriod: "May 19, 2025 to Nov 20, 2026 (Lifetime)",
       lastSyncedAt: new Date().toISOString(),
-      reportingDelayNotice: "Authentic YouTube Studio metrics for NoVoiceCraft.",
+      reportingDelayNotice: "Interactive Demo Showcase: Illustrative metrics based on real Minecraft YouTube Studio analytics.",
     };
   }
 
@@ -4659,9 +4659,9 @@ export function getNoVoiceCraftAnalytics(range: "7d" | "28d" | "90d" | "365d" = 
   }));
 
   return {
-    channelId: "UC_novoicecraft_official",
-    channelTitle: "NoVoiceCraft",
-    subscriberCount: 335,
+    channelId: "UC_craftvortex_demo",
+    channelTitle: "CraftVortex Gaming",
+    subscriberCount: 24800,
     lifetimeViews: 619466,
     videoCount: 132,
     periodViews: 306977,
@@ -4786,9 +4786,9 @@ export function getNoVoiceCraftAnalytics(range: "7d" | "28d" | "90d" | "365d" = 
       { sourceType: "EXT_URL", label: "Direct & External Shares", views: 9210, estimatedMinutesWatched: 833, percent: 3 },
     ],
     isLive: false,
-    dataSource: "NoVoiceCraft Real Channel Analytics (Authentic Studio Metrics)",
+    dataSource: "CraftVortex Gaming Showcase Analytics",
     reportingPeriod: "Oct 24, 2026 to Nov 20, 2026 (28 Days)",
     lastSyncedAt: new Date().toISOString(),
-    reportingDelayNotice: "Authentic YouTube Studio metrics for NoVoiceCraft.",
+    reportingDelayNotice: "Interactive Demo Showcase: Illustrative metrics based on real Minecraft YouTube Studio analytics.",
   };
 }

@@ -948,10 +948,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // ---------------------------------------------------------------------------
   const checkQuota = useCallback(
     (type: "ai" | "upload" | "channel", customTier?: PlanTier) => {
-      // Owner account has unlimited access across all quotas
+      // Master admin privileges unlock unlimited access across all quotas
       const isOwnerAccount =
         isOwner ||
-        user?.email?.toLowerCase() === "jaspreetsing3412@gmail.com" ||
         (profile as any)?.role === "owner" ||
         (profile as any)?.is_owner === true;
 
@@ -991,7 +990,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         max: limit.channels,
       };
     },
-    [profile, usage, isOwner, user?.email]
+    [profile, usage, isOwner]
   );
 
   const resetToDemoDefaults = useCallback(() => {

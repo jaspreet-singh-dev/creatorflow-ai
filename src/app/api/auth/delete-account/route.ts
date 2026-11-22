@@ -22,7 +22,10 @@ export async function POST(req: NextRequest) {
 
     // Users can only delete their own account unless an owner/admin is calling
     if (targetUserId !== user.id) {
-      const isOwner = user.email === "jaspreetsing3412@gmail.com";
+      const isOwner = Boolean(
+        process.env.ADMIN_OWNER_EMAIL &&
+        user.email?.toLowerCase() === process.env.ADMIN_OWNER_EMAIL.toLowerCase()
+      );
       if (!isOwner) {
         return NextResponse.json(
           { error: "Forbidden: You cannot delete another user's account." },

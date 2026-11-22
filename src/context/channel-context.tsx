@@ -20,15 +20,15 @@ const DEFAULT_DEMO_CHANNELS: ConnectedChannel[] = [
   {
     id: "chan-demo-1",
     user_id: "demo-user-123456",
-    youtube_channel_id: "UC_novoicecraft_official",
-    title: "NoVoiceCraft",
-    custom_url: "@novoice_craft",
+    youtube_channel_id: "UC_craftvortex_demo",
+    title: "CraftVortex Gaming",
+    custom_url: "@craftvortex",
     thumbnail_url: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=120&auto=format&fit=crop&q=80",
-    subscriber_count: 335,
-    video_count: 134,
-    view_count: 619466,
+    subscriber_count: 24800,
+    video_count: 86,
+    view_count: 1420000,
     is_active: true,
-    created_at: "2025-05-19T00:00:00.000Z",
+    created_at: "2025-01-01T00:00:00.000Z",
     updated_at: new Date().toISOString(),
   },
 ];
@@ -131,14 +131,22 @@ export function ChannelProvider({ children }: { children: React.ReactNode }) {
 
     if (isDemoMode) {
       const saved = localStorage.getItem("cf_channels_v1");
-      const loaded: ConnectedChannel[] = saved ? JSON.parse(saved) : DEFAULT_DEMO_CHANNELS;
+      let loaded: ConnectedChannel[] = saved ? JSON.parse(saved) : DEFAULT_DEMO_CHANNELS;
+      // Guarantee real channel NoVoiceCraft is NEVER present in demo mode or demo storage
+      loaded = loaded.filter(
+        (c) =>
+          !c.custom_url?.toLowerCase().includes("novoice") &&
+          !c.title?.toLowerCase().includes("novoice") &&
+          c.youtube_channel_id !== "UC_novoicecraft_official"
+      );
+      if (loaded.length === 0) {
+        loaded = DEFAULT_DEMO_CHANNELS;
+      }
       const deduplicated = deduplicateChannels(loaded);
-      if (saved && deduplicated.length !== loaded.length) {
-        try {
-          localStorage.setItem("cf_channels_v1", JSON.stringify(deduplicated));
-        } catch {
-          // ignore storage error
-        }
+      try {
+        localStorage.setItem("cf_channels_v1", JSON.stringify(deduplicated));
+      } catch {
+        // ignore storage error
       }
       setChannels(deduplicated);
 

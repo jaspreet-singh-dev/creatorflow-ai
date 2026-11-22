@@ -82,7 +82,7 @@ export default function AnalyticsDashboardPage() {
   const dailyPoints = analyticsData?.dailyPoints || [];
   const peakViewsDay = analyticsData?.peakViewsDay || (dailyPoints.length > 0 ? Math.max(...dailyPoints.map((d: any) => d.views)) : 36960);
   const isLive = Boolean(analyticsData?.isLive);
-  const dataSource = analyticsData?.dataSource || "NoVoiceCraft Real Channel Analytics";
+  const dataSource = analyticsData?.dataSource || "CraftVortex Gaming Showcase Analytics";
   const reportingPeriod = analyticsData?.reportingPeriod || (dateRange === "7d" ? "Nov 14 to Nov 20, 2026 (7 Days)" : dateRange === "28d" ? "Oct 24 to Nov 20, 2026 (28 Days)" : dateRange === "90d" ? "Aug 23 to Nov 20, 2026 (90 Days)" : "May 19, 2025 to Nov 20, 2026 (Lifetime)");
   const lastSynced = analyticsData?.lastSyncedAt
     ? new Date(analyticsData.lastSyncedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -98,7 +98,7 @@ export default function AnalyticsDashboardPage() {
     { percent: "100%", retention: 48, label: "Full Watch & Loop" },
   ];
 
-  // Audience Geography breakdown for NoVoiceCraft
+  // Audience Geography breakdown
   const audienceGeo = [
     { country: "India", flag: "🇮🇳", percent: 46 },
     { country: "United States", flag: "🇺🇸", percent: 22 },
@@ -111,12 +111,12 @@ export default function AnalyticsDashboardPage() {
   const handleExportCSV = () => {
     const csvRows = [
       ["Metric", "Value", "Date Range", "Channel", "Data Source"],
-      ["Period Views", totalViews, dateRange, activeChannel?.title || "", dataSource],
-      ["Watch Time (Hours)", watchTimeHours, dateRange, activeChannel?.title || "", dataSource],
-      ["Avg View Duration (s)", avgDurationSeconds, dateRange, activeChannel?.title || "", dataSource],
-      ["Subscribers Gained", subscribersGained, dateRange, activeChannel?.title || "", dataSource],
-      ["Subscribers Lost", subscribersLost, dateRange, activeChannel?.title || "", dataSource],
-      ["Net Subscribers", netSubscribers, dateRange, activeChannel?.title || "", dataSource],
+      ["Period Views", totalViews, dateRange, activeChannel?.title || "CraftVortex Gaming", dataSource],
+      ["Watch Time (Hours)", watchTimeHours, dateRange, activeChannel?.title || "CraftVortex Gaming", dataSource],
+      ["Avg View Duration (s)", avgDurationSeconds, dateRange, activeChannel?.title || "CraftVortex Gaming", dataSource],
+      ["Subscribers Gained", subscribersGained, dateRange, activeChannel?.title || "CraftVortex Gaming", dataSource],
+      ["Subscribers Lost", subscribersLost, dateRange, activeChannel?.title || "CraftVortex Gaming", dataSource],
+      ["Net Subscribers", netSubscribers, dateRange, activeChannel?.title || "CraftVortex Gaming", dataSource],
       [],
       ["Rank", "Video Title", "Views", "Likes", "Comments", "Duration", "CTR (%)", "Watch Time (h)", "Shorts URL"],
       ...topVideos.map((v: any, i: number) => [
@@ -136,7 +136,7 @@ export default function AnalyticsDashboardPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `youtube-analytics-${activeChannel?.title || "NoVoiceCraft"}-${dateRange}.csv`);
+    link.setAttribute("download", `youtube-analytics-${activeChannel?.title || "CraftVortex"}-${dateRange}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -158,12 +158,12 @@ export default function AnalyticsDashboardPage() {
                 className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
               >
                 {isLive ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <ShieldCheck className="w-3 h-3 text-brand-purple" />}
-                {isLive ? "Live YouTube Analytics API v2" : "Authentic Studio Metrics (NoVoiceCraft)"}
+                {isLive ? "Live YouTube Analytics API v2" : `Studio Metrics (${activeChannel?.title || "CraftVortex Gaming"})`}
               </Badge>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
               Official YouTube Studio metrics and performance reports for{" "}
-              <strong className="text-white">{activeChannel?.title || "NoVoiceCraft"}</strong>.
+              <strong className="text-white">{activeChannel?.title || "CraftVortex Gaming"}</strong>.
             </p>
           </div>
 
@@ -391,7 +391,7 @@ export default function AnalyticsDashboardPage() {
                   Shorts Retention Benchmark
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  Viewer drop-off points for NoVoiceCraft 4s–20s Minecraft clutches.
+                  Viewer drop-off points for {activeChannel?.title || "CraftVortex Gaming"} 4s–20s Minecraft clutches.
                 </CardDescription>
               </div>
             </div>

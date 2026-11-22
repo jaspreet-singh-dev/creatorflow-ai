@@ -134,9 +134,9 @@ export default function SubscriptionPage() {
             <div className="flex items-center gap-3">
               <ShieldCheck className="w-5 h-5 text-amber-400 shrink-0" />
               <div>
-                <p className="font-bold text-white text-sm">Product Owner Account Active</p>
+                <p className="font-bold text-white text-sm">Master Admin Privileges Active</p>
                 <p className="text-amber-200/80">
-                  Full owner privileges verified for jaspreetsing3412@gmail.com. All features, channels, uploads, and AI generation quotas are permanently unlocked without subscription requirement.
+                  Full administrator privileges verified. All features, paid tiers, multiple channels, video uploads, and AI generation quotas are permanently unlocked for free without requiring a subscription.
                 </p>
               </div>
             </div>
