@@ -88,20 +88,20 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 border-r border-navy-800 bg-navy-950/95 min-h-screen shrink-0 sticky top-0 h-screen select-none">
+    <aside className="hidden lg:flex flex-col w-64 border-r border-white/[0.06] bg-[#030712]/95 backdrop-blur-2xl min-h-screen shrink-0 sticky top-0 h-screen select-none z-30">
       {/* Brand Logo */}
-      <div className="h-16 flex items-center px-6 border-b border-navy-800 gap-2.5">
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-purple to-brand-blue flex items-center justify-center shadow-glow">
+      <div className="h-16 flex items-center px-6 border-b border-white/[0.06] gap-2.5">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-purple via-violet-600 to-brand-blue flex items-center justify-center shadow-glow">
           <Sparkles className="w-4 h-4 text-white" />
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-1.5">
-            <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white">CreatorFlow</span>
+            <span className="font-extrabold text-base tracking-tight text-white">CreatorFlow</span>
             <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.2 bg-brand-purple/20 text-brand-purple rounded border border-brand-purple/30">
               AI
             </span>
           </div>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">YouTube Workspace</span>
+          <span className="text-[10px] text-slate-400 font-medium">YouTube Workspace</span>
         </div>
       </div>
 
