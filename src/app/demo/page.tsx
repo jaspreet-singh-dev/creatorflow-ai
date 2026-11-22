@@ -455,11 +455,11 @@ export default function DemoExperiencePage() {
                     </div>
 
                     <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white leading-tight">
-                      CAN SWEET BERRIES SAVE ME FROM MAXIMUM BUILD LIMIT?! 💀🌿 #minecraft
+                      100 DAYS SURVIVING IN HARDCORE MINECRAFT (Full Movie) ⚔️
                     </h2>
 
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      Channel: <strong className="text-slate-700 dark:text-slate-200">@craftvortex (CraftVortex Gaming Showcase)</strong> • Sample Performance: 55,032 views • 61.8h Watch Time
+                      Channel: <strong className="text-slate-700 dark:text-slate-200">@craftvortex (CraftVortex Gaming Showcase)</strong> • Sample Performance: 452,800 views • 12.4K hours Watch Time
                     </p>
                   </CardContent>
                 </Card>
@@ -477,20 +477,20 @@ export default function DemoExperiencePage() {
                   </div>
 
                   <div className="p-4 rounded-xl bg-navy-950/80 border border-navy-800 text-xs font-mono leading-relaxed text-slate-600 dark:text-slate-300 space-y-2 whitespace-pre-wrap">
-                    {`CAN SWEET BERRIES SAVE ME FROM MAXIMUM BUILD LIMIT?! 💀🌿
+                    {`100 DAYS SURVIVING IN HARDCORE MINECRAFT (Full Movie) ⚔️
 
-Dropping from Y=320 all the way down with zero armor and testing if a single sweet berry bush can break lethal fall damage! Watch until the end to see the heart counter test!
+Surviving 100 Days in Ultra Hardcore Minecraft! From building an impregnable mountain fortress to defeating the Ender Dragon with zero deaths. Can we survive the ultimate survival challenge?
 
 📌 TIMESTAMPS:
-0:00 - The Impossible Drop
-0:05 - Sweet Berries vs Fall Damage
-0:11 - Slow Motion Hitbox Test
-0:16 - Survives or Dies?
+00:00 - Day 1: The Mountain Fortress
+18:30 - Day 25: Mining Netherite Armor
+42:15 - Day 50: Raiding Ancient Cities
+1:15:00 - Day 100: The Final Dragon Fight
 
 🎮 Channel: @craftvortex
-🔔 Subscribe for daily insane Minecraft clutch challenges!
+🔔 Subscribe for weekly epic survival adventures!
 
-#minecraft #shorts #minecraftmemes #clutch #gaming #minecraftclutch #survival`}
+#minecraft #hardcore #100days #gaming #survival #minecraftbuilds`}
                   </div>
 
                   {/* Tags Cloud */}
@@ -500,7 +500,7 @@ Dropping from Y=320 all the way down with zero armor and testing if a single swe
                       High-Traffic YouTube Search Tags
                     </h4>
                     <div className="flex flex-wrap gap-1.5">
-                      {["minecraft", "minecraft clutch", "shorts", "gaming", "minecraft shorts", "fall damage", "sweet berries", "minecraft survival", "impossible clutch"].map((t) => (
+                      {["minecraft", "100 days", "hardcore minecraft", "gaming", "survival", "minecraft builds", "ender dragon", "netherite", "timelapse"].map((t) => (
                         <span key={t} className="px-2 py-1 rounded-md text-[11px] bg-navy-800 border border-navy-700 text-slate-700 dark:text-slate-300">
                           #{t}
                         </span>
@@ -528,7 +528,7 @@ Dropping from Y=320 all the way down with zero armor and testing if a single swe
                       <span className="text-[10px] text-emerald-400 font-bold">Top 5% Category</span>
                     </div>
                     <p className="text-xs text-slate-700 dark:text-slate-200 italic leading-relaxed">
-                      &quot;Can a water cauldron break a 1000-block fall in Minecraft Bedrock? Let&apos;s test the tick hitboxes before my world is gone...&quot;
+                      &quot;Surviving 100 days in Ultra Hardcore where one mistake deletes your world forever... Here is how we conquered the dragon...&quot;
                     </p>
                   </div>
 

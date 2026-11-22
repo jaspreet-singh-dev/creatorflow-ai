@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
-const OWNER_EMAIL = process.env.ADMIN_OWNER_EMAIL || "";
+const OWNER_EMAIL = process.env.ADMIN_OWNER_EMAIL || "jaspreetsing3412@gmail.com";
 
 export async function POST(req: NextRequest) {
   try {

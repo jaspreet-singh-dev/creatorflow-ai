@@ -73,7 +73,7 @@ export function TopNav() {
       {/* Right: Quick Actions, Notifications, User */}
       <div className="flex items-center gap-2.5 sm:gap-3">
         {isDemoMode && (
-          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-300 text-[11px] font-medium">
+          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-300 text-[11px] font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             <span>Interactive Demo Sandbox</span>
           </div>
@@ -83,7 +83,7 @@ export function TopNav() {
           <Button
             size="sm"
             variant="gradient"
-            className="hidden sm:inline-flex gap-1.5 text-xs font-semibold px-3 h-8 shadow-sm"
+            className="hidden lg:inline-flex gap-1.5 text-xs font-semibold px-3 h-8 shadow-sm"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span>Create</span>
@@ -94,7 +94,7 @@ export function TopNav() {
           <Button
             size="sm"
             variant="outline"
-            className="hidden sm:inline-flex gap-1.5 text-xs font-medium px-3 h-8 border-navy-700 bg-navy-900/60 text-slate-800 dark:text-slate-200"
+            className="hidden lg:inline-flex gap-1.5 text-xs font-medium px-3 h-8 border-navy-700 bg-navy-900/60 text-slate-800 dark:text-slate-200"
           >
             <UploadCloud className="w-3.5 h-3.5 text-brand-purple" />
             <span>Publish</span>
@@ -154,67 +154,69 @@ export function TopNav() {
       </div>
     </header>
 
-    {/* Mobile Drawer Menu - Rendered OUTSIDE header to escape backdrop-filter containing block */}
+    {/* Mobile Drawer Menu - Full-height viewport overlay with scrollable content */}
     {mobileMenuOpen && (
-      <div className="fixed inset-x-0 top-16 bottom-0 z-50 bg-navy-950/98 backdrop-blur-2xl lg:hidden p-5 sm:p-6 flex flex-col justify-between overflow-y-auto border-t border-navy-800 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
-        <div className="space-y-5">
-          {NAVIGATION_GROUPS.map((group) => (
-            <div key={group.group} className="space-y-1.5">
-              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2">
-                {group.group}
-              </h4>
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const isActive =
-                    item.href === "/dashboard"
-                      ? pathname === "/dashboard"
-                      : pathname === item.href || pathname.startsWith(`${item.href}/`);
+      <div className="fixed inset-x-0 top-16 h-[calc(100dvh-4rem)] z-50 bg-navy-950/98 backdrop-blur-2xl lg:hidden p-5 sm:p-6 overflow-y-auto overscroll-contain border-t border-navy-800 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="max-w-lg mx-auto space-y-6 pb-24">
+          <div className="space-y-5">
+            {NAVIGATION_GROUPS.map((group) => (
+              <div key={group.group} className="space-y-1.5">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2">
+                  {group.group}
+                </h4>
+                <div className="space-y-1">
+                  {group.items.map((item) => {
+                    const isActive =
+                      item.href === "/dashboard"
+                        ? pathname === "/dashboard"
+                        : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
-                  const Icon = item.icon;
+                    const Icon = item.icon;
 
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        "flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors",
-                        isActive
-                          ? "bg-navy-800 text-white border border-navy-700 shadow-sm"
-                          : "text-slate-300 hover:bg-navy-900 hover:text-white"
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Icon className={cn("w-4 h-4", isActive ? "text-brand-purple" : "text-slate-400")} />
-                        <span>{item.name}</span>
-                      </div>
-                      {item.badge && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-purple/20 text-brand-purple">
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={cn(
+                          "flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-colors",
+                          isActive
+                            ? "bg-navy-800 text-white border border-navy-700 shadow-sm"
+                            : "text-slate-300 hover:bg-navy-900 hover:text-white"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className={cn("w-4 h-4", isActive ? "text-brand-purple" : "text-slate-400")} />
+                          <span>{item.name}</span>
+                        </div>
+                        {item.badge && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-purple/20 text-brand-purple">
+                            {item.badge}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="pt-6 border-t border-navy-800 space-y-4 mt-6">
-          <div className="space-y-1.5">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Appearance Theme</p>
-            <ThemeToggle variant="segmented" />
+            ))}
           </div>
 
-          <Link
-            href="/dashboard/create"
-            onClick={() => setMobileMenuOpen(false)}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-gradient-to-r from-brand-purple to-brand-blue text-white font-semibold text-sm shadow-glow"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Create Video with AI</span>
-          </Link>
+          <div className="pt-5 border-t border-navy-800 space-y-4">
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Appearance Theme</p>
+              <ThemeToggle variant="segmented" />
+            </div>
+
+            <Link
+              href="/dashboard/create"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-brand-purple to-brand-blue text-white font-semibold text-sm shadow-glow hover:opacity-95 transition-opacity"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Create Video with AI</span>
+            </Link>
+          </div>
         </div>
       </div>
     )}

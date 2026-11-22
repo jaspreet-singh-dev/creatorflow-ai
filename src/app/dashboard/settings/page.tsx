@@ -34,20 +34,14 @@ import {
   Monitor,
   Palette,
   Trash2,
-  Lock,
-  Unlock,
-  ShieldAlert,
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { profile, user, updateProfile, deleteAccount, isAdminUnlocked, unlockAdmin, lockAdmin } = useAuth();
+  const { profile, user, updateProfile, deleteAccount } = useAuth();
   const { resetToDemoDefaults } = useData();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  const [passkeyInput, setPasskeyInput] = useState("");
-  const [isVerifyingPasskey, setIsVerifyingPasskey] = useState(false);
-  const [passkeyError, setPasskeyError] = useState("");
 
   const [fullName, setFullName] = useState(profile?.full_name || "Alex Rivera");
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
@@ -352,109 +346,8 @@ export default function SettingsPage() {
             </Card>
           </div>
 
-          {/* Right Column: Master Admin Passkey & Live API Credentials (7 Cols) */}
+          {/* Right Column: Live API Credentials Configuration (7 Cols) */}
           <div className="lg:col-span-7 space-y-5">
-            {/* MASTER ADMIN ZERO-TRUST SECURITY CARD */}
-            <Card className={`border shadow-card ${isAdminUnlocked ? "border-amber-500/50 bg-amber-500/10" : "border-navy-800 bg-navy-900/90"}`}>
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base text-white flex items-center gap-2">
-                    {isAdminUnlocked ? (
-                      <Unlock className="w-4 h-4 text-amber-400" />
-                    ) : (
-                      <Lock className="w-4 h-4 text-slate-400" />
-                    )}
-                    Master Admin Passkey Security
-                  </CardTitle>
-                  <Badge variant={isAdminUnlocked ? "warning" : "secondary"} className="text-[10px] font-bold uppercase">
-                    {isAdminUnlocked ? "MASTER ADMIN UNLOCKED" : "LOCKED (STANDARD MODE)"}
-                  </Badge>
-                </div>
-                <CardDescription className="text-xs text-slate-400">
-                  Zero-trust security: Even if your email or Google session is compromised, paid tiers, bypass quotas, and master admin controls remain locked without your private passkey.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {isAdminUnlocked ? (
-                  <div className="space-y-3">
-                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold text-emerald-200">Full Owner & Master Admin Privileges Active</p>
-                        <p className="text-[11px] text-emerald-300/80 mt-0.5">
-                          All subscription tiers (Pro & Enterprise) are unlocked for free, AI generation quotas are unlimited, and administrative overrides are enabled.
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={async () => {
-                        await lockAdmin();
-                        toast.success("Admin Session Locked", "Master admin privileges have been revoked.");
-                      }}
-                      className="text-xs border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
-                    >
-                      <Lock className="w-3.5 h-3.5 mr-1.5" />
-                      Lock Admin Session
-                    </Button>
-                  </div>
-                ) : (
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      if (!passkeyInput.trim()) return;
-                      setIsVerifyingPasskey(true);
-                      setPasskeyError("");
-                      const res = await unlockAdmin(passkeyInput);
-                      setIsVerifyingPasskey(false);
-                      if (res.success) {
-                        toast.success("Admin Unlocked", "Master Admin privileges and lifetime Pro access activated.");
-                        setPasskeyInput("");
-                      } else {
-                        setPasskeyError(res.error || "Invalid passkey. Access denied.");
-                        toast.error("Access Denied", res.error || "Incorrect Master Admin Passkey.");
-                      }
-                    }}
-                    className="space-y-3"
-                  >
-                    <p className="text-xs text-slate-300">
-                      Enter your secret Master Admin Passkey to verify identity and unlock free lifetime Pro tier and unlimited quotas:
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Input
-                        type="password"
-                        placeholder="Enter Master Admin Passkey..."
-                        value={passkeyInput}
-                        onChange={(e) => {
-                          setPasskeyInput(e.target.value);
-                          if (passkeyError) setPasskeyError("");
-                        }}
-                        className="text-xs font-mono"
-                      />
-                      <Button
-                        type="submit"
-                        size="sm"
-                        variant="gradient"
-                        isLoading={isVerifyingPasskey}
-                        className="text-xs shrink-0 font-semibold"
-                      >
-                        <Unlock className="w-3.5 h-3.5 mr-1.5" />
-                        Unlock Admin
-                      </Button>
-                    </div>
-                    {passkeyError && (
-                      <p className="text-xs text-red-400 flex items-center gap-1.5 font-medium">
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        {passkeyError}
-                      </p>
-                    )}
-                  </form>
-                )}
-              </CardContent>
-            </Card>
-
             <Card className="border-navy-800 bg-navy-900/90 shadow-card">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">

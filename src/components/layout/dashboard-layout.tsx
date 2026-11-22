@@ -66,9 +66,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-navy-950 flex flex-col lg:flex-row text-slate-100">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         <TopNav />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0 overflow-x-hidden">
           {isUnconnectedRealUser && !isCurrentRouteAllowedWithoutChannel ? (
             <div className="max-w-2xl mx-auto my-8 p-8 rounded-2xl border border-navy-800 bg-navy-900/90 shadow-2xl text-center space-y-6 animate-in fade-in duration-300">
               <div className="w-16 h-16 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto border border-red-500/20 shadow-glow">

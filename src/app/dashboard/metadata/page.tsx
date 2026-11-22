@@ -52,15 +52,15 @@ export default function MetadataStudioPage() {
   const { toast } = useToast();
 
   // Input Form States
-  const [topic, setTopic] = useState("How to Automate YouTube Uploads using AI & Next.js");
+  const [topic, setTopic] = useState("CAN WATER CAULDRON SAVE ME FROM 1000 BLOCKS?! 💀 #minecraft");
   const [transcript, setTranscript] = useState(
-    "In this video we will discuss how to connect to YouTube Data API v3, how to authenticate with Google OAuth 2.0, generate metadata using Gemini AI, and schedule videos directly to YouTube from a Next.js app."
+    "Dropping from build limit Y=320 all the way to bedrock Y=-64 and testing whether landing inside a water cauldron completely eliminates fall damage in Minecraft hardcore survival mode!"
   );
-  const [niche, setNiche] = useState("Tech & Web Development");
-  const [targetAudience, setTargetAudience] = useState("Full Stack Developers and Content Creators");
-  const [primaryKeyword, setPrimaryKeyword] = useState("YouTube Automation Next.js");
-  const [secondaryKeywords, setSecondaryKeywords] = useState("gemini ai, youtube api, nextjs 15, oauth 2.0");
-  const [preferredTone, setPreferredTone] = useState("Engaging & Authoritative");
+  const [niche, setNiche] = useState("Minecraft & Gaming");
+  const [targetAudience, setTargetAudience] = useState("Minecraft players, clutch fans & YouTube Shorts viewers");
+  const [primaryKeyword, setPrimaryKeyword] = useState("minecraft clutch");
+  const [secondaryKeywords, setSecondaryKeywords] = useState("minecraft, shorts, water cauldron, clutch, survival");
+  const [preferredTone, setPreferredTone] = useState("Curious & High-Retention");
   const [language, setLanguage] = useState("English");
 
   // Associated Video
@@ -74,10 +74,11 @@ export default function MetadataStudioPage() {
   const [isAdvanced, setIsAdvanced] = useState(false);
 
   const QUICK_NICHES = [
+    "Minecraft & Gaming",
+    "Gaming",
     "Tech & Web Development",
     "AI & Automation",
     "Business & Finance",
-    "Gaming",
     "Education & How-To",
     "Vlog & Lifestyle",
   ];
@@ -85,36 +86,35 @@ export default function MetadataStudioPage() {
   // Generated Output state
   const [metadata, setMetadata] = useState<GeneratedMetadataOutput>({
     titles: [
-      "I Automated My YouTube Channel with Next.js & AI (Full Code)",
-      "How to Build a YouTube Automation App with Gemini AI in 2026",
-      "Stop Uploading Manually: YouTube Data API + Next.js Tutorial",
-      "The Ultimate Guide to YouTube API v3 Automation in Next.js",
-      "How I Publish Videos Automatically Using Next.js and Google OAuth",
+      "CAN WATER CAULDRON SAVE ME FROM 1000 BLOCKS?! 💀 #minecraft",
+      "Testing the Most Impossible Clutch in Minecraft History",
+      "I Tried Every Clutch Block From Maximum Build Height 😱",
+      "Water Cauldron vs Fall Damage: Can You Actually Survive?",
+      "The Only Clutch Trick Every Hardcore Player Must Know ⚡ #shorts",
     ],
     description:
-      "Learn how to build a production YouTube automation workspace from scratch using Next.js, Supabase, Google OAuth 2.0, and Gemini AI.\n\nIn this complete video tutorial, we cover:\n• Setting up Google Cloud Console credentials for YouTube Data API v3\n• Generating SEO-rich titles, descriptions, and tags with Gemini AI\n• Handling resumable chunked video uploads with OAuth 2.0\n• Scheduling releases and tracking real-time YouTube Analytics\n\nTIMESTAMPS:\n00:00 - Architecture Overview\n02:30 - Google OAuth 2.0 & Token Refresh\n07:15 - YouTube Data API v3 Endpoints\n14:40 - Gemini AI Metadata Engine\n21:10 - Testing Live Upload & Deployment\n\nRESOURCES:\n👉 Code Repository & Live App: https://creatorflow.ai\n👉 Official YouTube Data API Documentation: https://developers.google.com/youtube/v3\n\nDISCLAIMER: Content optimization improves audience relevance and search discoverability but does not guarantee algorithm distribution or subscriber growth.",
+      "Can a single water cauldron save you from maximum build limit in Minecraft hardcore?\n\nDropping from Y=320 with zero armor to test if the cauldron hitbox absorbs 100% of lethal fall damage! Watch till the end to see the frame-by-frame result!\n\nTIMESTAMPS:\n00:00 - The 1000 Block Drop\n00:05 - The Exact Hitbox Timing\n00:10 - Frame-by-Frame Slow Mo\n00:16 - Survives or Dies?\n\n🎮 Channel: @craftvortex\n🔔 Subscribe for daily insane Minecraft clutch challenges!\n\n#minecraft #shorts #gaming #clutch #minecraftmemes",
     tags: [
-      "youtube automation",
-      "nextjs 15",
-      "youtube data api v3",
-      "gemini ai tutorial",
-      "google oauth 2.0",
-      "ai metadata generator",
-      "nextjs tutorial",
-      "software architecture",
-      "creatorflow ai",
+      "minecraft",
+      "shorts",
+      "clutch",
+      "minecraft clutch",
+      "gaming",
+      "minecraft hardcore",
+      "survival",
+      "water cauldron",
+      "clutch trick",
     ],
-    hashtags: ["#YouTubeAutomation", "#Nextjs", "#GeminiAI", "#WebDevelopment"],
+    hashtags: ["#minecraft", "#shorts", "#clutch", "#gaming"],
     pinnedComment:
-      "💬 Are you currently uploading your videos manually or looking to build automated pipelines? Leave your stack below and I'll review your architecture!",
+      "💬 What block should I test dropping from build limit next? Comment below and I'll test it in tomorrow's Short!",
     chapters: [
-      { time: "00:00", title: "Architecture Overview" },
-      { time: "02:30", title: "Google OAuth 2.0 & Token Refresh" },
-      { time: "07:15", title: "YouTube Data API v3 Endpoints" },
-      { time: "14:40", title: "Gemini AI Metadata Engine" },
-      { time: "21:10", title: "Testing Live Upload & Deployment" },
+      { time: "00:00", title: "The 1000 Block Drop" },
+      { time: "00:05", title: "The Exact Hitbox Timing" },
+      { time: "00:10", title: "Frame-by-Frame Slow Mo" },
+      { time: "00:16", title: "Survives or Dies?" },
     ],
-    thumbnailIdeas: ["I AUTOMATED IT!", "ZERO MANUAL WORK", "NEXT.JS + AI BOT", "NEW YOUTUBE API"],
+    thumbnailIdeas: ["CAN IT SAVE ME?!", "1000 BLOCK DROP", "IMPOSSIBLE CLUTCH", "DEAD OR ALIVE?"],
     qualityScore: {
       overall: 95,
       clarity: 96,

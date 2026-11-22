@@ -3,7 +3,7 @@ import { google } from "googleapis";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { getOAuth2Client } from "@/lib/youtube/oauth";
-import { NOVOICECRAFT_VIDEOS } from "@/lib/data/novoicecraft-analytics-data";
+import { MOCK_VIDEOS } from "@/lib/data/mock-data";
 
 export const dynamic = "force-dynamic";
 
@@ -15,44 +15,44 @@ export async function GET(req: NextRequest) {
     const maxResults = Math.min(100, Math.max(1, parseInt(searchParams.get("maxResults") || "50", 10)));
     const search = (searchParams.get("search") || "").toLowerCase().trim();
 
-    const formattedDefaultVideos = NOVOICECRAFT_VIDEOS
+    const formattedDefaultVideos = MOCK_VIDEOS
       .filter((v) => !search || v.title.toLowerCase().includes(search))
       .slice(0, maxResults)
       .map((v) => ({
         id: v.id,
-        youtube_video_id: v.id,
+        youtube_video_id: v.youtube_video_id || v.id,
         title: v.title,
-        description: `Minecraft survival clutch challenge #${v.id}. Testing fall damage mechanics in YouTube Shorts format.`,
-        published_at: v.publishedAt,
-        publishedAt: v.publishedAt,
-        thumbnail_url: v.thumbnailUrl,
-        thumbnail: v.thumbnailUrl,
+        description: v.description,
+        published_at: v.published_at,
+        publishedAt: v.published_at,
+        thumbnail_url: v.thumbnail_url,
+        thumbnail: v.thumbnail_url,
         channelTitle: "CraftVortex Gaming",
-        tags: ["minecraft", "shorts", "clutch", "gaming"],
-        privacy_status: "public",
-        privacyStatus: "public",
-        status: "published",
-        duration: v.isoDuration,
-        duration_formatted: v.duration,
-        views: v.views,
-        viewCount: v.views,
-        likes: Math.round(v.views * 0.045),
-        likeCount: Math.round(v.views * 0.045),
-        comments: Math.round(v.views * 0.0018),
-        commentCount: Math.round(v.views * 0.0018),
-        watch_time_hours: v.watchTimeHours,
-        ctr: v.ctr,
-        video_url: v.videoUrl,
-        is_live_youtube_data: true,
+        tags: v.tags || ["minecraft", "gaming", "survival"],
+        privacy_status: v.privacy_status || "public",
+        privacyStatus: v.privacy_status || "public",
+        status: v.status || "published",
+        duration: "PT14M32S",
+        duration_formatted: "14:32",
+        views: 245000,
+        viewCount: 245000,
+        likes: 14200,
+        likeCount: 14200,
+        comments: 840,
+        commentCount: 840,
+        watch_time_hours: 4820,
+        ctr: 8.6,
+        video_url: v.video_file_url || "https://youtube.com/watch?v=dQw4w9WgXcQ",
+        is_live_youtube_data: false,
       }));
 
     if (!channelId || channelId.startsWith("chan-demo-")) {
       return NextResponse.json({
         success: true,
         videos: formattedDefaultVideos,
-        totalResults: NOVOICECRAFT_VIDEOS.length,
+        totalResults: MOCK_VIDEOS.length,
         isLive: false,
-        message: "Loaded CraftVortex Gaming demo video library.",
+        message: "Loaded CraftVortex Gaming demo showcase library.",
       });
     }
 
@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         success: true,
         videos: formattedDefaultVideos,
-        totalResults: NOVOICECRAFT_VIDEOS.length,
+        totalResults: MOCK_VIDEOS.length,
         isLive: false,
       });
     }
@@ -99,9 +99,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({
         success: true,
         videos: formattedDefaultVideos,
-        totalResults: NOVOICECRAFT_VIDEOS.length,
+        totalResults: MOCK_VIDEOS.length,
         isLive: false,
-        message: "Loaded authentic verified channel video catalog.",
+        message: "Loaded demo showcase video catalog.",
       });
     }
 
@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({
           success: true,
           videos: formattedDefaultVideos,
-          totalResults: NOVOICECRAFT_VIDEOS.length,
+          totalResults: MOCK_VIDEOS.length,
           isLive: false,
         });
       }
@@ -196,11 +196,11 @@ export async function GET(req: NextRequest) {
         dataSource: "Official YouTube Data API v3",
       });
     } catch (apiErr) {
-      console.warn("YouTube Data API fetch failed, falling back to verified channel catalog:", apiErr);
+      console.warn("YouTube Data API fetch failed, falling back to demo catalog:", apiErr);
       return NextResponse.json({
         success: true,
         videos: formattedDefaultVideos,
-        totalResults: NOVOICECRAFT_VIDEOS.length,
+        totalResults: MOCK_VIDEOS.length,
         isLive: false,
       });
     }

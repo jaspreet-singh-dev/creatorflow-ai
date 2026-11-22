@@ -38,9 +38,9 @@ export default function ContentAssistantPage() {
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState<"ideas" | "hooks" | "shorts" | "series">("ideas");
-  const [niche, setNiche] = useState("AI & Software Engineering");
-  const [topic, setTopic] = useState("Building Autonomous Agents");
-  const [targetAudience, setTargetAudience] = useState("Developers & Tech Founders");
+  const [niche, setNiche] = useState("Minecraft & Gaming");
+  const [topic, setTopic] = useState("CAN WATER CAULDRON SAVE ME FROM 1000 BLOCKS?! 💀 #minecraft");
+  const [targetAudience, setTargetAudience] = useState("Minecraft players, clutch fans & YouTube Shorts viewers");
   const [isLoading, setIsLoading] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<string | null>(null);
   const [isSavedDrawerOpen, setIsSavedDrawerOpen] = useState(false);

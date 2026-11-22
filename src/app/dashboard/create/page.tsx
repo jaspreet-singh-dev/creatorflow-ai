@@ -227,17 +227,21 @@ function CreateVideoContent() {
       const savedDraft = localStorage.getItem(storageKey);
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft);
-        if (parsed.topic) setTopic(parsed.topic);
+        if (parsed.topic && !parsed.topic.includes("autonomous AI agent") && !parsed.topic.includes("Next.js")) {
+          setTopic(parsed.topic);
+        } else {
+          setTopic("");
+        }
         if (parsed.niche && parsed.niche !== "Tech & Coding") {
           setNiche(parsed.niche);
         } else {
           setNiche("Minecraft & Gaming");
         }
         if (parsed.contentType) setContentType(parsed.contentType);
-        if (parsed.targetAudience && !parsed.targetAudience.includes("Software developers")) {
+        if (parsed.targetAudience && !parsed.targetAudience.includes("Software developers") && !parsed.targetAudience.includes("tech creators")) {
           setTargetAudience(parsed.targetAudience);
         } else {
-          setTargetAudience("Minecraft players & YouTube Shorts viewers");
+          setTargetAudience("Minecraft players, clutch fans & YouTube Shorts viewers");
         }
         if (parsed.language) setLanguage(parsed.language);
         if (parsed.editableScript) setEditableScript(parsed.editableScript);
@@ -1055,8 +1059,9 @@ Leave your biggest question in the comments below, and subscribe for weekly blue
             />
           </div>
 
-          {/* Stepper Buttons (Full Width Responsive Grid) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+          {/* Stepper Buttons (Full Width Responsive Grid with Overflow Protection) */}
+          <div className="overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-navy-700">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 min-w-[620px] sm:min-w-0">
             {STEPS.map((s) => {
               const isActive = currentStep === s.step;
               const isPast = currentStep > s.step;
@@ -1093,6 +1098,7 @@ Leave your biggest question in the comments below, and subscribe for weekly blue
                 </button>
               );
             })}
+            </div>
           </div>
         </div>
 

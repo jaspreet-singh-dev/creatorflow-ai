@@ -37,7 +37,7 @@ export function UserNav() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-1 pl-2 rounded-full border border-navy-800 bg-navy-900 hover:bg-navy-850 hover:border-navy-700 transition-colors"
       >
-        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 hidden md:inline-block max-w-[120px] truncate">
+        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 hidden lg:inline-block max-w-[120px] truncate">
           {displayName}
         </span>
         <div className="w-8 h-8 rounded-full overflow-hidden bg-brand-purple/20 border border-brand-purple/40 flex items-center justify-center text-xs font-semibold text-brand-purple">
