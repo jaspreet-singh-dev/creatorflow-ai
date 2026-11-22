@@ -32,13 +32,21 @@ interface YouTubeVideoItem {
   id: string;
   title: string;
   description: string;
-  publishedAt: string;
-  thumbnail: string;
-  channelTitle: string;
-  viewCount: number;
-  likeCount: number;
-  commentCount: number;
-  privacyStatus: string;
+  publishedAt?: string;
+  published_at?: string;
+  thumbnail?: string;
+  thumbnail_url?: string;
+  channelTitle?: string;
+  viewCount?: number;
+  views?: number;
+  likeCount?: number;
+  likes?: number;
+  commentCount?: number;
+  comments?: number;
+  privacyStatus?: string;
+  privacy_status?: string;
+  duration_formatted?: string;
+  video_url?: string;
 }
 
 export default function ChannelVideosPage() {
@@ -201,9 +209,16 @@ export default function ChannelVideosPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredVideos.map((video) => {
-              const formattedDate = video.publishedAt
-                ? format(new Date(video.publishedAt), "MMM d, yyyy")
+              const pubDate = video.publishedAt || video.published_at;
+              const formattedDate = pubDate
+                ? format(new Date(pubDate), "MMM d, yyyy")
                 : "Published";
+              const thumb = video.thumbnail || video.thumbnail_url;
+              const views = video.viewCount ?? video.views ?? 0;
+              const likes = video.likeCount ?? video.likes ?? 0;
+              const comments = video.commentCount ?? video.comments ?? 0;
+              const privacy = video.privacyStatus || video.privacy_status || "public";
+              const watchLink = video.video_url || `https://www.youtube.com/shorts/${video.id}`;
 
               return (
                 <Card
@@ -211,9 +226,9 @@ export default function ChannelVideosPage() {
                   className="border-navy-800 bg-navy-900/80 hover:border-brand-purple/40 transition-all flex flex-col justify-between shadow-card overflow-hidden group"
                 >
                   <div className="relative aspect-video w-full bg-navy-950 overflow-hidden">
-                    {video.thumbnail ? (
+                    {thumb ? (
                       <img
-                        src={video.thumbnail}
+                        src={thumb}
                         alt={video.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -223,10 +238,15 @@ export default function ChannelVideosPage() {
                       </div>
                     )}
                     <div className="absolute top-2 right-2">
-                      <Badge variant={video.privacyStatus === "public" ? "success" : "secondary"} className="text-[10px] capitalize">
-                        {video.privacyStatus}
+                      <Badge variant={privacy === "public" ? "success" : "secondary"} className="text-[10px] capitalize">
+                        {privacy}
                       </Badge>
                     </div>
+                    {video.duration_formatted && (
+                      <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-white">
+                        {video.duration_formatted}
+                      </div>
+                    )}
                   </div>
 
                   <CardHeader className="p-4 pb-2">
@@ -243,15 +263,15 @@ export default function ChannelVideosPage() {
                     <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-navy-800/80">
                       <span className="flex items-center gap-1">
                         <Eye className="w-3.5 h-3.5 text-brand-blue" />
-                        {formatNumber(video.viewCount)} views
+                        {formatNumber(views)} views
                       </span>
                       <span className="flex items-center gap-1">
                         <ThumbsUp className="w-3.5 h-3.5 text-emerald-400" />
-                        {formatNumber(video.likeCount)}
+                        {formatNumber(likes)}
                       </span>
                       <span className="flex items-center gap-1">
                         <MessageSquare className="w-3.5 h-3.5 text-brand-purple" />
-                        {formatNumber(video.commentCount)}
+                        {formatNumber(comments)}
                       </span>
                     </div>
                   </CardContent>
@@ -268,12 +288,12 @@ export default function ChannelVideosPage() {
                     </Button>
 
                     <a
-                      href={`https://www.youtube.com/watch?v=${video.id}`}
+                      href={watchLink}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-white p-1"
                     >
-                      <span className="text-[11px]">Watch</span>
+                      <span className="text-[11px]">Watch Short</span>
                       <ExternalLink className="w-3 h-3" />
                     </a>
                   </CardFooter>

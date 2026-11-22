@@ -228,9 +228,17 @@ function CreateVideoContent() {
       if (savedDraft) {
         const parsed = JSON.parse(savedDraft);
         if (parsed.topic) setTopic(parsed.topic);
-        if (parsed.niche) setNiche(parsed.niche);
+        if (parsed.niche && parsed.niche !== "Tech & Coding") {
+          setNiche(parsed.niche);
+        } else {
+          setNiche("Minecraft & Gaming");
+        }
         if (parsed.contentType) setContentType(parsed.contentType);
-        if (parsed.targetAudience) setTargetAudience(parsed.targetAudience);
+        if (parsed.targetAudience && !parsed.targetAudience.includes("Software developers")) {
+          setTargetAudience(parsed.targetAudience);
+        } else {
+          setTargetAudience("Minecraft players & YouTube Shorts viewers");
+        }
         if (parsed.language) setLanguage(parsed.language);
         if (parsed.editableScript) setEditableScript(parsed.editableScript);
         if (parsed.editableDescription) setEditableDescription(parsed.editableDescription);

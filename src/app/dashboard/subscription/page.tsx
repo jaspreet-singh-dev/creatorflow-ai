@@ -34,13 +34,15 @@ export default function SubscriptionPage() {
 
   const uniqueChannels = React.useMemo(() => deduplicateChannels(channels), [channels]);
 
-  const [currentTier, setCurrentTier] = useState<PlanTier>(profile?.plan_tier || "creator");
+  const [currentTier, setCurrentTier] = useState<PlanTier>(
+    isOwner ? "pro" : profile?.plan_tier || "free"
+  );
   const [switchMessage, setSwitchMessage] = useState<string | null>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const currentLimit = isOwner
     ? { ai: 999999, channels: 999999, uploads: 999999 }
-    : PLAN_LIMITS[currentTier] || PLAN_LIMITS.creator;
+    : PLAN_LIMITS[currentTier] || PLAN_LIMITS.free;
 
   const handleSwitchPlan = async (tier: PlanTier) => {
     if (tier === "free") {
