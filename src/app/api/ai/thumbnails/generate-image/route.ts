@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyApiAuth } from "@/lib/auth/server-auth";
-import { generateThumbnailSvg, svgToDataUri } from "@/lib/ai/thumbnail-graphics";
+import { generateThumbnailThemeAI } from "@/lib/ai/gemini";
 
 const generateImageRequestSchema = z.object({
   topic: z.string().min(2, "Topic must be at least 2 characters"),
   videoTitle: z.string().optional(),
+  description: z.string().optional(),
+  tags: z.array(z.string()).optional(),
   format: z.enum(["long_form", "shorts"]).optional().default("long_form"),
   niche: z.string().optional().default("Content Creation"),
   textOverlay: z.string().optional(),
   accentColor: z.string().optional(),
-  stylePreset: z
-    .enum(["cyber_gaming", "viral_hook", "urgent_danger", "hyper_mint", "split_contrast"])
-    .optional()
-    .default("hyper_mint"),
-  badgeText: z.string().optional(),
+  channelContext: z
+    .object({
+      channelTitle: z.string().optional(),
+      subscriberCount: z.number().optional(),
+      niche: z.string().optional(),
+    })
+    .optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -33,40 +37,32 @@ export async function POST(req: NextRequest) {
     const validatedData = generateImageRequestSchema.parse(body);
 
     const isShorts = validatedData.format === "shorts";
-    const derivedText =
-      validatedData.textOverlay?.trim() ||
-      (isShorts ? "WATCH THIS!" : "I AUTOMATED IT!");
 
-    // Generate High-CTR SVG visual composition
-    const svg = generateThumbnailSvg({
-      format: validatedData.format,
-      textOverlay: derivedText,
+    // 3. Generative AI analyzes content and metadata to design custom theme (like YouTube Studio)
+    const themeResult = await generateThumbnailThemeAI({
       topic: validatedData.topic,
       videoTitle: validatedData.videoTitle,
+      description: validatedData.description,
+      tags: validatedData.tags,
       niche: validatedData.niche,
-      stylePreset: validatedData.stylePreset,
-      accentColor: validatedData.accentColor,
-      badgeText: validatedData.badgeText,
+      format: validatedData.format,
+      userPreferredText: validatedData.textOverlay,
+      userPreferredColor: validatedData.accentColor,
+      channelContext: validatedData.channelContext,
     });
-
-    const dataUri = svgToDataUri(svg);
-
-    // AI Prompt formulated for third-party tools if user wants to render 3D renders
-    const aiPrompt = isShorts
-      ? `Cinematic 9:16 vertical YouTube Shorts cover for ${validatedData.topic}, dynamic ${validatedData.stylePreset} aesthetic, vibrant neon lighting with ${validatedData.accentColor || "#00F5A0"}, high contrast focal subject, dramatic bokeh background, 8k render.`
-      : `High-CTR 16:9 YouTube thumbnail background for ${validatedData.topic}, ${validatedData.stylePreset} style, dramatic rim lighting with ${validatedData.accentColor || "#00F5A0"}, sharp foreground subject on rule-of-thirds grid, clean dark obsidian background, 8k resolution.`;
 
     return NextResponse.json({
       success: true,
       data: {
-        imageUrl: dataUri,
-        textOverlay: derivedText,
+        imageUrl: themeResult.svgDataUri,
+        theme: themeResult.theme,
+        textOverlay: themeResult.theme.hookText,
+        accentColor: themeResult.theme.colorPalette.primaryAccent,
+        badgeText: themeResult.theme.badgeText,
         format: validatedData.format,
         dimensions: isShorts ? { width: 1080, height: 1920 } : { width: 1280, height: 720 },
-        stylePreset: validatedData.stylePreset,
-        accentColor: validatedData.accentColor || "#00F5A0",
-        aiImagePrompt: aiPrompt,
-        attribution: "Generated with CreatorFlow AI Visual Engine (Aurora Edition)",
+        isHeuristicFallback: themeResult.isHeuristicFallback,
+        attribution: themeResult.attributionNotice,
       },
     });
   } catch (error: any) {

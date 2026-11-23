@@ -549,17 +549,25 @@ Leave your biggest question in the comments below, and subscribe for weekly drop
         body: JSON.stringify({
           topic: topic || "CAN WATER CAULDRON SAVE ME?!",
           videoTitle: generatedOutput?.titles?.[selectedTitleIndex] || topic,
+          description: editableDescription,
+          tags: editableTags,
           format: contentType === "shorts" ? "shorts" : "long_form",
           niche,
           textOverlay: editableThumbnailText || "CAN IT SAVE ME?!",
           accentColor: "#00F5A0",
-          stylePreset: niche.toLowerCase().includes("minecraft") ? "cyber_gaming" : "hyper_mint",
+          channelContext: getChannelContextPayload(),
         }),
       });
       const data = await res.json();
       if (data.success && data.data?.imageUrl) {
         setAiThumbnailImage(data.data.imageUrl);
-        toast.success("AI Thumbnail Generated", "Created high-CTR visual for this video.");
+        if (data.data.textOverlay) {
+          setEditableThumbnailText(data.data.textOverlay);
+        }
+        toast.success(
+          "Generative AI Theme Created",
+          `Designed "${data.data.theme?.themeName || "Custom Theme"}" tailored to this video.`
+        );
       } else {
         toast.error("Generation Issue", data.error || "Failed to generate visual.");
       }

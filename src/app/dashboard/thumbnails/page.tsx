@@ -37,9 +37,12 @@ import {
   RefreshCw,
   Layers,
   Image as ImageIcon,
+  Flame,
+  BrainCircuit,
+  Compass,
 } from "lucide-react";
 import { ThumbnailConceptItem, ThumbnailGenerationOutput } from "@/lib/ai/gemini";
-import { generateThumbnailSvg, svgToDataUri } from "@/lib/ai/thumbnail-graphics";
+import { generateThumbnailSvg, svgToDataUri, GenerativeThemeSpecification } from "@/lib/ai/thumbnail-graphics";
 
 interface SavedThumbnailAsset {
   id: string;
@@ -72,22 +75,37 @@ export default function ThumbnailStudioPage() {
   const [tags, setTags] = useState<string[]>(["minecraft", "shorts", "clutch", "gaming", "survival"]);
   const [niche, setNiche] = useState<string>("Minecraft & Gaming");
 
-  // Style Preset for AI Visual Generation
-  const [stylePreset, setStylePreset] = useState<
-    "hyper_mint" | "cyber_gaming" | "urgent_danger" | "split_contrast" | "viral_hook"
-  >("cyber_gaming");
+  // Generative AI Theme Specification (YouTube Studio Grade)
+  const [activeTheme, setActiveTheme] = useState<GenerativeThemeSpecification | null>({
+    themeName: "Minecraft Lethal Suspense",
+    mood: "intense_gaming",
+    hookText: "CAN IT SAVE ME?!",
+    badgeText: "0.01s CLUTCH",
+    colorPalette: {
+      primaryAccent: "#00F5A0",
+      secondaryAccent: "#00D8F6",
+      glowColor: "#00F5A0",
+      backgroundMood: "emerald_neon",
+    },
+    visualFocalPoint: "First-person terminal velocity drop towards a tiny sweet berry bush with flashing red hearts.",
+    compositionLayout: "Vertical 9:16 safe zone with hook text centered between 25% and 45% height, keeping bottom clear of sound bar.",
+    graphicMotifs: ["minecraft_hearts", "isometric_blocks", "speed_particles"],
+    aiImagePrompt: "Cinematic vertical 9:16 Minecraft scene, player plummeting at terminal velocity, motion blur streaks, flashing red hearts, glowing emerald blocks, 8k render.",
+    ctrPredictionRationale: "Front-loads the life-or-death survival stakes with terminal velocity visual motifs, maximizing mobile scroll-stopping reflexes.",
+  });
 
   // Thumbnail Canvas State
   const [overlayText, setOverlayText] = useState<string>("CAN IT SAVE ME?!");
   const [textColor, setTextColor] = useState<string>("#00F5A0"); // Electric Mint
   
-  // Default generated SVG for instant visual fidelity
+  // Default generated SVG from initial theme
   const initialSvg = generateThumbnailSvg({
     format: "shorts",
     textOverlay: "CAN IT SAVE ME?!",
     topic: "CAN SWEET BERRIES SAVE ME?! 💀🌿",
-    stylePreset: "cyber_gaming",
+    badgeText: "0.01s CLUTCH",
     accentColor: "#00F5A0",
+    theme: activeTheme || undefined,
   });
   const [selectedImage, setSelectedImage] = useState<string>(svgToDataUri(initialSvg));
 
@@ -233,7 +251,7 @@ export default function ThumbnailStudioPage() {
       format: fmt,
       textOverlay: fmt === "shorts" ? "WATCH THIS!" : "I AUTOMATED IT!",
       topic: topic || videoTitle,
-      stylePreset,
+      theme: activeTheme || undefined,
       accentColor: textColor,
     });
     setSelectedImage(svgToDataUri(newSvg));
@@ -281,7 +299,7 @@ export default function ThumbnailStudioPage() {
           setSelectedImage(out.concepts[0].suggestedBackgroundUrl);
         }
         toast.success(
-          "AI Thumbnails Formulated",
+          "AI Concepts Formulated",
           `Generated 4 ${contentFormat === "shorts" ? "Shorts (9:16)" : "Long-Form (16:9)"} visual concepts based on video metadata.`
         );
       } else {
@@ -295,7 +313,7 @@ export default function ThumbnailStudioPage() {
     }
   };
 
-  // 2. Direct Instant AI Thumbnail Image Generation
+  // 2. Generative AI designs custom theme from content and metadata (like YouTube Studio)
   const handleGenerateAIVisualImage = async () => {
     setIsRenderingVisual(true);
     try {
@@ -308,11 +326,19 @@ export default function ThumbnailStudioPage() {
         body: JSON.stringify({
           topic: topic.trim() || videoTitle.trim() || "Viral Strategy",
           videoTitle: videoTitle.trim(),
+          description: description.trim(),
+          tags: tags,
           format: contentFormat,
           niche,
           textOverlay: overlayText.trim(),
           accentColor: textColor,
-          stylePreset,
+          channelContext: activeChannel
+            ? {
+                channelTitle: activeChannel.title,
+                subscriberCount: activeChannel.subscriber_count,
+                niche,
+              }
+            : undefined,
         }),
       });
 
@@ -322,6 +348,9 @@ export default function ThumbnailStudioPage() {
         setSelectedImage(result.imageUrl);
         setOverlayText(result.textOverlay);
         setTextColor(result.accentColor);
+        if (result.theme) {
+          setActiveTheme(result.theme);
+        }
         
         // Add to saved bank
         const newAsset: SavedThumbnailAsset = {
@@ -330,15 +359,15 @@ export default function ThumbnailStudioPage() {
           imageUrl: result.imageUrl,
           textOverlay: result.textOverlay,
           format: contentFormat,
-          style: stylePreset,
+          style: result.theme?.themeName || "Generative AI Theme",
           associatedTitle: videoTitle || "AI Generated Thumbnail",
           createdAt: new Date().toLocaleTimeString(),
         };
         setSavedAssets((prev) => [newAsset, ...prev]);
 
         toast.success(
-          "AI Thumbnail Generated!",
-          `High-CTR ${contentFormat === "shorts" ? "Shorts Cover (9:16)" : "Thumbnail (16:9)"} rendered successfully.`
+          "Generative AI Theme Designed!",
+          `Created "${result.theme?.themeName || "AI Theme"}" tailored to your content & metadata.`
         );
       } else {
         toast.error("Generation Issue", data.error || "Could not generate thumbnail visual.");
@@ -359,9 +388,6 @@ export default function ThumbnailStudioPage() {
     } else if (concept.suggestedBackgroundUrl) {
       setSelectedImage(concept.suggestedBackgroundUrl);
     }
-    if (concept.stylePreset) {
-      setStylePreset(concept.stylePreset);
-    }
     toast.info("Concept Applied", `Applied "${concept.name}" to canvas.`);
   };
 
@@ -381,7 +407,7 @@ export default function ThumbnailStudioPage() {
       imageUrl: selectedImage,
       textOverlay: overlayText,
       format: contentFormat,
-      style: stylePreset,
+      style: activeTheme?.themeName || "Generative Theme",
       associatedTitle: videoTitle || "Assigned in Studio",
       createdAt: new Date().toLocaleTimeString(),
     };
@@ -426,7 +452,7 @@ export default function ThumbnailStudioPage() {
       img.onload = () => {
         ctx.drawImage(img, 0, 0, width, height);
 
-        // If not already an SVG with baked text, overlay the high-CTR text
+        // If not an SVG with baked text, overlay the high-CTR text
         if (!selectedImage.startsWith("data:image/svg") && overlayText.trim()) {
           const text = overlayText.trim().toUpperCase();
           ctx.font = `900 ${isShorts ? "108px" : "88px"} Impact, 'Arial Black', sans-serif`;
@@ -484,7 +510,7 @@ export default function ThumbnailStudioPage() {
                 Thumbnail & Visual Studio
               </h1>
               <Badge variant="mint" className="text-[10px] font-bold uppercase tracking-wider">
-                AI CTR Optimization
+                Generative AI Theming
               </Badge>
               <Badge
                 variant={contentFormat === "shorts" ? "cyber" : "solar"}
@@ -494,8 +520,8 @@ export default function ThumbnailStudioPage() {
               </Badge>
             </div>
             <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-2xl leading-relaxed">
-              Generate click-optimized thumbnails and vertical Shorts covers. Formulate high-CTR text hooks,
-              psychological curiosity triggers, and AI image prompts tailored to your video metadata.
+              Generative AI analyzes your video content and metadata to design an authentic visual theme,
+              high-CTR psychological hook, and color psychology tailored like modern YouTube Studio.
             </p>
           </div>
 
@@ -529,7 +555,7 @@ export default function ThumbnailStudioPage() {
         </div>
 
         {/* ===================================================================
-            HERO: AI THUMBNAIL GENERATOR HUB
+            HERO: GENERATIVE AI CONTENT THEMING DOCK
             =================================================================== */}
         <Card className="aurora-card border border-white/10 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-mint-400/10 rounded-full blur-3xl pointer-events-none" />
@@ -539,15 +565,15 @@ export default function ThumbnailStudioPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <CardTitle className="text-base text-white flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-mint-400 animate-pulse" />
-                  AI Thumbnail Generation from Video Metadata
+                  <BrainCircuit className="w-4 h-4 text-mint-400 animate-pulse" />
+                  Generative AI Content & Metadata Theming
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  Select an existing project or enter video metadata below. The AI inspects your title, angle, and tags to formulate tailor-made concepts.
+                  Select a video project or enter content metadata. Generative AI analyzes topic nuance, emotional tension, and keywords to engineer the visual theme.
                 </CardDescription>
               </div>
 
-              {/* Action Buttons: Formulate Concepts & Instant Visual Generation */}
+              {/* Action Buttons: Generate Theme via AI & Formulate Concepts */}
               <div className="flex items-center gap-2 flex-wrap">
                 <Button
                   variant="outline"
@@ -567,17 +593,17 @@ export default function ThumbnailStudioPage() {
                   className="mint-btn-gradient text-xs font-bold px-4"
                 >
                   <Wand2 className="w-3.5 h-3.5 mr-1.5" />
-                  {isRenderingVisual ? "Generating AI Visual..." : "✨ Generate Thumbnail via AI"}
+                  {isRenderingVisual ? "AI Designing Theme..." : "✨ Generate Theme via AI"}
                 </Button>
               </div>
             </div>
           </CardHeader>
 
           <CardContent className="space-y-4 pt-1 relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {/* Select Project / Video */}
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">Bind to Project / Video</label>
+                <label className="text-[11px] font-semibold text-slate-300">Bind to Video Content</label>
                 <select
                   value={selectedEntityId}
                   onChange={(e) => handleSelectEntity(e.target.value)}
@@ -603,7 +629,7 @@ export default function ThumbnailStudioPage() {
 
               {/* Video Title */}
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">Video Title</label>
+                <label className="text-[11px] font-semibold text-slate-300">Video Title & Premise</label>
                 <Input
                   value={videoTitle}
                   onChange={(e) => setVideoTitle(e.target.value)}
@@ -622,26 +648,11 @@ export default function ThumbnailStudioPage() {
                   className="h-8 text-xs aurora-input"
                 />
               </div>
-
-              {/* AI Visual Style Preset */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">AI Visual Aesthetic</label>
-                <select
-                  value={stylePreset}
-                  onChange={(e) => setStylePreset(e.target.value as any)}
-                  className="w-full h-8 rounded-lg border border-white/10 bg-void-950 px-2.5 text-xs text-slate-200 focus:outline-none focus:border-mint-400"
-                >
-                  <option value="cyber_gaming">🎮 Cyber Gaming / Minecraft</option>
-                  <option value="hyper_mint">⚡ Aurora Hyper-Mint</option>
-                  <option value="urgent_danger">🚨 Urgent Warning / Danger</option>
-                  <option value="split_contrast">⚖️ Split Screen / Before & After</option>
-                </select>
-              </div>
             </div>
 
             {/* Metadata Tags Pill Row */}
             <div className="flex items-center gap-2 flex-wrap pt-1 text-[11px]">
-              <span className="text-slate-400 font-medium">Active Metadata Tags:</span>
+              <span className="text-slate-400 font-medium">Content Metadata Tags:</span>
               {tags.map((tag, idx) => (
                 <span
                   key={idx}
@@ -687,10 +698,10 @@ export default function ThumbnailStudioPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm text-white flex items-center gap-2">
                   <Sliders className="w-4 h-4 text-mint-400" />
-                  Canvas Customizer
+                  Theme Customizer
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
-                  Tune text hook, accent color, and background image asset.
+                  Fine-tune the AI-generated hook text, accent color, and pill badge.
                 </CardDescription>
               </CardHeader>
 
@@ -879,9 +890,58 @@ export default function ThumbnailStudioPage() {
           </div>
 
           {/* ===================================================================
-              RIGHT: REAL-TIME YOUTUBE SIMULATION (7 COLS)
+              RIGHT: AI THEME INSPECTOR + REAL-TIME YOUTUBE SIMULATION (7 COLS)
               =================================================================== */}
           <div className="lg:col-span-7 space-y-5">
+            {/* AI Generative Theme Telemetry Card */}
+            {activeTheme && (
+              <Card className="aurora-card border border-mint-400/30 shadow-2xl p-4 space-y-3 bg-void-950/80">
+                <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-mint-400 animate-pulse" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">
+                      Generative AI Theme: <strong className="text-mint-300">{activeTheme.themeName}</strong>
+                    </span>
+                  </div>
+                  <Badge variant="mint" className="text-[10px] font-mono">
+                    {activeTheme.mood.replace("_", " ").toUpperCase()}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="space-y-1 bg-void-900/60 p-2.5 rounded-lg border border-white/5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Visual Focal Subject</span>
+                    <p className="text-[11px] text-slate-200 leading-snug">{activeTheme.visualFocalPoint}</p>
+                  </div>
+
+                  <div className="space-y-1 bg-void-900/60 p-2.5 rounded-lg border border-white/5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Safe-Zone Composition</span>
+                    <p className="text-[11px] text-slate-200 leading-snug">{activeTheme.compositionLayout}</p>
+                  </div>
+                </div>
+
+                {activeTheme.ctrPredictionRationale && (
+                  <div className="p-2.5 rounded-lg bg-mint-400/5 border border-mint-400/20 text-[11px] text-slate-300 flex items-start gap-2">
+                    <Flame className="w-3.5 h-3.5 text-mint-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="text-mint-300">CTR Psychology:</strong> {activeTheme.ctrPredictionRationale}
+                    </div>
+                  </div>
+                )}
+
+                {activeTheme.graphicMotifs && activeTheme.graphicMotifs.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[10px]">
+                    <span className="text-slate-400 font-semibold">Active Motifs:</span>
+                    {activeTheme.graphicMotifs.map((motif, i) => (
+                      <span key={i} className="px-2 py-0.5 rounded bg-void-900 border border-white/10 text-cyan-300 font-mono">
+                        #{motif}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            )}
+
             <Card className="aurora-card border border-white/10 shadow-2xl">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">

@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { IdeaFormat } from "@/types/database.types";
-import { generateThumbnailSvg, svgToDataUri } from "@/lib/ai/thumbnail-graphics";
+import { generateThumbnailSvg, svgToDataUri, GenerativeThemeSpecification } from "@/lib/ai/thumbnail-graphics";
 
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
@@ -1257,6 +1257,252 @@ DISCLAIMER: Content optimization and SEO metadata improve organic search discove
     },
     isHeuristicFallback: true,
     attributionNotice: `[Sandbox Engine] Production-grade heuristic package${channelName ? ` tailored for ${channelName}` : ""}. Connect GEMINI_API_KEY in Settings for custom generative AI.`,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Phase 2.6: Generative AI Content Theming Engine (YouTube Studio Grade)
+// ---------------------------------------------------------------------------
+
+export interface GenerateThumbnailThemeInput {
+  topic: string;
+  videoTitle?: string;
+  description?: string;
+  tags?: string[];
+  niche?: string;
+  format?: "long_form" | "shorts";
+  userPreferredText?: string;
+  userPreferredColor?: string;
+  channelContext?: ChannelContextInput;
+}
+
+export interface GeneratedThumbnailThemeOutput {
+  theme: GenerativeThemeSpecification;
+  svgDataUri: string;
+  isHeuristicFallback: boolean;
+  attributionNotice: string;
+}
+
+export async function generateThumbnailThemeAI(
+  input: GenerateThumbnailThemeInput
+): Promise<GeneratedThumbnailThemeOutput> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  const isShorts = input.format === "shorts";
+  const formatName = isShorts ? "YouTube Shorts (9:16 Vertical)" : "YouTube Long-Form (16:9 Horizontal)";
+  const topic = input.topic || input.videoTitle || "Untitled Video";
+  const title = input.videoTitle || topic;
+  const niche = input.niche || "Content Creation";
+  const tags = input.tags && input.tags.length > 0 ? input.tags.join(", ") : "viral, trending, 2026";
+
+  if (apiKey && apiKey !== "AIzaSyYourGeminiApiKeyHere" && !apiKey.startsWith("placeholder")) {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+
+      const prompt = `You are an elite YouTube thumbnail art director, generative AI design specialist, and CTR psychologist for YouTube Studio.
+Analyze the following video content and its metadata to generate a custom, high-CTR thumbnail theme specifically tailored to this exact video.
+
+VIDEO METADATA:
+- Topic: "${topic}"
+- Title: "${title}"
+- Description: "${input.description ? input.description.slice(0, 300) : "Not provided"}"
+- Tags: "${tags}"
+- Content Niche: "${niche}"
+- Video Format: "${formatName}"
+- Channel: "${input.channelContext?.channelTitle || "Creator Channel"}"
+${input.userPreferredText ? `- User Preferred Text: "${input.userPreferredText}"` : ""}
+${input.userPreferredColor ? `- User Preferred Color: "${input.userPreferredColor}"` : ""}
+
+TASK:
+Design an intelligent visual theme according to this specific content:
+1. "themeName": An evocative theme name matching the content (e.g. "Minecraft Lethal Suspense", "0.01s Clutch Shock", "Obsidian Cyber Blueprint", "Viral Growth Explosion").
+2. "mood": "intense_gaming" | "shock_curiosity" | "clean_tech" | "urgent_danger" | "mysterious_intrigue" | "before_after"
+3. "hookText": High-CTR curiosity gap hook (1-3 words max for Shorts, 2-4 words for Long-Form, e.g. "CAN IT SAVE ME?!", "1000 BLOCKS", "DON'T DO THIS", "I AUTOMATED IT").
+4. "badgeText": Pill badge text (e.g. "NEW", "0.01s", "CLUTCH", "MYTH", "FAIL?", "2026", "STOP", "PRO").
+5. "colorPalette":
+   - "primaryAccent": Main text hex color (e.g. "#00F5A0", "#FACC15", "#00D8F6", "#EF4444", "#FFFFFF")
+   - "secondaryAccent": Badge / outline hex color
+   - "glowColor": Ambient flare / glow hex color
+   - "backgroundMood": "obsidian_void" | "deep_navy" | "crimson_danger" | "emerald_neon" | "split_contrast" | "cyber_grid" | "solar_flare"
+6. "visualFocalPoint": Detailed description of the primary visual scene & subject.
+7. "compositionLayout": Composition layout respecting YouTube safe zones.
+8. "graphicMotifs": 2-3 visual motifs to render from: ["minecraft_hearts", "isometric_blocks", "danger_hazard", "viral_arrow", "analytics_surge", "speed_particles", "split_comparison", "timer_badge"].
+9. "aiImagePrompt": Full 8k photorealistic prompt for Midjourney/Flux.
+10. "ctrPredictionRationale": 1-2 sentences explaining why this visual theme and psychological hook drive maximum click-through rate.
+
+Return ONLY a valid JSON object matching this exact schema:
+{
+  "themeName": "...",
+  "mood": "...",
+  "hookText": "...",
+  "badgeText": "...",
+  "colorPalette": {
+    "primaryAccent": "#...",
+    "secondaryAccent": "#...",
+    "glowColor": "#...",
+    "backgroundMood": "..."
+  },
+  "visualFocalPoint": "...",
+  "compositionLayout": "...",
+  "graphicMotifs": ["...", "..."],
+  "aiImagePrompt": "...",
+  "ctrPredictionRationale": "..."
+}
+`;
+
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) {
+        const parsed = JSON.parse(match[0]) as GenerativeThemeSpecification;
+        const svg = generateThumbnailSvg({
+          format: isShorts ? "shorts" : "long_form",
+          textOverlay: input.userPreferredText || parsed.hookText,
+          topic,
+          videoTitle: title,
+          niche,
+          badgeText: parsed.badgeText,
+          accentColor: input.userPreferredColor || parsed.colorPalette?.primaryAccent,
+          theme: parsed,
+        });
+
+        return {
+          theme: parsed,
+          svgDataUri: svgToDataUri(svg),
+          isHeuristicFallback: false,
+          attributionNotice: `[Generative AI Theme Engine] Content-analyzed theme designed by Gemini for ${formatName}.`,
+        };
+      }
+    } catch (err) {
+      console.warn("Live Gemini theme generation failed, using intelligent heuristic analyzer:", err);
+    }
+  }
+
+  return generateHeuristicThumbnailTheme(input);
+}
+
+function generateHeuristicThumbnailTheme(
+  input: GenerateThumbnailThemeInput
+): GeneratedThumbnailThemeOutput {
+  const isShorts = input.format === "shorts";
+  const formatName = isShorts ? "YouTube Shorts (9:16 Vertical)" : "YouTube Long-Form (16:9 Horizontal)";
+  const topic = input.topic || input.videoTitle || "Untitled Video";
+  const title = input.videoTitle || topic;
+  const niche = input.niche || "Content Creation";
+  const textCorpus = `${topic} ${title} ${(input.tags || []).join(" ")} ${niche}`.toLowerCase();
+
+  let theme: GenerativeThemeSpecification;
+
+  if (textCorpus.includes("minecraft") || textCorpus.includes("clutch") || textCorpus.includes("fall")) {
+    theme = {
+      themeName: "Minecraft Lethal Suspense",
+      mood: "intense_gaming",
+      hookText: input.userPreferredText || (isShorts ? "CAN IT SAVE ME?!" : "CAN WATER CAULDRON SAVE ME?!"),
+      badgeText: "0.01s CLUTCH",
+      colorPalette: {
+        primaryAccent: input.userPreferredColor || "#00F5A0",
+        secondaryAccent: "#00D8F6",
+        glowColor: "#00F5A0",
+        backgroundMood: "emerald_neon",
+      },
+      visualFocalPoint: "First-person terminal velocity fall towards a tiny water cauldron with red hearts flashing.",
+      compositionLayout: isShorts
+        ? "Vertical 9:16 drop angle with hook text pinned between 35%-48% vertical height safe zone."
+        : "Dynamic rule-of-thirds framing with bold text on left and falling subject on right.",
+      graphicMotifs: ["minecraft_hearts", "isometric_blocks", "speed_particles"],
+      aiImagePrompt: `Cinematic ${isShorts ? "vertical 9:16" : "16:9"} Minecraft scene, player character plummeting from Y=320 at terminal velocity, motion blur streaks, flashing red hearts, glowing green emerald blocks, 8k render.`,
+      ctrPredictionRationale: "Combines existential survival stakes with pixel-perfect curiosity to maximize instant thumb-stopping reflexes.",
+    };
+  } else if (textCorpus.includes("danger") || textCorpus.includes("warning") || textCorpus.includes("mistake") || textCorpus.includes("don't") || textCorpus.includes("stop")) {
+    theme = {
+      themeName: "Urgent Warning Hazard",
+      mood: "urgent_danger",
+      hookText: input.userPreferredText || (isShorts ? "DON'T DO THIS!" : "BIGGEST MISTAKE!"),
+      badgeText: "STOP NOW",
+      colorPalette: {
+        primaryAccent: input.userPreferredColor || "#EF4444",
+        secondaryAccent: "#FACC15",
+        glowColor: "#DC2626",
+        backgroundMood: "crimson_danger",
+      },
+      visualFocalPoint: "Glowing volumetric hazard beacon with high-contrast warning triangles and smoke.",
+      compositionLayout: "Central command warning with top safe-zone text and high-contrast dark border.",
+      graphicMotifs: ["danger_hazard", "viral_arrow"],
+      aiImagePrompt: `Dramatic ${isShorts ? "vertical 9:16" : "16:9"} YouTube thumbnail, glowing red warning signs, volumetric hazard smoke, intense cinematic contrast, 8k resolution.`,
+      ctrPredictionRationale: "Leverages strong Loss Aversion psychology (fear of doing something wrong) to command immediate clicks.",
+    };
+  } else if (textCorpus.includes("vs") || textCorpus.includes("compare") || textCorpus.includes("before") || textCorpus.includes("after")) {
+    theme = {
+      themeName: "Binary Contrast Duel",
+      mood: "before_after",
+      hookText: input.userPreferredText || (isShorts ? "BED vs SLIME" : "OLD vs NEW WAY"),
+      badgeText: "TESTED",
+      colorPalette: {
+        primaryAccent: input.userPreferredColor || "#00D8F6",
+        secondaryAccent: "#EF4444",
+        glowColor: "#00D8F6",
+        backgroundMood: "split_contrast",
+      },
+      visualFocalPoint: "50/50 dual split comparing the catastrophic failure vs optimal technique.",
+      compositionLayout: "Split horizontal/vertical divider with checkmark and cross emblems.",
+      graphicMotifs: ["split_comparison"],
+      aiImagePrompt: `Split-screen comparison ${isShorts ? "vertical 9:16" : "16:9"}, left side shows red explosion with fail icon, right side shows green success bounce with checkmark, high energy graphics, 8k.`,
+      ctrPredictionRationale: "Creates an irresistible curiosity gap by presenting an instant visual puzzle the viewer must watch to resolve.",
+    };
+  } else if (textCorpus.includes("growth") || textCorpus.includes("money") || textCorpus.includes("views") || textCorpus.includes("subscribers") || textCorpus.includes("viral")) {
+    theme = {
+      themeName: "Viral Growth Exponential",
+      mood: "shock_curiosity",
+      hookText: input.userPreferredText || (isShorts ? "10X RESULTS" : "THE 1% SECRET"),
+      badgeText: "VIRAL 2026",
+      colorPalette: {
+        primaryAccent: input.userPreferredColor || "#FFB800",
+        secondaryAccent: "#00F5A0",
+        glowColor: "#FFB800",
+        backgroundMood: "solar_flare",
+      },
+      visualFocalPoint: "Exponential curve skyrocketing past standard benchmarks with golden verification beacon.",
+      compositionLayout: "Ascending trajectory composition with hook text pinned above the growth curve.",
+      graphicMotifs: ["analytics_surge", "viral_arrow"],
+      aiImagePrompt: `High-energy YouTube thumbnail ${isShorts ? "9:16" : "16:9"}, glowing golden analytics line bursting through the frame, confetti particle trails, dark obsidian studio lighting, 8k.`,
+      ctrPredictionRationale: "Appeals directly to aspirational ambition and tangible proof of non-linear performance.",
+    };
+  } else {
+    theme = {
+      themeName: "Obsidian Cyber Blueprint",
+      mood: "clean_tech",
+      hookText: input.userPreferredText || (isShorts ? "WATCH THIS!" : "I AUTOMATED IT!"),
+      badgeText: "NEW 2026",
+      colorPalette: {
+        primaryAccent: input.userPreferredColor || "#00F5A0",
+        secondaryAccent: "#00D8F6",
+        glowColor: "#00F5A0",
+        backgroundMood: "obsidian_void",
+      },
+      visualFocalPoint: "Futuristic illuminated blueprint nodes with glowing cyber streaks.",
+      compositionLayout: "Rule-of-thirds modern architectural composition with hyper-contrast typography.",
+      graphicMotifs: ["speed_particles", "viral_arrow"],
+      aiImagePrompt: `Futuristic sleek ${isShorts ? "9:16 vertical" : "16:9 horizontal"} tech workspace, glowing neon green and cyan wireframe nodes on pure AMOLED black, octane render, 8k.`,
+      ctrPredictionRationale: "Positions the video as modern, high-authority, and premium to drive high browse click-through.",
+    };
+  }
+
+  const svg = generateThumbnailSvg({
+    format: isShorts ? "shorts" : "long_form",
+    textOverlay: theme.hookText,
+    topic,
+    videoTitle: title,
+    niche,
+    badgeText: theme.badgeText,
+    accentColor: theme.colorPalette.primaryAccent,
+    theme,
+  });
+
+  return {
+    theme,
+    svgDataUri: svgToDataUri(svg),
+    isHeuristicFallback: true,
+    attributionNotice: `[Generative Content Analyzer] Tailored theme engineered from metadata for ${formatName}.`,
   };
 }
 
