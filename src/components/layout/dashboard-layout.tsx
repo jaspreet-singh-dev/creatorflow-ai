@@ -64,10 +64,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   );
 
   return (
-    <div className="min-h-screen bg-[#030712] flex flex-col lg:flex-row text-slate-100 relative selection:bg-brand-purple/30 selection:text-white">
-      <div className="absolute inset-0 bg-cyber-grid opacity-40 pointer-events-none" />
+    <div className="min-h-screen bg-navy-950 flex flex-col lg:flex-row text-slate-100">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden relative z-10">
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         <TopNav />
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0 overflow-x-hidden">
           {isUnconnectedRealUser && !isCurrentRouteAllowedWithoutChannel ? (

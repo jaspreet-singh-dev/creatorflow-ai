@@ -96,7 +96,7 @@ export default function ThumbnailStudioPage() {
 
   // Thumbnail Canvas State
   const [overlayText, setOverlayText] = useState<string>("CAN IT SAVE ME?!");
-  const [textColor, setTextColor] = useState<string>("#00F5A0"); // Electric Mint
+  const [textColor, setTextColor] = useState<string>("#8B5CF6"); // Neon Violet
   
   // Default generated SVG from initial theme
   const initialSvg = generateThumbnailSvg({
@@ -500,20 +500,20 @@ export default function ThumbnailStudioPage() {
     <DashboardLayout>
       <div className="space-y-8 animate-in fade-in duration-200 max-w-7xl mx-auto pb-16">
         {/* ===================================================================
-            HEADER: TITLE + FORMAT CATEGORY SWITCHER (HYPER-MINT THEME)
+            HEADER: TITLE + FORMAT CATEGORY SWITCHER (SAAS THEME)
             =================================================================== */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/10 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-navy-800 pb-5">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-                <span className="w-2.5 h-7 rounded-full bg-mint-400 shadow-[0_0_12px_rgba(0,245,160,0.8)] inline-block" />
+                <span className="w-2.5 h-7 rounded-full bg-brand-purple shadow-glow inline-block" />
                 Thumbnail & Visual Studio
               </h1>
-              <Badge variant="mint" className="text-[10px] font-bold uppercase tracking-wider">
+              <Badge variant="purple" className="text-[10px] font-bold uppercase tracking-wider">
                 Generative AI Theming
               </Badge>
               <Badge
-                variant={contentFormat === "shorts" ? "cyber" : "solar"}
+                variant={contentFormat === "shorts" ? "purple" : "outline"}
                 className="text-[10px] font-bold uppercase tracking-wider"
               >
                 {contentFormat === "shorts" ? "YouTube Shorts (9:16)" : "Long-Form Video (16:9)"}
@@ -526,13 +526,13 @@ export default function ThumbnailStudioPage() {
           </div>
 
           {/* Format Category Switcher (Long-Form vs Shorts) */}
-          <div className="flex items-center gap-1.5 bg-void-950 p-1.5 rounded-xl border border-white/10 shadow-inner">
+          <div className="flex items-center gap-1.5 bg-navy-950 p-1.5 rounded-xl border border-navy-800 shadow-inner">
             <button
               type="button"
               onClick={() => handleFormatChange("long_form")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 contentFormat === "long_form"
-                  ? "mint-btn-gradient font-bold"
+                  ? "bg-brand-blue text-white shadow-glow font-bold"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -544,7 +544,7 @@ export default function ThumbnailStudioPage() {
               onClick={() => handleFormatChange("shorts")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 contentFormat === "shorts"
-                  ? "bg-gradient-to-r from-cyan-500 to-mint-400 text-void-950 font-bold shadow-[0_0_12px_rgba(0,216,246,0.5)]"
+                  ? "bg-brand-purple text-white shadow-glow font-bold"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -557,15 +557,15 @@ export default function ThumbnailStudioPage() {
         {/* ===================================================================
             HERO: GENERATIVE AI CONTENT THEMING DOCK
             =================================================================== */}
-        <Card className="aurora-card border border-white/10 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-mint-400/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyber-400/10 rounded-full blur-3xl pointer-events-none" />
+        <Card className="border border-navy-800 bg-navy-900/90 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-purple/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-blue/10 rounded-full blur-3xl pointer-events-none" />
 
           <CardHeader className="pb-3 relative z-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <CardTitle className="text-base text-white flex items-center gap-2">
-                  <BrainCircuit className="w-4 h-4 text-mint-400 animate-pulse" />
+                  <BrainCircuit className="w-4 h-4 text-brand-purple animate-pulse" />
                   Generative AI Content & Metadata Theming
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
@@ -580,17 +580,18 @@ export default function ThumbnailStudioPage() {
                   size="sm"
                   onClick={handleGenerateAIThumbnails}
                   isLoading={isGenerating}
-                  className="text-xs font-semibold border-white/10 text-slate-200 hover:border-mint-400/40"
+                  className="text-xs font-semibold border-navy-700 text-slate-200 hover:border-brand-purple/40"
                 >
-                  <RefreshCw className="w-3.5 h-3.5 mr-1.5 text-mint-400" />
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5 text-brand-purple" />
                   {isGenerating ? "Formulating..." : "Formulate Concepts"}
                 </Button>
 
                 <Button
+                  variant="gradient"
                   size="sm"
                   onClick={handleGenerateAIVisualImage}
                   isLoading={isRenderingVisual}
-                  className="mint-btn-gradient text-xs font-bold px-4"
+                  className="text-xs font-bold px-4 shadow-glow"
                 >
                   <Wand2 className="w-3.5 h-3.5 mr-1.5" />
                   {isRenderingVisual ? "AI Designing Theme..." : "✨ Generate Theme via AI"}
@@ -607,7 +608,7 @@ export default function ThumbnailStudioPage() {
                 <select
                   value={selectedEntityId}
                   onChange={(e) => handleSelectEntity(e.target.value)}
-                  className="w-full h-8 rounded-lg border border-white/10 bg-void-950 px-2.5 text-xs text-slate-200 focus:outline-none focus:border-mint-400"
+                  className="w-full h-8 rounded-lg border border-navy-800 bg-navy-950 px-2.5 text-xs text-slate-200 focus:outline-none focus:border-brand-purple"
                 >
                   <option value="">Manual Entry (No Bound Project)</option>
                   <optgroup label="Creator Studio Projects">
@@ -634,7 +635,7 @@ export default function ThumbnailStudioPage() {
                   value={videoTitle}
                   onChange={(e) => setVideoTitle(e.target.value)}
                   placeholder="e.g. CAN SWEET BERRIES SAVE ME?! 💀🌿 #minecraft"
-                  className="h-8 text-xs aurora-input"
+                  className="h-8 text-xs bg-navy-950 border-navy-800"
                 />
               </div>
 
@@ -645,7 +646,7 @@ export default function ThumbnailStudioPage() {
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g. Minecraft Lethal Fall Damage Clutch"
-                  className="h-8 text-xs aurora-input"
+                  className="h-8 text-xs bg-navy-950 border-navy-800"
                 />
               </div>
             </div>
@@ -656,14 +657,14 @@ export default function ThumbnailStudioPage() {
               {tags.map((tag, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-0.5 rounded-md bg-void-950 border border-white/10 text-mint-300 font-mono text-[10px]"
+                  className="px-2 py-0.5 rounded-md bg-navy-950 border border-navy-800 text-brand-purple font-mono text-[10px]"
                 >
                   #{tag}
                 </span>
               ))}
               <span className="text-slate-500 text-[10px]">
                 • Format:{" "}
-                <strong className="text-mint-400">
+                <strong className="text-brand-purple">
                   {contentFormat === "shorts" ? "Shorts (9:16)" : "Long-Form (16:9)"}
                 </strong>
               </span>
@@ -673,8 +674,8 @@ export default function ThumbnailStudioPage() {
             </div>
 
             {/* Safe Zone Advice Banner */}
-            <div className="p-2.5 rounded-lg border border-white/10 bg-void-950/70 text-xs text-slate-300 flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-mint-400 shrink-0 mt-0.5" />
+            <div className="p-2.5 rounded-lg border border-navy-800 bg-navy-950/70 text-xs text-slate-300 flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <div className="text-[11px] leading-relaxed">
                 <strong className="text-white">
                   {contentFormat === "shorts" ? "Shorts Safe-Zone Rules (9:16):" : "Long-Form Safe-Zone Rules (16:9):"}
@@ -694,10 +695,10 @@ export default function ThumbnailStudioPage() {
           {/* Controls & AI Concepts (5 Cols) */}
           <div className="lg:col-span-5 space-y-5">
             {/* Manual Canvas Controls */}
-            <Card className="aurora-card border border-white/10 shadow-xl">
+            <Card className="border border-navy-800 bg-navy-900/90 shadow-xl">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm text-white flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-mint-400" />
+                  <Sliders className="w-4 h-4 text-brand-purple" />
                   Theme Customizer
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
@@ -720,7 +721,7 @@ export default function ThumbnailStudioPage() {
                     value={overlayText}
                     onChange={(e) => setOverlayText(e.target.value.toUpperCase())}
                     placeholder={contentFormat === "shorts" ? "e.g. DON'T DO THIS!" : "e.g. I AUTOMATED IT!"}
-                    className="text-xs font-bold uppercase tracking-wide aurora-input"
+                    className="text-xs font-bold uppercase tracking-wide bg-navy-950 border-navy-800"
                   />
                 </div>
 
@@ -729,12 +730,12 @@ export default function ThumbnailStudioPage() {
                   <label className="text-xs font-semibold text-slate-300">Text Accent Color</label>
                   <div className="flex items-center gap-2">
                     {[
-                      { name: "Electric Mint", hex: "#00F5A0" },
-                      { name: "Cyber Cyan", hex: "#00D8F6" },
+                      { name: "Neon Violet", hex: "#8B5CF6" },
+                      { name: "Electric Cyan", hex: "#00D8F6" },
+                      { name: "Emerald Glow", hex: "#10B981" },
                       { name: "Solar Amber", hex: "#FFB800" },
                       { name: "Pure White", hex: "#FFFFFF" },
                       { name: "Danger Crimson", hex: "#EF4444" },
-                      { name: "Neon Purple", hex: "#A855F7" },
                     ].map((c) => (
                       <button
                         key={c.hex}
@@ -742,7 +743,7 @@ export default function ThumbnailStudioPage() {
                         onClick={() => setTextColor(c.hex)}
                         style={{ backgroundColor: c.hex }}
                         className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                          textColor === c.hex ? "border-white scale-110 shadow-[0_0_8px_rgba(255,255,255,0.7)]" : "border-void-800"
+                          textColor === c.hex ? "border-white scale-110 shadow-glow" : "border-navy-800"
                         }`}
                         title={c.name}
                       />
@@ -754,11 +755,12 @@ export default function ThumbnailStudioPage() {
                 <div className="flex items-center gap-2 pt-2">
                   <Button
                     onClick={handleSaveThumbnail}
-                    className="mint-btn-gradient flex-1 text-xs font-bold"
+                    variant="gradient"
+                    className="flex-1 text-xs font-bold shadow-glow"
                   >
                     {savedSuccess ? (
                       <>
-                        <Check className="w-3.5 h-3.5 mr-1.5 text-void-950" />
+                        <Check className="w-3.5 h-3.5 mr-1.5" />
                         Saved & Assigned!
                       </>
                     ) : (
@@ -770,10 +772,10 @@ export default function ThumbnailStudioPage() {
                     variant="outline"
                     size="sm"
                     onClick={handleDownloadPNG}
-                    className="text-xs border-white/10 text-white hover:border-mint-400/50"
+                    className="text-xs border-navy-700 text-white hover:border-brand-purple/50"
                     title="Export High-Res PNG"
                   >
-                    <Download className="w-3.5 h-3.5 mr-1.5 text-mint-400" />
+                    <Download className="w-3.5 h-3.5 mr-1.5 text-brand-purple" />
                     Export PNG
                   </Button>
                 </div>
@@ -784,11 +786,11 @@ export default function ThumbnailStudioPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-mint-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
                   AI Thumbnail Concepts ({concepts.length})
                 </h3>
                 {generationOutput?.isHeuristicFallback === false && (
-                  <Badge variant="mint" className="text-[10px]">
+                  <Badge variant="purple" className="text-[10px]">
                     Live Gemini
                   </Badge>
                 )}
@@ -798,7 +800,7 @@ export default function ThumbnailStudioPage() {
                 {concepts.map((con) => (
                   <Card
                     key={con.id}
-                    className="aurora-card border border-white/10 hover:border-mint-400/40 transition-all p-3.5 space-y-3 group"
+                    className="border border-navy-800 hover:border-brand-purple/40 transition-all p-3.5 space-y-3 group bg-navy-900/90"
                   >
                     {/* Header: Title + Category + CTR */}
                     <div className="flex items-center justify-between gap-2">
@@ -808,20 +810,20 @@ export default function ThumbnailStudioPage() {
                           {con.category}
                         </Badge>
                       </div>
-                      <span className="text-[10px] text-mint-400 font-semibold font-mono">
+                      <span className="text-[10px] text-emerald-400 font-semibold font-mono">
                         CTR: {con.estimatedCTR}
                       </span>
                     </div>
 
                     {/* Visual Preview Thumbnail Box */}
                     {con.generatedSvgUrl && (
-                      <div className="relative rounded-lg overflow-hidden border border-white/10 bg-black aspect-video max-h-36">
+                      <div className="relative rounded-lg overflow-hidden border border-navy-800 bg-black aspect-video max-h-36">
                         <img
                           src={con.generatedSvgUrl}
                           alt={con.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-mint-300 border border-white/10">
+                        <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-brand-purple border border-navy-800">
                           {con.stylePreset || "Visual Preset"}
                         </div>
                       </div>
@@ -831,7 +833,7 @@ export default function ThumbnailStudioPage() {
                     <div className="flex items-center gap-2">
                       <span
                         style={{ color: con.accentColor }}
-                        className="px-2 py-0.5 rounded bg-black/90 font-extrabold text-xs uppercase tracking-wide border border-white/10"
+                        className="px-2 py-0.5 rounded bg-black/90 font-extrabold text-xs uppercase tracking-wide border border-navy-800"
                       >
                         {con.textOverlay}
                       </span>
@@ -846,17 +848,17 @@ export default function ThumbnailStudioPage() {
 
                     {/* AI Prompt Section */}
                     {con.aiImagePrompt && (
-                      <div className="p-2 rounded bg-void-950 border border-white/10 text-[10px] text-slate-400 space-y-1">
+                      <div className="p-2 rounded bg-navy-950 border border-navy-800 text-[10px] text-slate-400 space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-slate-300">AI Image Prompt (Midjourney / Flux):</span>
                           <button
                             type="button"
                             onClick={() => handleCopyPrompt(con.aiImagePrompt, con.id)}
-                            className="text-mint-400 hover:text-white flex items-center gap-1 font-semibold"
+                            className="text-brand-purple hover:text-white flex items-center gap-1 font-semibold"
                           >
                             {copiedPromptId === con.id ? (
                               <>
-                                <Check className="w-3 h-3 text-mint-300" />
+                                <Check className="w-3 h-3 text-emerald-400" />
                                 <span>Copied</span>
                               </>
                             ) : (
@@ -878,7 +880,7 @@ export default function ThumbnailStudioPage() {
                         variant="secondary"
                         size="sm"
                         onClick={() => handleApplyConcept(con)}
-                        className="text-[11px] h-7 px-3 bg-void-950 hover:bg-mint-400 hover:text-void-950 border border-white/10 font-semibold"
+                        className="text-[11px] h-7 px-3 bg-navy-950 hover:bg-brand-purple hover:text-white border border-navy-800 font-semibold"
                       >
                         Apply to Canvas →
                       </Button>
@@ -895,36 +897,36 @@ export default function ThumbnailStudioPage() {
           <div className="lg:col-span-7 space-y-5">
             {/* AI Generative Theme Telemetry Card */}
             {activeTheme && (
-              <Card className="aurora-card border border-mint-400/30 shadow-2xl p-4 space-y-3 bg-void-950/80">
-                <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-white/10">
+              <Card className="border border-brand-purple/30 shadow-2xl p-4 space-y-3 bg-navy-950/80">
+                <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-navy-800">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-mint-400 animate-pulse" />
+                    <Sparkles className="w-4 h-4 text-brand-purple animate-pulse" />
                     <span className="text-xs font-bold text-white uppercase tracking-wider">
-                      Generative AI Theme: <strong className="text-mint-300">{activeTheme.themeName}</strong>
+                      Generative AI Theme: <strong className="text-brand-purple">{activeTheme.themeName}</strong>
                     </span>
                   </div>
-                  <Badge variant="mint" className="text-[10px] font-mono">
+                  <Badge variant="purple" className="text-[10px] font-mono">
                     {activeTheme.mood.replace("_", " ").toUpperCase()}
                   </Badge>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div className="space-y-1 bg-void-900/60 p-2.5 rounded-lg border border-white/5">
+                  <div className="space-y-1 bg-navy-900/60 p-2.5 rounded-lg border border-navy-800">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Visual Focal Subject</span>
                     <p className="text-[11px] text-slate-200 leading-snug">{activeTheme.visualFocalPoint}</p>
                   </div>
 
-                  <div className="space-y-1 bg-void-900/60 p-2.5 rounded-lg border border-white/5">
+                  <div className="space-y-1 bg-navy-900/60 p-2.5 rounded-lg border border-navy-800">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Safe-Zone Composition</span>
                     <p className="text-[11px] text-slate-200 leading-snug">{activeTheme.compositionLayout}</p>
                   </div>
                 </div>
 
                 {activeTheme.ctrPredictionRationale && (
-                  <div className="p-2.5 rounded-lg bg-mint-400/5 border border-mint-400/20 text-[11px] text-slate-300 flex items-start gap-2">
-                    <Flame className="w-3.5 h-3.5 text-mint-400 shrink-0 mt-0.5" />
+                  <div className="p-2.5 rounded-lg bg-brand-purple/10 border border-brand-purple/20 text-[11px] text-slate-300 flex items-start gap-2">
+                    <Flame className="w-3.5 h-3.5 text-brand-purple shrink-0 mt-0.5" />
                     <div>
-                      <strong className="text-mint-300">CTR Psychology:</strong> {activeTheme.ctrPredictionRationale}
+                      <strong className="text-brand-purple">CTR Psychology:</strong> {activeTheme.ctrPredictionRationale}
                     </div>
                   </div>
                 )}
@@ -933,7 +935,7 @@ export default function ThumbnailStudioPage() {
                   <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[10px]">
                     <span className="text-slate-400 font-semibold">Active Motifs:</span>
                     {activeTheme.graphicMotifs.map((motif, i) => (
-                      <span key={i} className="px-2 py-0.5 rounded bg-void-900 border border-white/10 text-cyan-300 font-mono">
+                      <span key={i} className="px-2 py-0.5 rounded bg-navy-900 border border-navy-800 text-cyan-300 font-mono">
                         #{motif}
                       </span>
                     ))}
@@ -942,11 +944,11 @@ export default function ThumbnailStudioPage() {
               </Card>
             )}
 
-            <Card className="aurora-card border border-white/10 shadow-2xl">
+            <Card className="border border-navy-800 bg-navy-900/90 shadow-2xl">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base text-white flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-cyber-400" />
+                    <Eye className="w-4 h-4 text-brand-purple" />
                     {contentFormat === "shorts"
                       ? "YouTube Shorts Player Simulation (9:16)"
                       : "Live YouTube Feed Simulation (16:9)"}
@@ -958,14 +960,14 @@ export default function ThumbnailStudioPage() {
                         onClick={() => setShowSafeZone(!showSafeZone)}
                         className={`text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors ${
                           showSafeZone
-                            ? "border-mint-400/50 bg-mint-400/10 text-mint-300"
-                            : "border-white/10 text-slate-400"
+                            ? "border-brand-purple/50 bg-brand-purple/15 text-brand-purple"
+                            : "border-navy-800 text-slate-400"
                         }`}
                       >
                         {showSafeZone ? "Safe Zone: ON" : "Safe Zone: OFF"}
                       </button>
                     )}
-                    <Badge variant={contentFormat === "shorts" ? "cyber" : "solar"} className="text-[10px]">
+                    <Badge variant={contentFormat === "shorts" ? "purple" : "outline"} className="text-[10px]">
                       {contentFormat === "shorts" ? "9:16 Vertical" : "16:9 Landscape"}
                     </Badge>
                   </div>
@@ -1013,7 +1015,7 @@ export default function ThumbnailStudioPage() {
 
                     {/* Simulated YouTube Video Row */}
                     <div className="flex items-start gap-3 pt-2">
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-void-950 border border-white/10 shrink-0">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-navy-950 border border-navy-800 shrink-0">
                         {activeChannel?.thumbnail_url ? (
                           <img src={activeChannel.thumbnail_url} alt="Channel" className="w-full h-full object-cover" />
                         ) : (
@@ -1055,11 +1057,11 @@ export default function ThumbnailStudioPage() {
 
                       {/* Safe Zone Visual Guide Overlay */}
                       {showSafeZone && (
-                        <div className="absolute inset-x-3 top-[20%] bottom-[25%] right-14 border border-dashed border-mint-400/60 rounded-xl pointer-events-none flex flex-col justify-between p-2">
-                          <span className="text-[9px] font-mono text-mint-300 bg-black/70 px-1 py-0.5 rounded self-start">
+                        <div className="absolute inset-x-3 top-[20%] bottom-[25%] right-14 border border-dashed border-brand-purple/60 rounded-xl pointer-events-none flex flex-col justify-between p-2">
+                          <span className="text-[9px] font-mono text-brand-purple bg-black/70 px-1 py-0.5 rounded self-start">
                             Safe Zone
                           </span>
-                          <span className="text-[8px] font-mono text-mint-300/80 bg-black/70 px-1 py-0.5 rounded self-end">
+                          <span className="text-[8px] font-mono text-brand-purple/80 bg-black/70 px-1 py-0.5 rounded self-end">
                             Center Focal Area
                           </span>
                         </div>
@@ -1116,14 +1118,14 @@ export default function ThumbnailStudioPage() {
 
                         {/* Spinning Sound Disc */}
                         <div className="w-8 h-8 rounded-full border border-white/20 bg-black/60 flex items-center justify-center animate-spin">
-                          <Music2 className="w-3.5 h-3.5 text-mint-400" />
+                          <Music2 className="w-3.5 h-3.5 text-brand-purple" />
                         </div>
                       </div>
 
                       {/* Bottom Channel Info & Sound Bar */}
                       <div className="absolute left-3 bottom-3 right-14 space-y-1 text-white pointer-events-none">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full overflow-hidden bg-void-950 border border-white/20">
+                          <div className="w-7 h-7 rounded-full overflow-hidden bg-navy-950 border border-navy-800">
                             {activeChannel?.thumbnail_url ? (
                               <img src={activeChannel.thumbnail_url} alt="Channel" className="w-full h-full object-cover" />
                             ) : (
@@ -1146,10 +1148,10 @@ export default function ThumbnailStudioPage() {
 
             {/* Saved Thumbnails Bank */}
             {savedAssets.length > 0 && (
-              <Card className="aurora-card border border-white/10 shadow-xl">
+              <Card className="border border-navy-800 bg-navy-900/90 shadow-xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm text-white flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-mint-400" />
+                    <Layers className="w-4 h-4 text-brand-purple" />
                     Saved Thumbnails Bank ({savedAssets.length})
                   </CardTitle>
                 </CardHeader>
@@ -1158,11 +1160,11 @@ export default function ThumbnailStudioPage() {
                     {savedAssets.map((asset) => (
                       <div
                         key={asset.id}
-                        className="rounded-lg border border-white/10 overflow-hidden bg-void-950 p-2 space-y-2 group"
+                        className="rounded-lg border border-navy-800 overflow-hidden bg-navy-950 p-2 space-y-2 group"
                       >
                         <div className="aspect-video rounded bg-black overflow-hidden relative">
                           <img src={asset.imageUrl} alt={asset.title} className="w-full h-full object-cover" />
-                          <Badge variant="mint" className="absolute top-1 left-1 text-[8px]">
+                          <Badge variant="purple" className="absolute top-1 left-1 text-[8px]">
                             {asset.format}
                           </Badge>
                         </div>
@@ -1179,7 +1181,7 @@ export default function ThumbnailStudioPage() {
                             setContentFormat(asset.format);
                             toast.info("Loaded Asset", `Loaded thumbnail into studio.`);
                           }}
-                          className="w-full text-[10px] h-6 bg-void-900 border border-white/10"
+                          className="w-full text-[10px] h-6 bg-navy-900 border border-navy-800"
                         >
                           Load in Studio
                         </Button>

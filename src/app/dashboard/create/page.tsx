@@ -791,8 +791,8 @@ ${editableThumbnailText}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-navy-800 pb-5">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-mint-400/20 via-teal-400/15 to-cyber-400/20 text-mint-400 border border-mint-400/30 flex items-center gap-1.5 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-mint-400" />
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-brand-purple/15 text-brand-purple border border-brand-purple/30 flex items-center gap-1.5 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
                 AI Video Studio
               </span>
 
@@ -814,7 +814,7 @@ ${editableThumbnailText}
 
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-2 flex items-center gap-2">
               <span>Creator Studio</span>
-              <span className="text-xs font-black px-2 py-0.5 rounded bg-mint-400/20 text-mint-400 border border-mint-400/30">
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-brand-purple/20 text-brand-purple border border-brand-purple/30">
                 PRO
               </span>
             </h1>
@@ -924,9 +924,9 @@ ${editableThumbnailText}
                     setContentType("shorts");
                     setPreviewMode("shorts");
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     contentType === "shorts"
-                      ? "bg-mint-400 text-black shadow-glow font-black"
+                      ? "bg-brand-purple text-white shadow-glow"
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
@@ -939,9 +939,9 @@ ${editableThumbnailText}
                     setContentType("long-form");
                     setPreviewMode("desktop");
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                     contentType === "long-form"
-                      ? "bg-cyber-400 text-black shadow-glow font-black"
+                      ? "bg-brand-blue text-white shadow-glow"
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
@@ -1537,10 +1537,10 @@ ${editableThumbnailText}
             {/* TAB CONTENT: THUMBNAIL VISUAL CONCEPT */}
             {activeTab === "thumbnail" && (
               <div className="space-y-4 animate-in fade-in-50 duration-200">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 rounded-xl bg-void-950/80 border border-white/10">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 rounded-xl bg-navy-950/80 border border-navy-800">
                   <div>
                     <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-mint-400" />
+                      <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
                       Visual Thumbnail Architecture
                     </h3>
                     <p className="text-[11px] text-slate-400">
@@ -1552,13 +1552,14 @@ ${editableThumbnailText}
                       size="sm"
                       onClick={handleGenerateStudioThumbnailImage}
                       isLoading={isGeneratingThumbnailImage}
-                      className="mint-btn-gradient text-xs h-7 px-3 font-bold"
+                      variant="gradient"
+                      className="text-xs h-7 px-3 font-bold"
                     >
                       <Sparkles className="w-3 h-3 mr-1" />
                       {isGeneratingThumbnailImage ? "Generating..." : "Generate AI Visual"}
                     </Button>
                     <Link href={`/dashboard/thumbnails`}>
-                      <Button variant="outline" size="sm" className="text-xs h-7 px-3 font-semibold border-white/10 text-white hover:border-mint-400/40">
+                      <Button variant="outline" size="sm" className="text-xs h-7 px-3 font-semibold border-navy-700 text-white hover:border-brand-purple/40">
                         Open Studio →
                       </Button>
                     </Link>
@@ -1567,20 +1568,20 @@ ${editableThumbnailText}
 
                 {/* AI Generated Thumbnail Visual Preview (if generated) */}
                 {aiThumbnailImage && (
-                  <Card className="aurora-card border border-mint-400/30 p-3.5 space-y-2 bg-void-950">
+                  <Card className="border border-brand-purple/30 p-3.5 space-y-2 bg-navy-900/90 shadow-xl">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-mint-400 flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
                         <Check className="w-3.5 h-3.5" /> AI Thumbnail Ready
                       </span>
                       <a
                         href={aiThumbnailImage}
                         download={`thumbnail-${Date.now()}.png`}
-                        className="text-[11px] font-bold text-mint-300 hover:text-white underline flex items-center gap-1"
+                        className="text-[11px] font-bold text-brand-purple hover:underline flex items-center gap-1"
                       >
                         <Download className="w-3 h-3" /> Download Visual
                       </a>
                     </div>
-                    <div className="rounded-lg overflow-hidden border border-white/10 bg-black aspect-video max-h-56">
+                    <div className="rounded-lg overflow-hidden border border-navy-800 bg-black aspect-video max-h-56">
                       <img src={aiThumbnailImage} alt="Generated Thumbnail" className="w-full h-full object-cover" />
                     </div>
                   </Card>
@@ -1588,30 +1589,30 @@ ${editableThumbnailText}
 
                 <div className="space-y-3">
                   {/* Thumbnail Text Editor */}
-                  <Card className="aurora-card border border-white/10 p-3.5 space-y-2 bg-void-950/60">
+                  <Card className="border border-navy-800 p-3.5 space-y-2 bg-navy-900/80">
                     <label className="text-xs font-bold text-slate-200">Thumbnail Big Bold Text</label>
                     <div className="flex items-center gap-2">
                       <Input
                         value={editableThumbnailText}
                         onChange={(e) => setEditableThumbnailText(e.target.value)}
-                        className="h-10 bg-void-950 border-white/10 text-sm font-extrabold text-mint-300 uppercase tracking-wider aurora-input"
+                        className="h-10 bg-navy-950 border-navy-800 text-sm font-extrabold text-white uppercase tracking-wider"
                       />
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleCopy(editableThumbnailText, "thumb-copy")}
-                        className="h-10 px-3 border-white/10 bg-void-900 text-slate-300 hover:text-white"
+                        className="h-10 px-3 border-navy-800 bg-navy-900 text-slate-300 hover:text-white"
                       >
-                        {copiedKey === "thumb-copy" ? <Check className="w-4 h-4 text-mint-400" /> : <Copy className="w-4 h-4" />}
+                        {copiedKey === "thumb-copy" ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                       </Button>
                     </div>
                   </Card>
 
                   {/* Visual Composition Blueprint */}
                   {thumbnailConcepts.map((c, i) => (
-                    <Card key={i} className="aurora-card border border-white/10 p-4 space-y-2 text-xs bg-void-950/60">
+                    <Card key={i} className="border border-navy-800 p-4 space-y-2 text-xs bg-navy-900/80">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-mint-400/10 text-mint-300 border border-mint-400/30">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-brand-purple/15 text-brand-purple border border-brand-purple/30">
                           Composition Blueprint
                         </span>
                         <span className="text-[11px] text-slate-400 font-medium">{c.contrast}</span>

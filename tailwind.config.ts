@@ -17,43 +17,43 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // Deep Void Obsidian Canvas
-        void: {
-          950: "#030508", // Purest deep midnight
-          900: "#060911", // Canvas background
-          850: "#0A0E1A", // Elevated surface / card base
-          800: "#101628", // Card border
-          750: "#161E34", // Highlight border
-          700: "#1F2B48", // Active state
+        navy: {
+          950: "#070A12", // Deepest background
+          900: "#0B101E", // Secondary background / card base
+          850: "#0F172A", // Elevated surface
+          800: "#162038", // Borders / subtle hover
+          700: "#1E2B4A", // Highlights / active border
+          600: "#2B3C66",
         },
-        // Electric Hyper-Mint (Primary Brand Accent)
-        mint: {
-          400: "#00F5A0",
-          500: "#00D26A",
-          600: "#059669",
-        },
-        // Cyber Cyan (Secondary Accent)
-        cyber: {
-          400: "#00D8F6",
-          500: "#06B6D4",
-          600: "#0284C7",
-        },
-        // Solar Amber (Engagement & Metric Highlight)
-        solar: {
-          400: "#FFB800",
-          500: "#F59E0B",
-          600: "#D97706",
-        },
-        // Mapped brand tokens for instant site-wide transformation
         brand: {
-          purple: "#00F5A0", // Transformed from purple to Electric Hyper-Mint!
-          "purple-hover": "#00D26A",
-          blue: "#00D8F6",   // Transformed to Cyber Cyan!
-          "blue-hover": "#0284C7",
-          mint: "#00F5A0",
-          cyan: "#00D8F6",
-          amber: "#FFB800",
-          emerald: "#10B981",
+          purple: "#8B5CF6",
+          "purple-hover": "#7C3AED",
+          blue: "#3B82F6",
+          "blue-hover": "#2563EB",
+          cyan: "#06B6D4",
+          violet: "#A855F7",
+        },
+        // Compatibility aliases for modern polished styling
+        void: {
+          950: "#070A12",
+          900: "#0B101E",
+          850: "#0F172A",
+          800: "#162038",
+        },
+        mint: {
+          300: "#6EE7B7",
+          400: "#10B981",
+          500: "#059669",
+        },
+        cyber: {
+          300: "#38BDF8",
+          400: "#06B6D4",
+          500: "#0284C7",
+        },
+        solar: {
+          300: "#FDE047",
+          400: "#FACC15",
+          500: "#EAB308",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -90,26 +90,15 @@ const config: Config = {
         },
       },
       borderRadius: {
-        "2xl": "1rem",
-        "3xl": "1.5rem",
-        "4xl": "2rem",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        glow: "0 0 25px -4px rgba(0, 245, 160, 0.35)",
-        "glow-lg": "0 0 45px -5px rgba(0, 245, 160, 0.5)",
-        "glow-cyan": "0 0 30px -4px rgba(0, 216, 246, 0.35)",
-        "glow-amber": "0 0 30px -4px rgba(255, 184, 0, 0.35)",
-        card: "0 10px 30px -5px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)",
-        "card-hover": "0 20px 45px -10px rgba(0, 245, 160, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.18)",
-        glass: "0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.14)",
-      },
-      backgroundImage: {
-        "radial-grid": "radial-gradient(rgba(0, 245, 160, 0.12) 1px, transparent 1px)",
-        "radial-glow": "radial-gradient(circle at 50% 0%, rgba(0, 245, 160, 0.22) 0%, rgba(0, 216, 246, 0.08) 50%, transparent 80%)",
-        "aurora-gradient": "linear-gradient(135deg, #00F5A0 0%, #00D8F6 50%, #FFB800 100%)",
+        glow: "0 0 25px -5px rgba(139, 92, 246, 0.25)",
+        "glow-blue": "0 0 25px -5px rgba(59, 130, 246, 0.25)",
+        "glow-mint": "0 0 25px -5px rgba(16, 185, 129, 0.25)",
+        card: "0 4px 20px -2px rgba(0, 0, 0, 0.4)",
       },
     },
   },

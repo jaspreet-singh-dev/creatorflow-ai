@@ -4,32 +4,30 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-xl text-xs sm:text-sm font-extrabold tracking-tight transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mint-400 disabled:pointer-events-none disabled:opacity-50 select-none active:scale-[0.97]",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-lg text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple disabled:pointer-events-none disabled:opacity-50 select-none",
   {
     variants: {
       variant: {
         default:
-          "bg-mint-400 text-black shadow-glow hover:bg-mint-500 hover:shadow-glow-lg border border-emerald-300/50 font-black",
+          "bg-brand-purple text-white shadow hover:bg-brand-purple-hover active:scale-[0.98]",
         secondary:
-          "bg-void-850 text-slate-200 hover:bg-void-800 hover:text-white border border-white/10 hover:border-mint-400/40 shadow-card",
+          "bg-navy-800 text-slate-100 hover:bg-navy-700 border border-navy-700 active:scale-[0.98]",
         outline:
-          "border border-white/10 bg-white/[0.04] text-slate-200 hover:bg-mint-400/10 hover:border-mint-400/50 hover:text-mint-400 backdrop-blur-md shadow-sm",
+          "border border-navy-700 bg-transparent text-slate-200 hover:bg-navy-850 hover:text-white hover:border-navy-600",
         ghost:
-          "text-slate-300 hover:bg-white/[0.06] hover:text-mint-400",
+          "text-slate-300 hover:bg-navy-850 hover:text-white",
         destructive:
-          "bg-rose-500/15 text-rose-300 border border-rose-500/30 hover:bg-rose-500/25",
+          "bg-rose-600/20 text-rose-300 border border-rose-500/30 hover:bg-rose-600/30",
         blue:
-          "bg-cyber-500 text-black shadow hover:bg-cyber-600 border border-cyan-300/40 font-bold",
+          "bg-brand-blue text-white shadow hover:bg-brand-blue-hover active:scale-[0.98]",
         gradient:
-          "mint-btn-gradient",
-        amber:
-          "bg-gradient-to-r from-solar-400 to-solar-500 text-black font-black shadow-glow-amber hover:opacity-95 border border-amber-300/50",
+          "bg-gradient-to-r from-brand-purple via-violet-600 to-brand-blue text-white shadow-glow hover:opacity-95 active:scale-[0.98]",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-8 rounded-lg px-3 text-xs",
-        lg: "h-12 rounded-xl px-7 text-sm sm:text-base font-black tracking-normal",
-        icon: "h-9 w-9 rounded-lg",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-11 rounded-lg px-6 text-base",
+        icon: "h-9 w-9",
       },
     },
     defaultVariants: {

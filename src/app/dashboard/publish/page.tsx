@@ -1465,7 +1465,7 @@ function PublishWorkspaceContent() {
 
                   <div className="pt-2">
                     <Link href="/dashboard/thumbnails">
-                      <Button size="sm" className="w-full mint-btn-gradient text-xs font-bold shadow-[0_0_12px_rgba(0,245,160,0.4)]">
+                      <Button variant="gradient" size="sm" className="w-full text-xs font-bold shadow-glow">
                         <Sparkles className="w-3.5 h-3.5 mr-1.5" />
                         ✨ Generate Thumbnail via AI (16:9 & Shorts) →
                       </Button>
