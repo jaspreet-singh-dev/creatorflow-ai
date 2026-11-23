@@ -53,33 +53,28 @@ export default function SignUpPage() {
     }
   };
 
-  const handleLaunchDemo = () => {
-    signInDemo();
-    router.push("/dashboard");
-  };
-
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 relative overflow-hidden flex flex-col justify-between selection:bg-brand-purple/30 selection:text-white">
-      {/* Background Kinetic Cyber Grid & Ambient Glows */}
-      <div className="absolute inset-0 bg-cyber-grid opacity-60 pointer-events-none" />
-      <div className="ambient-glow-violet -top-32 -left-32 opacity-40" />
+    <div className="min-h-screen bg-[#030508] text-slate-100 relative overflow-hidden flex flex-col justify-between selection:bg-mint-400/30 selection:text-black">
+      {/* Background Kinetic Grid & Ambient Glows */}
+      <div className="absolute inset-0 bg-aurora-grid opacity-60 pointer-events-none" />
+      <div className="ambient-glow-mint -top-32 -left-32 opacity-40" />
       <div className="ambient-glow-cyan bottom-0 right-0 opacity-30" />
 
       {/* Header */}
-      <header className="relative z-20 px-6 lg:px-12 py-5 flex items-center justify-between border-b border-white/[0.06] backdrop-blur-md bg-[#030712]/50">
+      <header className="relative z-20 px-6 lg:px-12 py-5 flex items-center justify-between border-b border-white/[0.06] backdrop-blur-xl bg-[#030508]/60">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-purple via-violet-600 to-brand-blue flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-mint-400 via-teal-400 to-cyber-400 flex items-center justify-center shadow-glow group-hover:scale-105 transition-transform">
+            <Sparkles className="w-5 h-5 text-black stroke-[2.5]" />
           </div>
-          <span className="font-extrabold text-xl tracking-tight text-white">
-            CreatorFlow <span className="cyber-accent-text">AI</span>
+          <span className="font-black text-xl tracking-tight text-white">
+            CreatorFlow <span className="aurora-accent-text">AI</span>
           </span>
         </Link>
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Link href="/login">
-            <Button variant="outline" size="sm" className="text-xs font-semibold">
+            <Button variant="outline" size="sm" className="text-xs font-bold">
               Sign In
             </Button>
           </Link>
@@ -91,39 +86,39 @@ export default function SignUpPage() {
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           {/* Left Panel */}
           <div className="lg:col-span-7 space-y-6 text-left hidden md:block">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-bold text-violet-300 shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-mint-400/10 border border-mint-400/25 text-xs font-bold text-mint-400 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5" />
               <span>Free Tier Creator Onboarding</span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.15]">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.15]">
               Unlock Viral YouTube Growth with{" "}
-              <span className="cyber-accent-text">AI Precision.</span>
+              <span className="aurora-accent-text">AI Precision.</span>
             </h1>
 
-            <p className="text-sm sm:text-base text-slate-400 max-w-lg leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-400 max-w-lg leading-relaxed font-medium">
               Start formulating high-retention titles, opening hooks, structured scripts, and automated publishing tags on day one.
             </p>
 
-            <div className="cyber-card p-5 space-y-3.5 max-w-lg">
-              <p className="text-xs font-bold text-slate-200 uppercase tracking-wider">
+            <div className="aurora-card p-5 space-y-3.5 max-w-lg">
+              <p className="text-xs font-black text-white uppercase tracking-wider">
                 Included with your Free Creator account:
               </p>
               <div className="space-y-2 text-xs text-slate-300">
                 <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-mint-400 shrink-0" />
                   <span>30 AI metadata & viral title formulations per month</span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-mint-400 shrink-0" />
                   <span>Interactive YouTube Shorts & Desktop Player Simulator</span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-mint-400 shrink-0" />
                   <span>Direct YouTube Channel sync & chunked 4K upload manager</span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-mint-400 shrink-0" />
                   <span>Gaming & Minecraft retention challenge prompt presets</span>
                 </div>
               </div>
@@ -132,9 +127,9 @@ export default function SignUpPage() {
 
           {/* Right Panel: Signup Form */}
           <div className="lg:col-span-5 w-full max-w-md mx-auto space-y-4">
-            <div className="cyber-card p-6 sm:p-7 space-y-5">
+            <div className="aurora-card p-6 sm:p-7 space-y-5">
               <div className="space-y-1">
-                <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                   Create Account
                 </h2>
                 <p className="text-xs text-slate-400 leading-relaxed">
@@ -144,10 +139,10 @@ export default function SignUpPage() {
 
               {isSuccess ? (
                 <div className="p-6 text-center space-y-4 animate-in zoom-in-95">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
+                  <div className="w-12 h-12 rounded-full bg-mint-400/20 text-mint-400 flex items-center justify-center mx-auto border border-mint-400/40">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <h4 className="font-bold text-white text-base">Account Created!</h4>
+                  <h4 className="font-black text-white text-base">Account Created!</h4>
                   <p className="text-xs text-slate-300 leading-relaxed">
                     Welcome to CreatorFlow AI, <strong className="text-white">{fullName || email}</strong>! Redirecting to your workspace...
                   </p>
@@ -208,7 +203,7 @@ export default function SignUpPage() {
                   <Button
                     type="submit"
                     variant="gradient"
-                    className="w-full text-xs sm:text-sm font-bold h-11 shadow-glow"
+                    className="w-full text-xs sm:text-sm h-11"
                     isLoading={isLoading}
                   >
                     Start Creating Free
@@ -220,7 +215,7 @@ export default function SignUpPage() {
               <div className="pt-3 border-t border-white/[0.08] text-center">
                 <p className="text-xs text-slate-400">
                   Already have an account?{" "}
-                  <Link href="/login" className="text-brand-purple hover:underline font-bold">
+                  <Link href="/login" className="text-mint-400 hover:underline font-black">
                     Sign In
                   </Link>
                 </p>
@@ -228,11 +223,11 @@ export default function SignUpPage() {
             </div>
 
             <div className="flex items-center justify-center gap-3 text-[11px] text-slate-500 flex-wrap pt-2">
-              <Link href="/terms" className="hover:text-slate-300 transition-colors">Terms of Service</Link>
+              <Link href="/terms" className="hover:text-mint-400 transition-colors">Terms of Service</Link>
               <span>•</span>
-              <Link href="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</Link>
+              <Link href="/privacy" className="hover:text-mint-400 transition-colors">Privacy Policy</Link>
               <span>•</span>
-              <Link href="/contact" className="hover:text-slate-300 transition-colors">Support</Link>
+              <Link href="/contact" className="hover:text-mint-400 transition-colors">Support</Link>
             </div>
           </div>
         </div>

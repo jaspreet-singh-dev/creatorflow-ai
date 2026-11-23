@@ -1462,6 +1462,15 @@ function PublishWorkspaceContent() {
                   <CardDescription className="text-xs text-slate-400">
                     Create standard 16:9 thumbnails (1280 × 720) with text presets, badges, and PNG export.
                   </CardDescription>
+
+                  <div className="pt-2">
+                    <Link href="/dashboard/thumbnails">
+                      <Button size="sm" className="w-full mint-btn-gradient text-xs font-bold shadow-[0_0_12px_rgba(0,245,160,0.4)]">
+                        <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                        ✨ Generate Thumbnail via AI (16:9 & Shorts) →
+                      </Button>
+                    </Link>
+                  </div>
                 </CardHeader>
 
                 <CardContent className="space-y-4 text-xs">

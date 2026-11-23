@@ -4,95 +4,95 @@
 
 @layer base {
   :root, [data-theme="dark"] {
-    --background: 224 71% 3%; /* #030712 Deep midnight obsidian */
+    --background: 220 50% 2%; /* #030508 Deep Void Obsidian */
     --foreground: 210 40% 98%;
 
-    --card: 225 50% 6%; /* #070B16 Rich obsidian card */
+    --card: 222 45% 5%; /* #060911 Rich Void Card Base */
     --card-foreground: 210 40% 98%;
 
-    --popover: 225 50% 6%;
+    --popover: 222 45% 5%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 263 80% 60%; /* #8B5CF6 Radiant Violet */
-    --primary-foreground: 210 40% 98%;
+    --primary: 158 100% 48%; /* #00F5A0 Electric Hyper-Mint */
+    --primary-foreground: 220 50% 2%;
 
-    --secondary: 220 35% 14%;
+    --secondary: 220 30% 12%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 35% 12%;
+    --muted: 220 30% 10%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 91% 60%; /* #3B82F6 Electric Blue */
-    --accent-foreground: 210 40% 98%;
+    --accent: 188 100% 48%; /* #00D8F6 Cyber Cyan */
+    --accent-foreground: 220 50% 2%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 30% 16%;
-    --input: 220 30% 16%;
-    --ring: 263 80% 60%;
+    --border: 220 25% 15%;
+    --input: 220 25% 15%;
+    --ring: 158 100% 48%;
 
-    --radius: 0.75rem;
+    --radius: 0.85rem;
   }
 
   [data-theme="amoled"] {
-    --background: 0 0% 0%;
+    --background: 0 0% 0%; /* Pure OLED True Black */
     --foreground: 0 0% 100%;
 
-    --card: 0 0% 4%;
+    --card: 0 0% 3%;
     --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 4%;
+    --popover: 0 0% 3%;
     --popover-foreground: 0 0% 100%;
 
-    --primary: 263 80% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 158 100% 48%; /* #00F5A0 */
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 0 0% 10%;
+    --secondary: 0 0% 8%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 8%;
+    --muted: 0 0% 6%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 188 100% 48%; /* #00D8F6 */
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 14%;
-    --input: 0 0% 14%;
-    --ring: 263 80% 60%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 158 100% 48%;
   }
 
   [data-theme="light"] {
-    --background: 210 40% 98%; /* #F8FAFC soft white */
-    --foreground: 222 47% 11%; /* #0F172A slate 900 */
+    --background: 220 20% 98%; /* #F8F9FB Swiss Daylight Minimalist */
+    --foreground: 222 47% 9%; /* #090D16 Deep Charcoal Ink */
 
-    --card: 0 0% 100%; /* #FFFFFF pure white */
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 100%; /* #FFFFFF Pure Paper White */
+    --card-foreground: 222 47% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 222 47% 9%;
 
-    --primary: 263 70% 50%; /* #8B5CF6 */
-    --primary-foreground: 210 40% 98%;
+    --primary: 158 100% 35%; /* #059669 Vibrant Emerald */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 220 15% 94%;
+    --secondary-foreground: 222 47% 9%;
 
-    --muted: 210 40% 94%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 220 15% 92%;
+    --muted-foreground: 215 16% 45%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 188 100% 35%; /* #0284C7 Deep Cyan */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%; /* #E2E8F0 */
-    --input: 214 32% 91%;
-    --ring: 263 70% 50%;
+    --border: 214 25% 90%; /* #E2E8F0 */
+    --input: 214 25% 90%;
+    --ring: 158 100% 35%;
   }
 }
 
@@ -101,7 +101,7 @@ html {
 }
 
 body {
-  background-color: #030712;
+  background-color: #030508;
   color: #F8FAFC;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -109,114 +109,99 @@ body {
 }
 
 /* ========================================================
-   NEO-CYBER SIGNATURE DESIGN SYSTEM TOKENS
-   Unique, Tactile, High-Converting Creator Architecture
+   AURORA HYPER-MINT SIGNATURE SYSTEM (Brand New Style)
    ======================================================== */
 
-/* Cyber Grid Background */
-.bg-cyber-grid {
+/* Radial Matrix Grid Canvas with Electric Mint Dots */
+.bg-cyber-grid, .bg-aurora-grid {
   background-image: 
-    radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    radial-gradient(rgba(139, 92, 246, 0.12) 1px, transparent 1px);
+    radial-gradient(rgba(0, 245, 160, 0.12) 1px, transparent 1px),
+    radial-gradient(rgba(0, 216, 246, 0.08) 1px, transparent 1px);
   background-size: 24px 24px, 72px 72px;
   background-position: 0 0, 12px 12px;
 }
 
-/* Prismatic Glass Card with Top Inset Highlight */
-.cyber-card {
-  background: rgba(7, 11, 22, 0.78);
+/* Aurora Glass Card with Top Inset Highlight */
+.cyber-card, .aurora-card {
+  background: rgba(6, 9, 17, 0.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 
-    0 16px 40px -12px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    0 16px 40px -12px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
   border-radius: 1.25rem;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.cyber-card:hover {
-  border-color: rgba(168, 85, 247, 0.3);
+.cyber-card:hover, .aurora-card:hover {
+  border-color: rgba(0, 245, 160, 0.35);
   box-shadow: 
-    0 24px 50px -12px rgba(0, 0, 0, 0.75),
-    0 0 35px -8px rgba(139, 92, 246, 0.2),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+    0 24px 50px -12px rgba(0, 0, 0, 0.8),
+    0 0 35px -8px rgba(0, 245, 160, 0.22),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.22);
 }
 
-/* High-Impact Hero Gradient Text */
-.cyber-gradient-text {
+/* Brand New Button: Electric Hyper-Mint Neo-Key */
+.cyber-btn-gradient, .mint-btn-gradient {
+  background: linear-gradient(135deg, #00F5A0 0%, #00D8F6 50%, #05DF85 100%);
+  color: #030508 !important;
+  font-weight: 800 !important;
+  box-shadow: 
+    0 0 24px -2px rgba(0, 245, 160, 0.45),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-btn-gradient:hover, .mint-btn-gradient:hover {
+  box-shadow: 
+    0 0 36px 0 rgba(0, 245, 160, 0.7),
+    0 4px 18px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  transform: translateY(-1.5px);
+}
+
+.cyber-btn-gradient:active, .mint-btn-gradient:active {
+  transform: scale(0.98);
+}
+
+/* Recessed Aurora Void Input */
+.cyber-input, .aurora-input {
+  background: rgba(4, 6, 12, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.65);
+  border-radius: 0.75rem;
+  color: #FFFFFF;
+  transition: all 0.2s ease;
+}
+
+.cyber-input:focus, .aurora-input:focus {
+  border-color: #00F5A0 !important;
+  box-shadow: 
+    0 0 0 2px rgba(0, 245, 160, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.65) !important;
+}
+
+/* Gradient Text Accents */
+.cyber-gradient-text, .aurora-gradient-text {
   background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 40%, #94A3B8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.cyber-accent-text {
-  background: linear-gradient(135deg, #C084FC 0%, #E879F9 35%, #60A5FA 70%, #2DD4BF 100%);
+.cyber-accent-text, .aurora-accent-text {
+  background: linear-gradient(135deg, #00F5A0 0%, #00D8F6 50%, #FFB800 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Kinetic Neon Glow Button */
-.cyber-btn-gradient {
-  background: linear-gradient(135deg, #7C3AED 0%, #9333EA 35%, #4F46E5 70%, #0284C7 100%);
-  color: #FFFFFF;
-  box-shadow: 
-    0 0 20px -3px rgba(139, 92, 246, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.cyber-btn-gradient:hover {
-  box-shadow: 
-    0 0 32px 0 rgba(168, 85, 247, 0.6),
-    0 4px 16px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.45);
-  transform: translateY(-1px);
-}
-
-.cyber-btn-gradient:active {
-  transform: scale(0.98);
-}
-
-/* Recessed Obsidian Input */
-.cyber-input {
-  background: rgba(5, 8, 16, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
-  border-radius: 0.75rem;
-  color: #F8FAFC;
-  transition: all 0.2s ease;
-}
-
-.cyber-input:focus {
-  border-color: #8B5CF6;
-  box-shadow: 
-    0 0 0 2px rgba(139, 92, 246, 0.25),
-    inset 0 2px 4px rgba(0, 0, 0, 0.6);
-}
-
-/* Keycap Token Badge */
-.cyber-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.25rem 0.625rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.025em;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(17, 24, 45, 0.6);
-  backdrop-filter: blur(8px);
-}
-
 /* Ambient Radial Glow Effect */
-.ambient-glow-violet {
+.ambient-glow-mint {
   position: absolute;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 245, 160, 0.18) 0%, transparent 70%);
   pointer-events: none;
   filter: blur(60px);
 }
@@ -225,7 +210,7 @@ body {
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 216, 246, 0.14) 0%, transparent 70%);
   pointer-events: none;
   filter: blur(60px);
 }
@@ -234,107 +219,130 @@ body {
   position: absolute;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 184, 0, 0.15) 0%, transparent 70%);
   pointer-events: none;
   filter: blur(50px);
 }
 
-/* ========================================================
-   CUSTOM SLEEK SCROLLBAR
-   ======================================================== */
+/* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #030712;
+  background: #030508;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #151D2F;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8B5CF6;
+  background: #00F5A0;
 }
 
 /* ========================================================
-   AMOLED OVERRIDES (#000000 OLED True Black)
+   NEW AMOLED PURE OLED BLACK (#000000 True Black)
    ======================================================== */
 [data-theme="amoled"] body {
   background-color: #000000 !important;
   color: #FFFFFF !important;
 }
 
-[data-theme="amoled"] .cyber-card {
-  background: rgba(8, 8, 10, 0.95) !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.9), inset 0 1px 0 0 rgba(255, 255, 255, 0.1) !important;
+[data-theme="amoled"] .cyber-card,
+[data-theme="amoled"] .aurora-card {
+  background: #040404 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.95), inset 0 1px 0 0 rgba(255, 255, 255, 0.12) !important;
 }
 
 [data-theme="amoled"] .bg-navy-950,
-[data-theme="amoled"] .bg-obsidian-950 {
+[data-theme="amoled"] .bg-obsidian-950,
+[data-theme="amoled"] .bg-void-950 {
   background-color: #000000 !important;
 }
 
 [data-theme="amoled"] .bg-navy-900,
-[data-theme="amoled"] .bg-obsidian-900 {
+[data-theme="amoled"] .bg-obsidian-900,
+[data-theme="amoled"] .bg-void-900 {
   background-color: #060606 !important;
 }
 
 [data-theme="amoled"] .border-navy-800,
-[data-theme="amoled"] .border-obsidian-800 {
+[data-theme="amoled"] .border-obsidian-800,
+[data-theme="amoled"] .border-void-800 {
   border-color: #1A1A1A !important;
 }
 
 /* ========================================================
-   LIGHT / DAYLIGHT STUDIO OVERRIDES
-   Zero Invisible Words — High-Contrast Accessible Design
+   NEW SWISS DAYLIGHT STUDIO (#F8F9FB White Architecture)
+   Ultra-Crisp, High-Contrast Scandinavian Minimalist
    ======================================================== */
 [data-theme="light"] body {
-  background-color: #F8FAFC !important;
-  color: #0F172A !important;
+  background-color: #F8F9FB !important;
+  color: #090D16 !important;
 }
 
-[data-theme="light"] .cyber-card {
-  background: rgba(255, 255, 255, 0.98) !important;
+[data-theme="light"] .cyber-card,
+[data-theme="light"] .aurora-card {
+  background: #FFFFFF !important;
   border-color: #E2E8F0 !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.02) !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.02) !important;
 }
 
-[data-theme="light"] .cyber-input {
+[data-theme="light"] .cyber-input,
+[data-theme="light"] .aurora-input {
   background: #FFFFFF !important;
   border-color: #CBD5E1 !important;
-  color: #0F172A !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  color: #090D16 !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04) !important;
 }
 
-[data-theme="light"] .cyber-gradient-text {
-  background: linear-gradient(135deg, #0F172A 0%, #1E293B 40%, #334155 100%) !important;
+[data-theme="light"] .cyber-gradient-text,
+[data-theme="light"] .aurora-gradient-text {
+  background: linear-gradient(135deg, #090D16 0%, #1E293B 50%, #334155 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
 
+[data-theme="light"] .cyber-accent-text,
+[data-theme="light"] .aurora-accent-text {
+  background: linear-gradient(135deg, #059669 0%, #0284C7 50%, #D97706 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+[data-theme="light"] .mint-btn-gradient,
+[data-theme="light"] .cyber-btn-gradient {
+  background: linear-gradient(135deg, #059669 0%, #0284C7 100%) !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35) !important;
+}
+
 [data-theme="light"] .bg-navy-950,
-[data-theme="light"] .bg-obsidian-950 {
-  background-color: #F8FAFC !important;
+[data-theme="light"] .bg-obsidian-950,
+[data-theme="light"] .bg-void-950 {
+  background-color: #F8F9FB !important;
 }
 
 [data-theme="light"] .bg-navy-900,
-[data-theme="light"] .bg-obsidian-900 {
+[data-theme="light"] .bg-obsidian-900,
+[data-theme="light"] .bg-void-900 {
   background-color: #FFFFFF !important;
 }
 
 [data-theme="light"] .border-navy-800,
 [data-theme="light"] .border-navy-700,
-[data-theme="light"] .border-obsidian-800 {
+[data-theme="light"] .border-obsidian-800,
+[data-theme="light"] .border-void-800 {
   border-color: #E2E8F0 !important;
 }
 
 [data-theme="light"] .text-white {
-  color: #0F172A !important;
+  color: #090D16 !important;
 }
 
 [data-theme="light"] .text-slate-100,

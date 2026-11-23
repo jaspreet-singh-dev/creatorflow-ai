@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Image as ImageIcon,
   Sparkles,
   Download,
   Eye,
@@ -34,8 +33,13 @@ import {
   CheckCircle2,
   Palette,
   ExternalLink,
+  Wand2,
+  RefreshCw,
+  Layers,
+  Image as ImageIcon,
 } from "lucide-react";
 import { ThumbnailConceptItem, ThumbnailGenerationOutput } from "@/lib/ai/gemini";
+import { generateThumbnailSvg, svgToDataUri } from "@/lib/ai/thumbnail-graphics";
 
 interface SavedThumbnailAsset {
   id: string;
@@ -45,6 +49,7 @@ interface SavedThumbnailAsset {
   format: "long_form" | "shorts";
   style: string;
   associatedTitle?: string;
+  createdAt: string;
 }
 
 export default function ThumbnailStudioPage() {
@@ -53,7 +58,7 @@ export default function ThumbnailStudioPage() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Content Format: YouTube Shorts (9:16) default for NoVoiceCraft or Long-Form (16:9)
+  // Content Format: YouTube Shorts (9:16) default or Long-Form (16:9)
   const [contentFormat, setContentFormat] = useState<"long_form" | "shorts">("shorts");
   const [showSafeZone, setShowSafeZone] = useState<boolean>(true);
 
@@ -61,60 +66,102 @@ export default function ThumbnailStudioPage() {
   const [selectedEntityId, setSelectedEntityId] = useState<string>("");
   const [topic, setTopic] = useState<string>("CAN SWEET BERRIES SAVE ME?! 💀🌿");
   const [videoTitle, setVideoTitle] = useState<string>("CAN SWEET BERRIES SAVE ME?! 💀🌿 #minecraft");
-  const [description, setDescription] = useState<string>("Dropping from Y=320 all the way down with zero armor and testing if a single sweet berry bush can break lethal fall damage in Minecraft!");
+  const [description, setDescription] = useState<string>(
+    "Dropping from Y=320 all the way down with zero armor and testing if a single sweet berry bush can break lethal fall damage in Minecraft!"
+  );
   const [tags, setTags] = useState<string[]>(["minecraft", "shorts", "clutch", "gaming", "survival"]);
   const [niche, setNiche] = useState<string>("Minecraft & Gaming");
 
+  // Style Preset for AI Visual Generation
+  const [stylePreset, setStylePreset] = useState<
+    "hyper_mint" | "cyber_gaming" | "urgent_danger" | "split_contrast" | "viral_hook"
+  >("cyber_gaming");
+
   // Thumbnail Canvas State
   const [overlayText, setOverlayText] = useState<string>("CAN IT SAVE ME?!");
-  const [textColor, setTextColor] = useState<string>("#4ADE80"); // Minecraft green
-  const [selectedImage, setSelectedImage] = useState<string>(
-    "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1080&h=1920&auto=format&fit=crop&q=80"
-  );
+  const [textColor, setTextColor] = useState<string>("#00F5A0"); // Electric Mint
+  
+  // Default generated SVG for instant visual fidelity
+  const initialSvg = generateThumbnailSvg({
+    format: "shorts",
+    textOverlay: "CAN IT SAVE ME?!",
+    topic: "CAN SWEET BERRIES SAVE ME?! 💀🌿",
+    stylePreset: "cyber_gaming",
+    accentColor: "#00F5A0",
+  });
+  const [selectedImage, setSelectedImage] = useState<string>(svgToDataUri(initialSvg));
 
   // AI Generation State
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [isRenderingVisual, setIsRenderingVisual] = useState<boolean>(false);
   const [generationOutput, setGenerationOutput] = useState<ThumbnailGenerationOutput | null>(null);
   const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState<boolean>(false);
 
-  // Default Concepts
+  // Default Concepts with pre-rendered SVGs
   const [concepts, setConcepts] = useState<ThumbnailConceptItem[]>([
     {
       id: "concept-1",
       name: "Lethal Fall Clutch",
       category: "Shock & Proof",
       textOverlay: "CAN IT SAVE ME?!",
-      accentColor: "#4ADE80",
+      accentColor: "#00F5A0",
       visualDescription: "First-person perspective falling towards sweet berry bush from maximum height with hearts flashing red.",
       aiImagePrompt: "Cinematic vertical 9:16 Minecraft scene, player falling at terminal velocity towards a single green sweet berry bush on stone ground, dramatic motion blur, high contrast, vibrant green and red accents.",
       layoutComposition: "Dramatic vertical drop with bold curiosity text in top safe zone",
       estimatedCTR: "Very High",
-      suggestedBackgroundUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1080&h=1920&auto=format&fit=crop&q=80",
+      stylePreset: "cyber_gaming",
+      generatedSvgUrl: svgToDataUri(
+        generateThumbnailSvg({
+          format: "shorts",
+          textOverlay: "CAN IT SAVE ME?!",
+          topic: "Minecraft Lethal Fall",
+          stylePreset: "cyber_gaming",
+          accentColor: "#00F5A0",
+        })
+      ),
     },
     {
       id: "concept-2",
       name: "Split Survival Test",
       category: "Before & After",
       textOverlay: "BED vs SLIME",
-      accentColor: "#38BDF8",
+      accentColor: "#00D8F6",
       visualDescription: "50/50 split comparing red bed clutch explosion vs slime block bounce survival.",
       aiImagePrompt: "9:16 vertical split comparison, left side red bed with skull icon, right side glowing green slime block with checkmark, high energy gaming graphic.",
       layoutComposition: "Vertical split comparison layout with bold centered hook",
       estimatedCTR: "Very High",
-      suggestedBackgroundUrl: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1080&h=1920&auto=format&fit=crop&q=80",
+      stylePreset: "split_contrast",
+      generatedSvgUrl: svgToDataUri(
+        generateThumbnailSvg({
+          format: "shorts",
+          textOverlay: "BED vs SLIME",
+          topic: "Bed vs Slime Survival",
+          stylePreset: "split_contrast",
+          accentColor: "#00D8F6",
+        })
+      ),
     },
     {
       id: "concept-3",
       name: "Shock Height Drop",
       category: "Curiosity Gap",
       textOverlay: "1000 BLOCKS?!",
-      accentColor: "#FACC15",
+      accentColor: "#FFB800",
       visualDescription: "Extreme build height drop with giant yellow numbers and danger border.",
       aiImagePrompt: "Vertical 9:16 dramatic Minecraft drop, cloud layers below, huge glowing 1000 BLOCKS font in safe zone, intense cinematic lighting.",
       layoutComposition: "Center-aligned punchline with vignette shadow",
       estimatedCTR: "High",
-      suggestedBackgroundUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1080&h=1920&auto=format&fit=crop&q=80",
+      stylePreset: "hyper_mint",
+      generatedSvgUrl: svgToDataUri(
+        generateThumbnailSvg({
+          format: "shorts",
+          textOverlay: "1000 BLOCKS?!",
+          topic: "1000 Blocks Drop",
+          stylePreset: "hyper_mint",
+          accentColor: "#FFB800",
+        })
+      ),
     },
     {
       id: "concept-4",
@@ -126,11 +173,20 @@ export default function ThumbnailStudioPage() {
       aiImagePrompt: "High-contrast Minecraft cliff edge with warning signs and glowing red hazard icons, intense cinematic atmosphere.",
       layoutComposition: "Top-aligned text with focal subject below",
       estimatedCTR: "High Momentum",
-      suggestedBackgroundUrl: "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=1080&h=1920&auto=format&fit=crop&q=80",
+      stylePreset: "urgent_danger",
+      generatedSvgUrl: svgToDataUri(
+        generateThumbnailSvg({
+          format: "shorts",
+          textOverlay: "DO NOT JUMP!",
+          topic: "Do Not Jump Warning",
+          stylePreset: "urgent_danger",
+          accentColor: "#F87171",
+        })
+      ),
     },
   ]);
 
-  // Saved Assets Gallery - Cleared of old tech assets
+  // Saved Assets Gallery
   const [savedAssets, setSavedAssets] = useState<SavedThumbnailAsset[]>([]);
 
   // When a video/project is picked from dropdown, sync metadata
@@ -148,8 +204,6 @@ export default function ThumbnailStudioPage() {
       setNiche(proj.niche || "Minecraft & Gaming");
       if (proj.contentType === "shorts") {
         setContentFormat("shorts");
-        setSelectedImage("https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1080&h=1920&auto=format&fit=crop&q=80");
-        setOverlayText("WATCH THIS!");
       } else {
         setContentFormat("long_form");
       }
@@ -175,18 +229,18 @@ export default function ThumbnailStudioPage() {
   // Format Switcher Trigger
   const handleFormatChange = (fmt: "long_form" | "shorts") => {
     setContentFormat(fmt);
-    if (fmt === "shorts") {
-      setSelectedImage("https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=1080&h=1920&auto=format&fit=crop&q=80");
-      setOverlayText("DON'T DO THIS!");
-      setTextColor("#FACC15");
-    } else {
-      setSelectedImage("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1280&auto=format&fit=crop&q=80");
-      setOverlayText("I AUTOMATED IT!");
-      setTextColor("#FACC15");
-    }
+    const newSvg = generateThumbnailSvg({
+      format: fmt,
+      textOverlay: fmt === "shorts" ? "WATCH THIS!" : "I AUTOMATED IT!",
+      topic: topic || videoTitle,
+      stylePreset,
+      accentColor: textColor,
+    });
+    setSelectedImage(svgToDataUri(newSvg));
+    setOverlayText(fmt === "shorts" ? "WATCH THIS!" : "I AUTOMATED IT!");
   };
 
-  // Generate AI Thumbnails from Metadata
+  // 1. Generate AI Thumbnail Concepts from Metadata
   const handleGenerateAIThumbnails = async () => {
     setIsGenerating(true);
     try {
@@ -221,12 +275,14 @@ export default function ThumbnailStudioPage() {
         setConcepts(out.concepts);
         if (out.recommendedText) setOverlayText(out.recommendedText);
         if (out.recommendedColor) setTextColor(out.recommendedColor);
-        if (out.concepts[0]?.suggestedBackgroundUrl) {
+        if (out.concepts[0]?.generatedSvgUrl) {
+          setSelectedImage(out.concepts[0].generatedSvgUrl);
+        } else if (out.concepts[0]?.suggestedBackgroundUrl) {
           setSelectedImage(out.concepts[0].suggestedBackgroundUrl);
         }
         toast.success(
-          "AI Thumbnails Generated",
-          `Generated 4 ${contentFormat === "shorts" ? "Shorts (9:16)" : "Long-Form (16:9)"} concepts based on video metadata.`
+          "AI Thumbnails Formulated",
+          `Generated 4 ${contentFormat === "shorts" ? "Shorts (9:16)" : "Long-Form (16:9)"} visual concepts based on video metadata.`
         );
       } else {
         toast.error("Generation Issue", data.error || "Failed to generate thumbnail concepts.");
@@ -239,12 +295,72 @@ export default function ThumbnailStudioPage() {
     }
   };
 
+  // 2. Direct Instant AI Thumbnail Image Generation
+  const handleGenerateAIVisualImage = async () => {
+    setIsRenderingVisual(true);
+    try {
+      const res = await fetch("/api/ai/thumbnails/generate-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.id || "demo-session"}`,
+        },
+        body: JSON.stringify({
+          topic: topic.trim() || videoTitle.trim() || "Viral Strategy",
+          videoTitle: videoTitle.trim(),
+          format: contentFormat,
+          niche,
+          textOverlay: overlayText.trim(),
+          accentColor: textColor,
+          stylePreset,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.data) {
+        const result = data.data;
+        setSelectedImage(result.imageUrl);
+        setOverlayText(result.textOverlay);
+        setTextColor(result.accentColor);
+        
+        // Add to saved bank
+        const newAsset: SavedThumbnailAsset = {
+          id: `thumb-${Date.now()}`,
+          title: topic || videoTitle,
+          imageUrl: result.imageUrl,
+          textOverlay: result.textOverlay,
+          format: contentFormat,
+          style: stylePreset,
+          associatedTitle: videoTitle || "AI Generated Thumbnail",
+          createdAt: new Date().toLocaleTimeString(),
+        };
+        setSavedAssets((prev) => [newAsset, ...prev]);
+
+        toast.success(
+          "AI Thumbnail Generated!",
+          `High-CTR ${contentFormat === "shorts" ? "Shorts Cover (9:16)" : "Thumbnail (16:9)"} rendered successfully.`
+        );
+      } else {
+        toast.error("Generation Issue", data.error || "Could not generate thumbnail visual.");
+      }
+    } catch (err: any) {
+      toast.error("Generation Failed", err?.message || "Failed to reach AI thumbnail renderer.");
+    } finally {
+      setIsRenderingVisual(false);
+    }
+  };
+
   // Apply a Concept to Canvas
   const handleApplyConcept = (concept: ThumbnailConceptItem) => {
     setOverlayText(concept.textOverlay);
     setTextColor(concept.accentColor);
-    if (concept.suggestedBackgroundUrl) {
+    if (concept.generatedSvgUrl) {
+      setSelectedImage(concept.generatedSvgUrl);
+    } else if (concept.suggestedBackgroundUrl) {
       setSelectedImage(concept.suggestedBackgroundUrl);
+    }
+    if (concept.stylePreset) {
+      setStylePreset(concept.stylePreset);
     }
     toast.info("Concept Applied", `Applied "${concept.name}" to canvas.`);
   };
@@ -265,13 +381,13 @@ export default function ThumbnailStudioPage() {
       imageUrl: selectedImage,
       textOverlay: overlayText,
       format: contentFormat,
-      style: "Custom Text Overlay",
+      style: stylePreset,
       associatedTitle: videoTitle || "Assigned in Studio",
+      createdAt: new Date().toLocaleTimeString(),
     };
     setSavedAssets([newAsset, ...savedAssets]);
 
     if (selectedEntityId) {
-      // Check project
       const proj = projects.find((p) => p.id === selectedEntityId);
       if (proj) {
         updateProject(proj.id, {
@@ -293,44 +409,104 @@ export default function ThumbnailStudioPage() {
     setTimeout(() => setSavedSuccess(false), 2500);
   };
 
-  const handleDownload = (imageUrl: string) => {
-    window.open(imageUrl, "_blank");
+  // Download High-Res PNG (Offscreen Canvas Compositor)
+  const handleDownloadPNG = async () => {
+    try {
+      const isShorts = contentFormat === "shorts";
+      const width = isShorts ? 1080 : 1280;
+      const height = isShorts ? 1920 : 720;
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // If not already an SVG with baked text, overlay the high-CTR text
+        if (!selectedImage.startsWith("data:image/svg") && overlayText.trim()) {
+          const text = overlayText.trim().toUpperCase();
+          ctx.font = `900 ${isShorts ? "108px" : "88px"} Impact, 'Arial Black', sans-serif`;
+          ctx.textAlign = isShorts ? "center" : "left";
+          ctx.textBaseline = "middle";
+
+          const x = isShorts ? width / 2 : width * 0.08;
+          const y = isShorts ? height * 0.45 : height * 0.65;
+
+          ctx.strokeStyle = "#000000";
+          ctx.lineWidth = isShorts ? 24 : 18;
+          ctx.lineJoin = "round";
+          ctx.strokeText(text, x, y);
+
+          ctx.fillStyle = textColor || "#00F5A0";
+          ctx.fillText(text, x, y);
+        }
+
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `creatorflow-${contentFormat}-${Date.now()}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast.success("Thumbnail Exported", `Saved high-res PNG (${width}x${height}).`);
+        }, "image/png");
+      };
+
+      img.onerror = () => {
+        window.open(selectedImage, "_blank");
+      };
+
+      img.src = selectedImage;
+    } catch (err) {
+      console.warn("Canvas export error:", err);
+      window.open(selectedImage, "_blank");
+    }
   };
 
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-in fade-in duration-200 max-w-7xl mx-auto pb-16">
-        {/* Header with Title and Format Category Toggle */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-navy-800 pb-5">
+        {/* ===================================================================
+            HEADER: TITLE + FORMAT CATEGORY SWITCHER (HYPER-MINT THEME)
+            =================================================================== */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-white/10 pb-5">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+                <span className="w-2.5 h-7 rounded-full bg-mint-400 shadow-[0_0_12px_rgba(0,245,160,0.8)] inline-block" />
                 Thumbnail & Visual Studio
               </h1>
-              <Badge variant="blue" className="text-[10px] font-bold uppercase tracking-wider">
+              <Badge variant="mint" className="text-[10px] font-bold uppercase tracking-wider">
                 AI CTR Optimization
               </Badge>
               <Badge
-                variant={contentFormat === "shorts" ? "default" : "secondary"}
+                variant={contentFormat === "shorts" ? "cyber" : "solar"}
                 className="text-[10px] font-bold uppercase tracking-wider"
               >
                 {contentFormat === "shorts" ? "YouTube Shorts (9:16)" : "Long-Form Video (16:9)"}
               </Badge>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl">
-              Generate click-optimized thumbnails and vertical Shorts covers. Formulate high-CTR text hooks, 
+            <p className="text-xs sm:text-sm text-slate-400 mt-1.5 max-w-2xl leading-relaxed">
+              Generate click-optimized thumbnails and vertical Shorts covers. Formulate high-CTR text hooks,
               psychological curiosity triggers, and AI image prompts tailored to your video metadata.
             </p>
           </div>
 
           {/* Format Category Switcher (Long-Form vs Shorts) */}
-          <div className="flex items-center gap-2 bg-navy-900/90 p-1 rounded-xl border border-navy-800 shadow-inner">
+          <div className="flex items-center gap-1.5 bg-void-950 p-1.5 rounded-xl border border-white/10 shadow-inner">
             <button
               type="button"
               onClick={() => handleFormatChange("long_form")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 contentFormat === "long_form"
-                  ? "bg-brand-purple text-white shadow-glow"
+                  ? "mint-btn-gradient font-bold"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -342,7 +518,7 @@ export default function ThumbnailStudioPage() {
               onClick={() => handleFormatChange("shorts")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 contentFormat === "shorts"
-                  ? "bg-gradient-to-r from-red-600 to-brand-purple text-white shadow-glow"
+                  ? "bg-gradient-to-r from-cyan-500 to-mint-400 text-void-950 font-bold shadow-[0_0_12px_rgba(0,216,246,0.5)]"
                   : "text-slate-400 hover:text-white"
               }`}
             >
@@ -352,13 +528,18 @@ export default function ThumbnailStudioPage() {
           </div>
         </div>
 
-        {/* Video Metadata Inspector & Generator Hub */}
-        <Card className="border-navy-800 bg-gradient-to-b from-navy-900/90 to-navy-950/90 shadow-xl border-t-2 border-t-brand-purple/50">
-          <CardHeader className="pb-3">
+        {/* ===================================================================
+            HERO: AI THUMBNAIL GENERATOR HUB
+            =================================================================== */}
+        <Card className="aurora-card border border-white/10 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-mint-400/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyber-400/10 rounded-full blur-3xl pointer-events-none" />
+
+          <CardHeader className="pb-3 relative z-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
                 <CardTitle className="text-base text-white flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-brand-purple" />
+                  <Sparkles className="w-4 h-4 text-mint-400 animate-pulse" />
                   AI Thumbnail Generation from Video Metadata
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
@@ -366,43 +547,54 @@ export default function ThumbnailStudioPage() {
                 </CardDescription>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Action Buttons: Formulate Concepts & Instant Visual Generation */}
+              <div className="flex items-center gap-2 flex-wrap">
                 <Button
-                  variant="gradient"
+                  variant="outline"
                   size="sm"
                   onClick={handleGenerateAIThumbnails}
                   isLoading={isGenerating}
-                  className="text-xs font-semibold shadow-glow px-4"
+                  className="text-xs font-semibold border-white/10 text-slate-200 hover:border-mint-400/40"
                 >
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                  {isGenerating ? "Analyzing Metadata..." : "Generate AI Thumbnails"}
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5 text-mint-400" />
+                  {isGenerating ? "Formulating..." : "Formulate Concepts"}
+                </Button>
+
+                <Button
+                  size="sm"
+                  onClick={handleGenerateAIVisualImage}
+                  isLoading={isRenderingVisual}
+                  className="mint-btn-gradient text-xs font-bold px-4"
+                >
+                  <Wand2 className="w-3.5 h-3.5 mr-1.5" />
+                  {isRenderingVisual ? "Generating AI Visual..." : "✨ Generate Thumbnail via AI"}
                 </Button>
               </div>
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-4 pt-1">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <CardContent className="space-y-4 pt-1 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               {/* Select Project / Video */}
               <div className="space-y-1">
                 <label className="text-[11px] font-semibold text-slate-300">Bind to Project / Video</label>
                 <select
                   value={selectedEntityId}
                   onChange={(e) => handleSelectEntity(e.target.value)}
-                  className="w-full h-8 rounded-lg border border-navy-800 bg-navy-950 px-2.5 text-xs text-slate-200 focus:outline-none focus:border-brand-purple"
+                  className="w-full h-8 rounded-lg border border-white/10 bg-void-950 px-2.5 text-xs text-slate-200 focus:outline-none focus:border-mint-400"
                 >
                   <option value="">Manual Entry (No Bound Project)</option>
                   <optgroup label="Creator Studio Projects">
                     {projects.map((p) => (
                       <option key={p.id} value={p.id}>
-                        [Project] {p.name.slice(0, 36)}... ({p.contentType || "long_form"})
+                        [Project] {p.name.slice(0, 32)}... ({p.contentType || "long_form"})
                       </option>
                     ))}
                   </optgroup>
                   <optgroup label="Channel Published Videos">
                     {videos.map((v) => (
                       <option key={v.id} value={v.id}>
-                        [Video] {v.title.slice(0, 36)}...
+                        [Video] {v.title.slice(0, 32)}...
                       </option>
                     ))}
                   </optgroup>
@@ -416,7 +608,7 @@ export default function ThumbnailStudioPage() {
                   value={videoTitle}
                   onChange={(e) => setVideoTitle(e.target.value)}
                   placeholder="e.g. CAN SWEET BERRIES SAVE ME?! 💀🌿 #minecraft"
-                  className="h-8 text-xs"
+                  className="h-8 text-xs aurora-input"
                 />
               </div>
 
@@ -427,8 +619,23 @@ export default function ThumbnailStudioPage() {
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g. Minecraft Lethal Fall Damage Clutch"
-                  className="h-8 text-xs"
+                  className="h-8 text-xs aurora-input"
                 />
+              </div>
+
+              {/* AI Visual Style Preset */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-300">AI Visual Aesthetic</label>
+                <select
+                  value={stylePreset}
+                  onChange={(e) => setStylePreset(e.target.value as any)}
+                  className="w-full h-8 rounded-lg border border-white/10 bg-void-950 px-2.5 text-xs text-slate-200 focus:outline-none focus:border-mint-400"
+                >
+                  <option value="cyber_gaming">🎮 Cyber Gaming / Minecraft</option>
+                  <option value="hyper_mint">⚡ Aurora Hyper-Mint</option>
+                  <option value="urgent_danger">🚨 Urgent Warning / Danger</option>
+                  <option value="split_contrast">⚖️ Split Screen / Before & After</option>
+                </select>
               </div>
             </div>
 
@@ -438,22 +645,25 @@ export default function ThumbnailStudioPage() {
               {tags.map((tag, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-0.5 rounded-md bg-navy-800 border border-navy-700 text-slate-300 font-mono text-[10px]"
+                  className="px-2 py-0.5 rounded-md bg-void-950 border border-white/10 text-mint-300 font-mono text-[10px]"
                 >
                   #{tag}
                 </span>
               ))}
               <span className="text-slate-500 text-[10px]">
-                • Format: <strong className="text-brand-purple">{contentFormat === "shorts" ? "Shorts (9:16)" : "Long-Form (16:9)"}</strong>
+                • Format:{" "}
+                <strong className="text-mint-400">
+                  {contentFormat === "shorts" ? "Shorts (9:16)" : "Long-Form (16:9)"}
+                </strong>
               </span>
               <span className="text-slate-500 text-[10px]">
-                • Channel: <strong className="text-white">{activeChannel?.title || "CreatorFlow"}</strong>
+                • Channel: <strong className="text-white">{activeChannel?.title || "NoVoiceCraft"}</strong>
               </span>
             </div>
 
             {/* Safe Zone Advice Banner */}
-            <div className="p-2.5 rounded-lg border border-navy-800 bg-navy-950/70 text-xs text-slate-300 flex items-start gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="p-2.5 rounded-lg border border-white/10 bg-void-950/70 text-xs text-slate-300 flex items-start gap-2">
+              <ShieldCheck className="w-4 h-4 text-mint-400 shrink-0 mt-0.5" />
               <div className="text-[11px] leading-relaxed">
                 <strong className="text-white">
                   {contentFormat === "shorts" ? "Shorts Safe-Zone Rules (9:16):" : "Long-Form Safe-Zone Rules (16:9):"}
@@ -466,21 +676,24 @@ export default function ThumbnailStudioPage() {
           </CardContent>
         </Card>
 
-        {/* Workspace: Left Parameters (5 Cols) vs Right Live Feed Simulation (7 Cols) */}
+        {/* ===================================================================
+            WORKSPACE: CONTROLS & CONCEPTS (5 COLS) VS LIVE PREVIEW (7 COLS)
+            =================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Controls & AI Concepts (5 Cols) */}
           <div className="lg:col-span-5 space-y-5">
             {/* Manual Canvas Controls */}
-            <Card className="border-navy-800 bg-navy-900/90 shadow-card">
+            <Card className="aurora-card border border-white/10 shadow-xl">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm text-white flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-brand-purple" />
+                  <Sliders className="w-4 h-4 text-mint-400" />
                   Canvas Customizer
                 </CardTitle>
                 <CardDescription className="text-xs text-slate-400">
                   Tune text hook, accent color, and background image asset.
                 </CardDescription>
               </CardHeader>
+
               <CardContent className="space-y-3.5">
                 {/* Text Overlay */}
                 <div className="space-y-1">
@@ -496,7 +709,7 @@ export default function ThumbnailStudioPage() {
                     value={overlayText}
                     onChange={(e) => setOverlayText(e.target.value.toUpperCase())}
                     placeholder={contentFormat === "shorts" ? "e.g. DON'T DO THIS!" : "e.g. I AUTOMATED IT!"}
-                    className="text-xs font-bold uppercase tracking-wide"
+                    className="text-xs font-bold uppercase tracking-wide aurora-input"
                   />
                 </div>
 
@@ -505,12 +718,12 @@ export default function ThumbnailStudioPage() {
                   <label className="text-xs font-semibold text-slate-300">Text Accent Color</label>
                   <div className="flex items-center gap-2">
                     {[
-                      { name: "Yellow", hex: "#FACC15" },
-                      { name: "White", hex: "#FFFFFF" },
-                      { name: "Cyan", hex: "#38BDF8" },
-                      { name: "Emerald", hex: "#4ADE80" },
-                      { name: "Red", hex: "#F87171" },
-                      { name: "Purple", hex: "#A855F7" },
+                      { name: "Electric Mint", hex: "#00F5A0" },
+                      { name: "Cyber Cyan", hex: "#00D8F6" },
+                      { name: "Solar Amber", hex: "#FFB800" },
+                      { name: "Pure White", hex: "#FFFFFF" },
+                      { name: "Danger Crimson", hex: "#EF4444" },
+                      { name: "Neon Purple", hex: "#A855F7" },
                     ].map((c) => (
                       <button
                         key={c.hex}
@@ -518,7 +731,7 @@ export default function ThumbnailStudioPage() {
                         onClick={() => setTextColor(c.hex)}
                         style={{ backgroundColor: c.hex }}
                         className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                          textColor === c.hex ? "border-white scale-110 shadow-glow" : "border-navy-700"
+                          textColor === c.hex ? "border-white scale-110 shadow-[0_0_8px_rgba(255,255,255,0.7)]" : "border-void-800"
                         }`}
                         title={c.name}
                       />
@@ -526,41 +739,31 @@ export default function ThumbnailStudioPage() {
                   </div>
                 </div>
 
-                {/* Background Image URL */}
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-slate-300">Background Image URL</label>
-                  <Input
-                    value={selectedImage}
-                    onChange={(e) => setSelectedImage(e.target.value)}
-                    placeholder="Paste image URL..."
-                    className="text-xs"
-                  />
-                </div>
-
-                {/* Actions */}
+                {/* Actions: Save & Assign and Export High-Res PNG */}
                 <div className="flex items-center gap-2 pt-2">
                   <Button
-                    variant="gradient"
-                    size="sm"
                     onClick={handleSaveThumbnail}
-                    className="flex-1 text-xs font-semibold shadow-glow"
+                    className="mint-btn-gradient flex-1 text-xs font-bold"
                   >
                     {savedSuccess ? (
                       <>
-                        <Check className="w-3.5 h-3.5 mr-1.5 text-emerald-300" />
+                        <Check className="w-3.5 h-3.5 mr-1.5 text-void-950" />
                         Saved & Assigned!
                       </>
                     ) : (
                       "Save & Assign to Video"
                     )}
                   </Button>
+
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleDownload(selectedImage)}
-                    className="text-xs border-navy-700"
+                    onClick={handleDownloadPNG}
+                    className="text-xs border-white/10 text-white hover:border-mint-400/50"
+                    title="Export High-Res PNG"
                   >
-                    <Download className="w-3.5 h-3.5" />
+                    <Download className="w-3.5 h-3.5 mr-1.5 text-mint-400" />
+                    Export PNG
                   </Button>
                 </div>
               </CardContent>
@@ -570,11 +773,11 @@ export default function ThumbnailStudioPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
+                  <Sparkles className="w-3.5 h-3.5 text-mint-400" />
                   AI Thumbnail Concepts ({concepts.length})
                 </h3>
                 {generationOutput?.isHeuristicFallback === false && (
-                  <Badge variant="blue" className="text-[10px]">
+                  <Badge variant="mint" className="text-[10px]">
                     Live Gemini
                   </Badge>
                 )}
@@ -584,8 +787,9 @@ export default function ThumbnailStudioPage() {
                 {concepts.map((con) => (
                   <Card
                     key={con.id}
-                    className="border-navy-800 bg-navy-900/80 hover:border-brand-purple/40 transition-all p-3.5 space-y-2 group"
+                    className="aurora-card border border-white/10 hover:border-mint-400/40 transition-all p-3.5 space-y-3 group"
                   >
+                    {/* Header: Title + Category + CTR */}
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-white">{con.name}</span>
@@ -593,15 +797,30 @@ export default function ThumbnailStudioPage() {
                           {con.category}
                         </Badge>
                       </div>
-                      <span className="text-[10px] text-emerald-400 font-semibold font-mono">
+                      <span className="text-[10px] text-mint-400 font-semibold font-mono">
                         CTR: {con.estimatedCTR}
                       </span>
                     </div>
 
+                    {/* Visual Preview Thumbnail Box */}
+                    {con.generatedSvgUrl && (
+                      <div className="relative rounded-lg overflow-hidden border border-white/10 bg-black aspect-video max-h-36">
+                        <img
+                          src={con.generatedSvgUrl}
+                          alt={con.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-mint-300 border border-white/10">
+                          {con.stylePreset || "Visual Preset"}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Text Overlay & Layout */}
                     <div className="flex items-center gap-2">
                       <span
                         style={{ color: con.accentColor }}
-                        className="px-2 py-0.5 rounded bg-black/80 font-extrabold text-xs uppercase tracking-wide border border-white/10"
+                        className="px-2 py-0.5 rounded bg-black/90 font-extrabold text-xs uppercase tracking-wide border border-white/10"
                       >
                         {con.textOverlay}
                       </span>
@@ -616,17 +835,17 @@ export default function ThumbnailStudioPage() {
 
                     {/* AI Prompt Section */}
                     {con.aiImagePrompt && (
-                      <div className="p-2 rounded bg-navy-950 border border-navy-800 text-[10px] text-slate-400 space-y-1">
+                      <div className="p-2 rounded bg-void-950 border border-white/10 text-[10px] text-slate-400 space-y-1">
                         <div className="flex items-center justify-between">
                           <span className="font-semibold text-slate-300">AI Image Prompt (Midjourney / Flux):</span>
                           <button
                             type="button"
                             onClick={() => handleCopyPrompt(con.aiImagePrompt, con.id)}
-                            className="text-brand-purple hover:text-white flex items-center gap-1 font-semibold"
+                            className="text-mint-400 hover:text-white flex items-center gap-1 font-semibold"
                           >
                             {copiedPromptId === con.id ? (
                               <>
-                                <Check className="w-3 h-3 text-emerald-400" />
+                                <Check className="w-3 h-3 text-mint-300" />
                                 <span>Copied</span>
                               </>
                             ) : (
@@ -648,7 +867,7 @@ export default function ThumbnailStudioPage() {
                         variant="secondary"
                         size="sm"
                         onClick={() => handleApplyConcept(con)}
-                        className="text-[11px] h-7 px-3 bg-navy-800 hover:bg-brand-purple hover:text-white"
+                        className="text-[11px] h-7 px-3 bg-void-950 hover:bg-mint-400 hover:text-void-950 border border-white/10 font-semibold"
                       >
                         Apply to Canvas →
                       </Button>
@@ -659,13 +878,15 @@ export default function ThumbnailStudioPage() {
             </div>
           </div>
 
-          {/* Real-time YouTube Feed Simulation Column (7 Cols) */}
+          {/* ===================================================================
+              RIGHT: REAL-TIME YOUTUBE SIMULATION (7 COLS)
+              =================================================================== */}
           <div className="lg:col-span-7 space-y-5">
-            <Card className="border-navy-800 bg-navy-900/90 shadow-card">
+            <Card className="aurora-card border border-white/10 shadow-2xl">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base text-white flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-brand-blue" />
+                    <Eye className="w-4 h-4 text-cyber-400" />
                     {contentFormat === "shorts"
                       ? "YouTube Shorts Player Simulation (9:16)"
                       : "Live YouTube Feed Simulation (16:9)"}
@@ -677,14 +898,14 @@ export default function ThumbnailStudioPage() {
                         onClick={() => setShowSafeZone(!showSafeZone)}
                         className={`text-[10px] font-semibold px-2 py-0.5 rounded border transition-colors ${
                           showSafeZone
-                            ? "border-emerald-500/50 bg-emerald-500/10 text-emerald-400"
-                            : "border-navy-700 text-slate-400"
+                            ? "border-mint-400/50 bg-mint-400/10 text-mint-300"
+                            : "border-white/10 text-slate-400"
                         }`}
                       >
                         {showSafeZone ? "Safe Zone: ON" : "Safe Zone: OFF"}
                       </button>
                     )}
-                    <Badge variant="blue" className="text-[10px]">
+                    <Badge variant={contentFormat === "shorts" ? "cyber" : "solar"} className="text-[10px]">
                       {contentFormat === "shorts" ? "9:16 Vertical" : "16:9 Landscape"}
                     </Badge>
                   </div>
@@ -697,12 +918,12 @@ export default function ThumbnailStudioPage() {
               </CardHeader>
 
               <CardContent className="space-y-4">
-                {/* ==============================================================
+                {/* -------------------------------------------------------------
                     A. LONG-FORM (16:9) PREVIEW CANVAS
-                    ============================================================== */}
+                    ------------------------------------------------------------- */}
                 {contentFormat === "long_form" && (
                   <div className="space-y-3">
-                    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-navy-700 shadow-2xl flex items-center justify-center select-none group">
+                    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-black border border-white/10 shadow-2xl flex items-center justify-center select-none group">
                       <img
                         src={selectedImage}
                         alt="Thumbnail Preview"
@@ -712,8 +933,8 @@ export default function ThumbnailStudioPage() {
                       {/* Subtle Vignette Gradient */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
 
-                      {/* Text Overlay */}
-                      {overlayText && (
+                      {/* Text Overlay (if not baked into SVG) */}
+                      {!selectedImage.startsWith("data:image/svg") && overlayText && (
                         <div className="absolute bottom-6 left-6 max-w-[85%] pointer-events-none">
                           <span
                             style={{ color: textColor }}
@@ -732,7 +953,7 @@ export default function ThumbnailStudioPage() {
 
                     {/* Simulated YouTube Video Row */}
                     <div className="flex items-start gap-3 pt-2">
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-navy-800 border border-navy-700 shrink-0">
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-void-950 border border-white/10 shrink-0">
                         {activeChannel?.thumbnail_url ? (
                           <img src={activeChannel.thumbnail_url} alt="Channel" className="w-full h-full object-cover" />
                         ) : (
@@ -744,7 +965,7 @@ export default function ThumbnailStudioPage() {
                           {videoTitle || topic || "Untitled Masterclass"}
                         </p>
                         <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                          <span>{activeChannel?.title || "CreatorFlow Channel"}</span>
+                          <span>{activeChannel?.title || "NoVoiceCraft"}</span>
                           <span>•</span>
                           <span>142K views</span>
                           <span>•</span>
@@ -755,13 +976,13 @@ export default function ThumbnailStudioPage() {
                   </div>
                 )}
 
-                {/* ==============================================================
+                {/* -------------------------------------------------------------
                     B. YOUTUBE SHORTS (9:16) PREVIEW CANVAS
-                    ============================================================== */}
+                    ------------------------------------------------------------- */}
                 {contentFormat === "shorts" && (
                   <div className="py-2 flex flex-col items-center justify-center">
                     {/* Vertical 9:16 Shorts Container */}
-                    <div className="relative w-[280px] h-[497px] rounded-2xl overflow-hidden bg-black border-2 border-navy-700 shadow-2xl select-none group">
+                    <div className="relative w-[280px] h-[497px] rounded-2xl overflow-hidden bg-black border-2 border-white/15 shadow-2xl select-none group">
                       {/* Background Visual */}
                       <img
                         src={selectedImage}
@@ -774,18 +995,18 @@ export default function ThumbnailStudioPage() {
 
                       {/* Safe Zone Visual Guide Overlay */}
                       {showSafeZone && (
-                        <div className="absolute inset-x-3 top-[20%] bottom-[25%] right-14 border border-dashed border-emerald-400/60 rounded-xl pointer-events-none flex flex-col justify-between p-2">
-                          <span className="text-[9px] font-mono text-emerald-300 bg-black/60 px-1 py-0.5 rounded self-start">
+                        <div className="absolute inset-x-3 top-[20%] bottom-[25%] right-14 border border-dashed border-mint-400/60 rounded-xl pointer-events-none flex flex-col justify-between p-2">
+                          <span className="text-[9px] font-mono text-mint-300 bg-black/70 px-1 py-0.5 rounded self-start">
                             Safe Zone
                           </span>
-                          <span className="text-[8px] font-mono text-emerald-300/80 bg-black/60 px-1 py-0.5 rounded self-end">
+                          <span className="text-[8px] font-mono text-mint-300/80 bg-black/70 px-1 py-0.5 rounded self-end">
                             Center Focal Area
                           </span>
                         </div>
                       )}
 
-                      {/* High-CTR Text Overlay (Centered in Upper Third) */}
-                      {overlayText && (
+                      {/* High-CTR Text Overlay (if not baked into SVG) */}
+                      {!selectedImage.startsWith("data:image/svg") && overlayText && (
                         <div className="absolute top-[28%] left-4 right-14 pointer-events-none text-center">
                           <span
                             style={{ color: textColor }}
@@ -796,7 +1017,7 @@ export default function ThumbnailStudioPage() {
                         </div>
                       )}
 
-                      {/* Right Action Icons Column (Like on Real YouTube Shorts) */}
+                      {/* Right Action Icons Column */}
                       <div className="absolute right-2 bottom-12 flex flex-col items-center gap-4 text-white pointer-events-none">
                         <div className="flex flex-col items-center">
                           <div className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center">
@@ -835,92 +1056,79 @@ export default function ThumbnailStudioPage() {
 
                         {/* Spinning Sound Disc */}
                         <div className="w-8 h-8 rounded-full border border-white/20 bg-black/60 flex items-center justify-center animate-spin">
-                          <Music2 className="w-3.5 h-3.5 text-brand-purple" />
+                          <Music2 className="w-3.5 h-3.5 text-mint-400" />
                         </div>
                       </div>
 
                       {/* Bottom Channel Info & Sound Bar */}
                       <div className="absolute left-3 bottom-3 right-14 space-y-1 text-white pointer-events-none">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full overflow-hidden bg-navy-800 border border-white/20">
+                          <div className="w-7 h-7 rounded-full overflow-hidden bg-void-950 border border-white/20">
                             {activeChannel?.thumbnail_url ? (
                               <img src={activeChannel.thumbnail_url} alt="Channel" className="w-full h-full object-cover" />
                             ) : (
                               <Youtube className="w-4 h-4 text-red-500 m-1.5" />
                             )}
                           </div>
-                          <span className="text-xs font-bold truncate">@{activeChannel?.title || "CreatorFlow"}</span>
-                          <span className="px-2 py-0.5 rounded-full bg-red-600 text-[9px] font-bold">
-                            Subscribe
+                          <span className="text-xs font-bold text-white truncate">
+                            {activeChannel?.title || "@NoVoiceCraft"}
                           </span>
                         </div>
-
-                        <p className="text-[11px] font-medium text-slate-200 line-clamp-1">
-                          {videoTitle || topic} #shorts #trending
+                        <p className="text-[11px] font-semibold text-slate-200 line-clamp-1">
+                          {videoTitle || topic}
                         </p>
-
-                        <div className="flex items-center gap-1.5 text-[9px] text-slate-300">
-                          <Music2 className="w-3 h-3 text-brand-purple" />
-                          <span className="truncate">Original Audio - @{activeChannel?.title || "CreatorFlow"}</span>
-                        </div>
                       </div>
                     </div>
                   </div>
                 )}
               </CardContent>
-
-              <CardFooter className="pt-2 flex justify-between border-t border-navy-800/80">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleDownload(selectedImage)}
-                  className="text-xs border-navy-700"
-                >
-                  <Download className="w-3.5 h-3.5 mr-1.5" />
-                  Download Asset
-                </Button>
-                <Button
-                  variant="gradient"
-                  size="sm"
-                  onClick={handleSaveThumbnail}
-                  className="text-xs font-semibold shadow-glow"
-                >
-                  Save & Assign to Video
-                </Button>
-              </CardFooter>
             </Card>
 
-            {/* Saved Thumbnails Gallery */}
-            <div className="space-y-3 pt-2">
-              <h3 className="text-sm font-bold text-white">Saved Thumbnail Assets ({savedAssets.length})</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {savedAssets.map((t) => (
-                  <div
-                    key={t.id}
-                    onClick={() => {
-                      setSelectedImage(t.imageUrl);
-                      setOverlayText(t.textOverlay);
-                      setContentFormat(t.format || "long_form");
-                    }}
-                    className="rounded-lg border border-navy-800 bg-navy-950 p-2 cursor-pointer hover:border-brand-purple/40 transition-colors space-y-2 group"
-                  >
-                    <div className={`w-full ${t.format === "shorts" ? "aspect-[9/16] max-h-48" : "aspect-video"} rounded overflow-hidden relative`}>
-                      <img src={t.imageUrl} alt={t.title} className="w-full h-full object-cover" />
-                      <div className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-extrabold text-amber-300">
-                        {t.textOverlay}
+            {/* Saved Thumbnails Bank */}
+            {savedAssets.length > 0 && (
+              <Card className="aurora-card border border-white/10 shadow-xl">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-white flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-mint-400" />
+                    Saved Thumbnails Bank ({savedAssets.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {savedAssets.map((asset) => (
+                      <div
+                        key={asset.id}
+                        className="rounded-lg border border-white/10 overflow-hidden bg-void-950 p-2 space-y-2 group"
+                      >
+                        <div className="aspect-video rounded bg-black overflow-hidden relative">
+                          <img src={asset.imageUrl} alt={asset.title} className="w-full h-full object-cover" />
+                          <Badge variant="mint" className="absolute top-1 left-1 text-[8px]">
+                            {asset.format}
+                          </Badge>
+                        </div>
+                        <div className="space-y-0.5">
+                          <p className="text-[11px] font-bold text-white truncate">{asset.title}</p>
+                          <p className="text-[9px] text-slate-500">{asset.createdAt}</p>
+                        </div>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedImage(asset.imageUrl);
+                            setOverlayText(asset.textOverlay);
+                            setContentFormat(asset.format);
+                            toast.info("Loaded Asset", `Loaded thumbnail into studio.`);
+                          }}
+                          className="w-full text-[10px] h-6 bg-void-900 border border-white/10"
+                        >
+                          Load in Studio
+                        </Button>
                       </div>
-                      <div className="absolute top-1 right-1 px-1 py-0.5 rounded bg-black/70 text-[8px] font-bold text-slate-300 uppercase">
-                        {t.format === "shorts" ? "Shorts" : "16:9"}
-                      </div>
-                    </div>
-                    <div className="text-[11px] truncate">
-                      <p className="font-semibold text-white truncate">{t.title}</p>
-                      <p className="text-[10px] text-slate-400 truncate">{t.associatedTitle || t.style}</p>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

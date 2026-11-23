@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { IdeaFormat } from "@/types/database.types";
+import { generateThumbnailSvg, svgToDataUri } from "@/lib/ai/thumbnail-graphics";
 
 export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
@@ -1285,6 +1286,8 @@ export interface ThumbnailConceptItem {
   layoutComposition: string;
   estimatedCTR: "Very High" | "High" | "High Momentum";
   suggestedBackgroundUrl?: string;
+  generatedSvgUrl?: string;
+  stylePreset?: "cyber_gaming" | "viral_hook" | "urgent_danger" | "hyper_mint" | "split_contrast";
 }
 
 export interface ThumbnailGenerationOutput {
@@ -1416,19 +1419,42 @@ Return ONLY a valid JSON object matching this exact structure:
             "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=1280&auto=format&fit=crop&q=80",
           ];
 
+      const presetList: Array<"hyper_mint" | "cyber_gaming" | "split_contrast" | "urgent_danger"> = [
+        "hyper_mint",
+        "cyber_gaming",
+        "split_contrast",
+        "urgent_danger",
+      ];
+
       const concepts: ThumbnailConceptItem[] = Array.isArray(parsed.concepts)
-        ? parsed.concepts.map((c: any, idx: number) => ({
-            id: c.id || `concept-${idx + 1}`,
-            name: c.name || `Concept ${idx + 1}`,
-            category: c.category || "Curiosity Gap",
-            textOverlay: (c.textOverlay || "NEW METHOD").toUpperCase(),
-            accentColor: c.accentColor || "#FACC15",
-            visualDescription: c.visualDescription || "High-impact visual composition.",
-            aiImagePrompt: c.aiImagePrompt || `Cinematic photorealistic shot of ${topic}, dramatic lighting, 8k.`,
-            layoutComposition: c.layoutComposition || (isShorts ? "Centered vertical focal point" : "Rule of thirds"),
-            estimatedCTR: c.estimatedCTR || "Very High",
-            suggestedBackgroundUrl: backgroundPool[idx % backgroundPool.length],
-          }))
+        ? parsed.concepts.map((c: any, idx: number) => {
+            const preset = presetList[idx % presetList.length];
+            const textOverlay = (c.textOverlay || "NEW METHOD").toUpperCase();
+            const accentColor = c.accentColor || "#00F5A0";
+            const svg = generateThumbnailSvg({
+              format: isShorts ? "shorts" : "long_form",
+              textOverlay,
+              topic,
+              videoTitle: input.videoTitle,
+              niche,
+              stylePreset: preset,
+              accentColor,
+            });
+            return {
+              id: c.id || `concept-${idx + 1}`,
+              name: c.name || `Concept ${idx + 1}`,
+              category: c.category || "Curiosity Gap",
+              textOverlay,
+              accentColor,
+              visualDescription: c.visualDescription || "High-impact visual composition.",
+              aiImagePrompt: c.aiImagePrompt || `Cinematic photorealistic shot of ${topic}, dramatic lighting, 8k.`,
+              layoutComposition: c.layoutComposition || (isShorts ? "Centered vertical focal point" : "Rule of thirds"),
+              estimatedCTR: c.estimatedCTR || "Very High",
+              suggestedBackgroundUrl: backgroundPool[idx % backgroundPool.length],
+              generatedSvgUrl: svgToDataUri(svg),
+              stylePreset: preset,
+            };
+          })
         : [];
 
         if (concepts.length > 0) {
@@ -1456,6 +1482,7 @@ Return ONLY a valid JSON object matching this exact structure:
 function generateHeuristicThumbnails(input: ThumbnailGenerationInput): ThumbnailGenerationOutput {
   const isShorts = input.format === "shorts";
   const topic = input.topic || input.videoTitle || "Creator Blueprint";
+  const niche = input.niche || "Content Creation";
   const kw = topic.split(" ").slice(0, 3).join(" ").toUpperCase();
   const dimensions = isShorts ? { width: 1080, height: 1920 } : { width: 1280, height: 720 };
   const safeZoneAdvice = isShorts
@@ -1578,14 +1605,39 @@ function generateHeuristicThumbnails(input: ThumbnailGenerationInput): Thumbnail
         },
       ];
 
+  const presetList: Array<"hyper_mint" | "cyber_gaming" | "split_contrast" | "urgent_danger"> = [
+    "hyper_mint",
+    "cyber_gaming",
+    "split_contrast",
+    "urgent_danger",
+  ];
+
+  const enrichedConcepts: ThumbnailConceptItem[] = concepts.map((c, idx) => {
+    const preset = presetList[idx % presetList.length];
+    const svg = generateThumbnailSvg({
+      format: isShorts ? "shorts" : "long_form",
+      textOverlay: c.textOverlay,
+      topic,
+      videoTitle: input.videoTitle,
+      niche,
+      stylePreset: preset,
+      accentColor: c.accentColor,
+    });
+    return {
+      ...c,
+      stylePreset: preset,
+      generatedSvgUrl: svgToDataUri(svg),
+    };
+  });
+
   return {
     format: isShorts ? "shorts" : "long_form",
     aspectRatio: isShorts ? "9:16" : "16:9",
     dimensions,
     safeZoneAdvice,
-    recommendedText: concepts[0].textOverlay,
-    recommendedColor: concepts[0].accentColor,
-    concepts,
+    recommendedText: enrichedConcepts[0].textOverlay,
+    recommendedColor: enrichedConcepts[0].accentColor,
+    concepts: enrichedConcepts,
     isHeuristicFallback: true,
     attributionNotice: `[Sandbox Engine] Heuristic concepts designed for ${isShorts ? "YouTube Shorts" : "Long-Form"}. Configure GEMINI_API_KEY in Settings for custom generative AI.`,
   };

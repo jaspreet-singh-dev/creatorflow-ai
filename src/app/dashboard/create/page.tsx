@@ -46,6 +46,7 @@ import {
   Film,
   ThumbsUp,
   Share2,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -244,6 +245,8 @@ Subscribe right now or this creeper spawns in your base tonight!`);
     "#clutch",
   ]);
   const [editableThumbnailText, setEditableThumbnailText] = useState("CAN IT SAVE ME?! 💀");
+  const [aiThumbnailImage, setAiThumbnailImage] = useState<string | null>(null);
+  const [isGeneratingThumbnailImage, setIsGeneratingThumbnailImage] = useState(false);
   const [editablePinnedComment, setEditablePinnedComment] = useState(
     "💬 What clutch item should I test next from world height limit? Let me know below!"
   );
@@ -533,6 +536,40 @@ Leave your biggest question in the comments below, and subscribe for weekly drop
     toast.info("Undone", `Restored previous ${section} state.`);
   };
 
+  // Generate Thumbnail via AI for Current Project
+  const handleGenerateStudioThumbnailImage = async () => {
+    setIsGeneratingThumbnailImage(true);
+    try {
+      const res = await fetch("/api/ai/thumbnails/generate-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.id || "demo-session"}`,
+        },
+        body: JSON.stringify({
+          topic: topic || "CAN WATER CAULDRON SAVE ME?!",
+          videoTitle: generatedOutput?.titles?.[selectedTitleIndex] || topic,
+          format: contentType === "shorts" ? "shorts" : "long_form",
+          niche,
+          textOverlay: editableThumbnailText || "CAN IT SAVE ME?!",
+          accentColor: "#00F5A0",
+          stylePreset: niche.toLowerCase().includes("minecraft") ? "cyber_gaming" : "hyper_mint",
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.data?.imageUrl) {
+        setAiThumbnailImage(data.data.imageUrl);
+        toast.success("AI Thumbnail Generated", "Created high-CTR visual for this video.");
+      } else {
+        toast.error("Generation Issue", data.error || "Failed to generate visual.");
+      }
+    } catch (err: any) {
+      toast.error("Generation Error", err?.message || "Could not reach generator.");
+    } finally {
+      setIsGeneratingThumbnailImage(false);
+    }
+  };
+
   // Save or Update Video Project
   const handleSaveToProject = () => {
     const chosenTitle = generatedOutput?.titles?.[selectedTitleIndex] || topic || "Untitled Project";
@@ -746,8 +783,8 @@ ${editableThumbnailText}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-navy-800 pb-5">
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1.5 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-gradient-to-r from-mint-400/20 via-teal-400/15 to-cyber-400/20 text-mint-400 border border-mint-400/30 flex items-center gap-1.5 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-mint-400" />
                 AI Video Studio
               </span>
 
@@ -767,9 +804,9 @@ ${editableThumbnailText}
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-2 flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight mt-2 flex items-center gap-2">
               <span>Creator Studio</span>
-              <span className="text-xs font-bold px-2 py-0.5 rounded bg-brand-purple/20 text-brand-purple border border-brand-purple/30">
+              <span className="text-xs font-black px-2 py-0.5 rounded bg-mint-400/20 text-mint-400 border border-mint-400/30">
                 PRO
               </span>
             </h1>
@@ -879,9 +916,9 @@ ${editableThumbnailText}
                     setContentType("shorts");
                     setPreviewMode("shorts");
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
                     contentType === "shorts"
-                      ? "bg-brand-purple text-white shadow-glow"
+                      ? "bg-mint-400 text-black shadow-glow font-black"
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
@@ -894,9 +931,9 @@ ${editableThumbnailText}
                     setContentType("long-form");
                     setPreviewMode("desktop");
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
                     contentType === "long-form"
-                      ? "bg-brand-blue text-white shadow-glow"
+                      ? "bg-cyber-400 text-black shadow-glow font-black"
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
@@ -1492,49 +1529,81 @@ ${editableThumbnailText}
             {/* TAB CONTENT: THUMBNAIL VISUAL CONCEPT */}
             {activeTab === "thumbnail" && (
               <div className="space-y-4 animate-in fade-in-50 duration-200">
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-navy-900/60 border border-navy-800">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3.5 rounded-xl bg-void-950/80 border border-white/10">
                   <div>
                     <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-brand-purple" />
+                      <Sparkles className="w-3.5 h-3.5 text-mint-400" />
                       Visual Thumbnail Architecture
                     </h3>
                     <p className="text-[11px] text-slate-400">
-                      AI layout prompt, high-contrast overlay text, and composition rules.
+                      AI layout prompt, high-contrast overlay text, and instant visual generation.
                     </p>
                   </div>
-                  <Link href={`/dashboard/publish?tab=thumbnails`}>
-                    <Button variant="gradient" size="sm" className="text-xs h-7 px-3 font-semibold">
-                      Open Canvas Studio →
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleGenerateStudioThumbnailImage}
+                      isLoading={isGeneratingThumbnailImage}
+                      className="mint-btn-gradient text-xs h-7 px-3 font-bold"
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      {isGeneratingThumbnailImage ? "Generating..." : "Generate AI Visual"}
                     </Button>
-                  </Link>
+                    <Link href={`/dashboard/thumbnails`}>
+                      <Button variant="outline" size="sm" className="text-xs h-7 px-3 font-semibold border-white/10 text-white hover:border-mint-400/40">
+                        Open Studio →
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
+
+                {/* AI Generated Thumbnail Visual Preview (if generated) */}
+                {aiThumbnailImage && (
+                  <Card className="aurora-card border border-mint-400/30 p-3.5 space-y-2 bg-void-950">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-mint-400 flex items-center gap-1">
+                        <Check className="w-3.5 h-3.5" /> AI Thumbnail Ready
+                      </span>
+                      <a
+                        href={aiThumbnailImage}
+                        download={`thumbnail-${Date.now()}.png`}
+                        className="text-[11px] font-bold text-mint-300 hover:text-white underline flex items-center gap-1"
+                      >
+                        <Download className="w-3 h-3" /> Download Visual
+                      </a>
+                    </div>
+                    <div className="rounded-lg overflow-hidden border border-white/10 bg-black aspect-video max-h-56">
+                      <img src={aiThumbnailImage} alt="Generated Thumbnail" className="w-full h-full object-cover" />
+                    </div>
+                  </Card>
+                )}
 
                 <div className="space-y-3">
                   {/* Thumbnail Text Editor */}
-                  <Card className="border-navy-800 bg-navy-900/60 p-3.5 space-y-2">
+                  <Card className="aurora-card border border-white/10 p-3.5 space-y-2 bg-void-950/60">
                     <label className="text-xs font-bold text-slate-200">Thumbnail Big Bold Text</label>
                     <div className="flex items-center gap-2">
                       <Input
                         value={editableThumbnailText}
                         onChange={(e) => setEditableThumbnailText(e.target.value)}
-                        className="h-10 bg-navy-950 border-navy-700 text-sm font-extrabold text-amber-300 uppercase tracking-wider"
+                        className="h-10 bg-void-950 border-white/10 text-sm font-extrabold text-mint-300 uppercase tracking-wider aurora-input"
                       />
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleCopy(editableThumbnailText, "thumb-copy")}
-                        className="h-10 px-3 border-navy-700 bg-navy-900"
+                        className="h-10 px-3 border-white/10 bg-void-900 text-slate-300 hover:text-white"
                       >
-                        {copiedKey === "thumb-copy" ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                        {copiedKey === "thumb-copy" ? <Check className="w-4 h-4 text-mint-400" /> : <Copy className="w-4 h-4" />}
                       </Button>
                     </div>
                   </Card>
 
                   {/* Visual Composition Blueprint */}
                   {thumbnailConcepts.map((c, i) => (
-                    <Card key={i} className="border-navy-800 bg-navy-900/60 p-4 space-y-2 text-xs">
+                    <Card key={i} className="aurora-card border border-white/10 p-4 space-y-2 text-xs bg-void-950/60">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-mint-400/10 text-mint-300 border border-mint-400/30">
                           Composition Blueprint
                         </span>
                         <span className="text-[11px] text-slate-400 font-medium">{c.contrast}</span>
